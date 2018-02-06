@@ -1,0 +1,6 @@
+*.obj
+*.mp4
+*.idea
+*.png
+
+__pycache__
