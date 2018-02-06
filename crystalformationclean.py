@@ -600,4 +600,3 @@ print("All set, started...")
 position = interact_and_iterate()
 # print("Save the positions in pickle...")
 # save_the_positions_in_pickle()
- 
