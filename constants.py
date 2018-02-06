@@ -25,7 +25,7 @@ electrodeV=abs((kb*Te/(2*e))*(numpy.log(2*math.pi*me/mi))) #potential at electro
 wallV=electrodeV #cylindrical sides of wall same potential
 radinfluence=5*lambdaD
 dipolea=boxr/100.
-mu0=4*math.pi*10**(-7) #Permeability free space
+mu0=4*math.pi*10**(-7) # Permeability free space
 
 
 
