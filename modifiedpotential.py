@@ -222,7 +222,7 @@ def pospos(): #positive charge positions
 def magEcharge(r): #magnitude of E field due to charge
 	normr=numpy.linalg.norm(r)
 	rhat=r/normr
-	return abs((voidchargeguess/numbcharge)/(4*math.pi*e0*normr**2))*rhat
+	return abs((voidcharge/numbcharge)/(4*math.pi*e0*normr**2))*rhat
 
 @jit
 def gridcheck(chargepos):
@@ -321,7 +321,7 @@ rmax=fsolve(func,0.4*LAMBDA)
 voidchargeguess=voidvol(rmax)*ne0*e
 voidcharge = voidQ(rmax)[0]
 chargepos=pospos()
-numbcharge=len(chargepos[0])
+numbcharge=len(chargepos[0])*2*math.pi*boxr/lambdaD #The factor multiplied by is the number of 2D slices in the r-z plane there are in the 3D volume
 
 separationsheath=lambdaD#separation distance between grid points
 separationhor1=lambdaD
@@ -338,6 +338,9 @@ Evalsradialz=[numpy.zeros(len(Evalsradial[0]))]*len(Evalsradial)
 Evalsheathr=[numpy.zeros(len(Evalsheath[0]))]*len(Evalsheath)
 def checkedenofm(): #Run this function to calculate ratio of charge in the void that is displaced compared to outside void in rest of sheath
 	print("Ratio of charge inside to outside region of inaccessibility=", voidcharge/(ne0*e*(2*math.pi*boxr*sheathd-voidvol(rmax))))
+	print("Approximate volume using half doughnut calculation is", 2*math.pi*(rmax/2)*math.pi*rmax**2/2, "should be bigger than integral of my solid, which is", voidvol(rmax))
+
+
 ################################Plotting################################################
 
 # plt.figure()

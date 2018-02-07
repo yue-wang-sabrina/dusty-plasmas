@@ -34,13 +34,13 @@ dt=0.0001 #Much longer than charging time which is order nanoseconds
 sheathd=10*lambdaD
 electrodeV=abs((kb*Te/(2*e))*(numpy.log(2*math.pi*me/mi))) #potential at electrode
 wallV=electrodeV #cylindrical sides of wall same potential
-radinfluence=5*lambdaD
+radinfluence=10*lambdaD
 dipolea=boxr/100.
 mu0=4*math.pi*10**(-7) #Permeaility free space
-Bmom=((2*math.pi*(0.003)**3)*0.014/mu0)*numpy.array([0,0,1]) #Nm/T #At 50 lambdaDs away I want the B to be 0.005T
+Bmom=((2*math.pi*(0.003)**3)*0.014/mu0)*numpy.array([0,0,1]) #Nm/T #At 1cm away I want the B to be 0.014T
 magBmom=numpy.sqrt(Bmom[0]**2+Bmom[1]**2+Bmom[2]**2)
 Bmomhat=numpy.array(Bmom)/magBmom
-dipolepos=[0,0,-0.003] 
+dipolepos=[0,0,-0.0005] 
 
 def OLMsol(): #Solve for dust grain surface potential and dust grain charge
 	x0=3.3*Te/e
@@ -100,8 +100,8 @@ def finitesolenoid(r,N=50,L=0.5,rad=0.1,I=1000): #N coils over length of solenoi
 
 
 ##Plot for solenoid
-heightbox=boxz
-widthbox=boxz
+heightbox=sheathd
+widthbox=0.002
 dx=0.
 stepsize=widthbox/3
 stepsizeheight=heightbox/3
@@ -146,7 +146,7 @@ Ulist=abs(numpy.hstack(numpy.hstack(U)))
 Vlist=abs(numpy.hstack(numpy.hstack(V)))
 Wlist=abs(numpy.hstack(numpy.hstack(W)))
 maximumarrow=max(max(Ulist),max(Vlist),max(Wlist))
-Q = ax.quiver3D(X,Y, Z, U, V, W,length=0.01,arrow_length_ratio=0.5,normalize=False) #length is just a multiplication factor
+Q = ax.quiver3D(X,Y, Z, U, V, W,length=boxz*0.1,arrow_length_ratio=0.5,normalize=True) #length is just a multiplication factor
 #P = ax.scatter(X,Y,Z)
 # maxx=max(Ulist)
 # maxy=max(Vlist)

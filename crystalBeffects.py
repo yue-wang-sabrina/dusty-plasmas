@@ -39,13 +39,13 @@ dt=0.0001 #Much longer than charging time which is order nanoseconds
 sheathd=10*lambdaD
 electrodeV=abs((kb*Te/(2*e))*(numpy.log(2*math.pi*me/mi))) #potential at electrode
 wallV=electrodeV #cylindrical sides of wall same potential
-radinfluence=10*lambdaD
+radinfluence=0.001#10*lambdaD
 dipolea=boxr/100.
 mu0=4*math.pi*10**(-7) #Permeaility free space
 Bmom=((2*math.pi*(0.003)**3)*0.014/mu0)*numpy.array([0,0,1]) #Nm/T #At 1cm away I want the B to be 0.014T
 magBmom=numpy.sqrt(Bmom[0]**2+Bmom[1]**2+Bmom[2]**2)
 Bmomhat=numpy.array(Bmom)/magBmom
-dipolepos=[0,0,-0.01] 
+dipolepos=[0,0,-0.0005] 
 
 def OLMsol(): #Solve for dust grain surface potential and dust grain charge
 	x0=3.3*Te/e
@@ -570,14 +570,13 @@ def interpolate(r):
 		else:
 			print("Problem: dust grain at x and y positions", [r[0],r[1]])
 		Efinal=[Efinal[0]*numpy.cos(theta),Efinal[0]*numpy.sin(theta),Efinal[1]]
-		return numpy.array([Efinal[0],Efinal[1],0])*diminishfactor
+		return numpy.array([Efinal[0],Efinal[1],Efinal[2]])
 
 
 
 ##Create dictionary of particles from pickle object
-diminishfactor=10**(0)
 position=[]
-numparticles=100
+numparticles=2000
 names=[]
 for i in numpy.arange(numparticles):
 	names.append('g%s'%i)
@@ -606,8 +605,8 @@ pairs=[i for i in pairs if i not in removelist]
 
 
 ##Interact and iterate 
-iterationsB=20000
-inititerations=1000
+iterationsB=300
+inititerations=300
 g9velcheck=[]
 g9poscheck=[]
 g9acccheck=[]
@@ -693,13 +692,13 @@ ax.set_ylim([-rmax*1.5,rmax*1.5])
 
 data=df[df['time']==0]
 point, = ax.plot(data.x, data.y, data.z, linestyle="", marker=".")
-#plt.cla()
+plt.cla()
 # for i in [[0,0],[0,1],[1,0],[1,1]]:
 # 	circx=((-1)**(i[0]))*numpy.arange(100)*boxr*0.9
 # 	circy=((-1)**(i[1]))*numpy.sqrt(boxr**2-circx**2)
 # 	ax.plot(circx,circy,'r-')
 ani = matplotlib.animation.FuncAnimation(fig, update_graph, frames=iterationsB+inititerations,interval=1, blit=True)
-ani.save('voidplusrotationdimfactor1.mp4', fps=30,extra_args=['-vcodec', 'libx264'])
+#ani.save('rotationwithBfieldonly.mp4', fps=30,extra_args=['-vcodec', 'libx264'])
 plt.show()
 
 
