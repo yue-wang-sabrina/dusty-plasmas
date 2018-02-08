@@ -39,7 +39,7 @@ dt=0.0001 #Much longer than charging time which is order nanoseconds
 sheathd=10*lambdaD
 electrodeV=abs((kb*Te/(2*e))*(numpy.log(2*math.pi*me/mi))) #potential at electrode
 wallV=electrodeV #cylindrical sides of wall same potential
-radinfluence=0.001#10*lambdaD
+radinfluence=10*lambdaD
 dipolea=boxr/100.
 mu0=4*math.pi*10**(-7) #Permeaility free space
 Bmom=((2*math.pi*(0.003)**3)*0.014/mu0)*numpy.array([0,0,1]) #Nm/T #At 1cm away I want the B to be 0.014T
@@ -570,13 +570,13 @@ def interpolate(r):
 		else:
 			print("Problem: dust grain at x and y positions", [r[0],r[1]])
 		Efinal=[Efinal[0]*numpy.cos(theta),Efinal[0]*numpy.sin(theta),Efinal[1]]
-		return numpy.array([Efinal[0],Efinal[1],Efinal[2]])
+		return numpy.array([Efinal[0],Efinal[1],0])
 
 
 
 ##Create dictionary of particles from pickle object
 position=[]
-numparticles=2000
+numparticles=200
 names=[]
 for i in numpy.arange(numparticles):
 	names.append('g%s'%i)
@@ -605,8 +605,8 @@ pairs=[i for i in pairs if i not in removelist]
 
 
 ##Interact and iterate 
-iterationsB=300
-inititerations=300
+iterationsB=500
+inititerations=100
 g9velcheck=[]
 g9poscheck=[]
 g9acccheck=[]
