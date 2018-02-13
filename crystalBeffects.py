@@ -345,7 +345,7 @@ class Dust:
 
 			##Just blindly multiplying by factor
 			omega=abs(e*magB/mi)
-			tau=0.05/omega			
+			tau=0.00284/omega			
 			vdrift[0]*=(omega*tau)**2/(1+(omega*tau)**2)
 			vdrift[1]*=(omega*tau)**2/(1+(omega*tau)**2)
 			vdrift[2]*=(omega*tau)**2/(1+(omega*tau)**2)
@@ -379,6 +379,7 @@ class Dust:
 				(numpy.sqrt(math.pi/2)*special.erf(u/numpy.sqrt(2))*\
 					(1+u**2+(1-u**2)*(1+2*z*tau)+4*z**2*tau**2*u**(-2)*numpy.log(coloumblog))+\
 						(u**(-1)*(1+2*z*tau+u**2-4*z**2*tau**2*numpy.log(coloumblog))*numpy.exp(-u**2/2.)))*mach/machmag
+			#print(force/self.m)
 			return force/self.m
 
 		else:
@@ -576,7 +577,7 @@ def interpolate(r):
 
 ##Create dictionary of particles from pickle object
 position=[]
-numparticles=1000
+numparticles=10
 names=[]
 for i in numpy.arange(numparticles):
 	names.append('g%s'%i)
@@ -605,7 +606,7 @@ pairs=[i for i in pairs if i not in removelist]
 
 
 ##Interact and iterate 
-iterationsB=500
+iterationsB=10
 inititerations=100
 g9velcheck=[]
 g9poscheck=[]
@@ -648,7 +649,7 @@ for i in tqdm(numpy.arange(iterationsB)):
 		dustdict[j[0]].selffieldmany(interactfield)
 		dustdict[j[1]].selffieldmany(-interactfield)
 	for k in dustdict:	
-		dustdict[k].steptest(numpy.array(dustdict[k].multifields)+interpolate(dustdict[k].getselfpos()))
+		dustdict[k].steptest(numpy.array(dustdict[k].multifields))#+interpolate(dustdict[k].getselfpos()))
 		# acc.append(dustdict[k].getselfacc())
 		# vel.append(dustdict[k].getselfvel())
 		position.append(dustdict[k].getselfpos())
@@ -672,7 +673,7 @@ def update_graph(num):
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
-#ax.view_init(elev=90., azim=90)
+ax.view_init(elev=90., azim=90)
 if min(newx)==max(newx):
 	ax.set_xlim([-10*lambdaD,10*lambdaD])
 else:

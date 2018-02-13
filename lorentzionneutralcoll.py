@@ -15,6 +15,7 @@ import pickle
 from tqdm import tqdm
 from numpy import isclose
 from scipy import interpolate
+from math import isclose
 
 #Some constants
 radd=1.5*10**(-6) #radius of dust particle
@@ -35,7 +36,7 @@ lambdaD= 1./(1./(lambdadi**2)+1./(lambdade**2))**0.5  #dusty debye radius
 boxr=523*lambdaD #cylinder radius
 boxz=0.001 #cylinder height
 g=-9.8 #gravitational acceleration
-dt=0.000001 #Much longer than charging time which is order nanoseconds
+dt=0.0000001 
 sheathd=10*lambdaD
 electrodeV=abs((kb*Te/(2*e))*(numpy.log(2*math.pi*me/mi))) #potential at electrode
 wallV=electrodeV #cylindrical sides of wall same potential
@@ -48,6 +49,7 @@ Bmomhat=numpy.array(Bmom)/magBmom
 dipolepos=[0,0,-0.0005] 
 
 omegatau=0.01 #Referenced by konopka in his experiments for ion collisions
+
 class ion:
 	def __init__(self,pos,vel,acc):
 		self.pos=numpy.array(pos)
@@ -97,7 +99,7 @@ class ion:
 	def getselfpos(self):
 		return self.pos
 
-def runsim(iterations=200):
+def runsim(iterations=2000):
 	iterations = iterations
 	vinit=numpy.sqrt(kb*Ti/mi)
 	ion1=ion(pos=[0,0,0],vel=[vinit,0,0],acc=[0,0,0])
@@ -131,6 +133,9 @@ def runsim(iterations=200):
 	direction=numpy.cross(ion1.constE(),ion1.constB())/(numpy.linalg.norm(numpy.cross(ion1.constE(),ion1.constB())))
 	return newx,newy,newz,numpy.array(direction),ion1
 
+#newx,newy,newz,direct,ion1=runsim(iterations=20000)
+
+
 def plotrunsim(newx,newy,newz):
 	newx=newx
 	newy=newy
@@ -146,6 +151,8 @@ def plotrunsim(newx,newy,newz):
 	ax.set_ylabel("y")
 	ax.set_zlabel("z")
 	plt.show()
+
+#plotrunsim(newx,newy,newz)
 
 def checkdrift():	
 	iterations = numpy.arange(200,20000,500)
@@ -202,7 +209,97 @@ def compareFEM(iterations=500):
 
 #compareFEM()
 
-def thermalkickexb():
-	pass
+def thermalkickexb(iterations=20000):
+	iterations = iterations
+	tau=10**(-6)
+	tkick=int(tau/dt) #Every tkick iterations give particle a thermal kick
+	if tkick==0:
+		raise ValueError("Error: dt>tau")	
+	vinit=numpy.sqrt(kb*Ti/mi)
+	ion1=ion(pos=[0,0,0],vel=[vinit,0,0],acc=[0,0,0])
+	position=[]
+	velocity=[]
+
+	for i in tqdm(numpy.arange(int(iterations/tkick))):
+		theta=math.pi*numpy.random.random_sample()
+		phi=2*math.pi*numpy.random.random_sample()
+		rhat = numpy.array([numpy.sin(theta)*numpy.cos(phi),numpy.cos(theta)*numpy.sin(phi),numpy.cos(theta)])
+		ion1.vel1=rhat*numpy.sqrt(kb*Ti/mi)
+		ion1.updateRK4(B=ion1.constB())
+		position.append(ion1.getselfpos())
+		velocity.append(numpy.linalg.norm(ion1.getselfvel()))
+		for j in numpy.arange(tkick-1):
+			ion1.updateRK4(B=ion1.constB())
+			position.append(ion1.getselfpos())
+			velocity.append(numpy.linalg.norm(ion1.getselfvel()))
+
+	newx=[i[0] for i in position]
+	newy=[i[1] for i in position]
+	newz=[i[2] for i in position]
+	return newx[-1]-newx[0] ##Note need to return in whatever direction we're drifting!
+	
+	# fig = plt.figure()
+	# ax = fig.add_subplot(111, projection='3d')
+	# ax.plot(newx,newy,newz,'r--',label="RK4")
+	# ax.scatter(newx[-1],newy[-1],newz[-1],'ro',label="End")
+	# ax.scatter(newx[0],newy[0],newz[0],'bo',label="Start")
+	# plt.legend()
+	# ax.set_xlabel("x")
+	# ax.set_ylabel("y")
+	# ax.set_zlabel("z")
+	# plt.title("Thermal kick included at every dt=%s seconds"%tau)
+	# plt.show()
+
+#thermalkickexb(20000)
+def averagekickeffect(iterations=20000):
+	driftdistancecol=[]
+	for i in tqdm(numpy.arange(2000)):
+		driftdistancecol.append(thermalkickexb(iterations))
+	ion1=ion(pos=[0,0,0],vel=[numpy.sqrt(kb*Ti/mi),0,0],acc=[0,0,0])
+	driftnocol=-dt*iterations*numpy.linalg.norm(ion1.constE())/numpy.linalg.norm(ion1.constB())
+	driftdistancecol=numpy.array(driftdistancecol)/driftnocol
+	return driftdistancecol
+
+drifts=averagekickeffect()
+fig = plt.figure()
+plt.scatter(numpy.arange(len(drifts)),drifts)
+plt.xlabel("Iteration number")
+plt.ylabel("driftlength_collision/driftlength_nocollision")
+plt.title("Plot of ratio of drift with thermal kicks to drift using pure EXB")
+fig.show()
+
+def bootstrap(drifts,bsit=2000): #Bootstrap iteration is to take bsit resamplings.
+	drifts.sort()
+	mean = numpy.mean(drifts)
+	samplesind = numpy.random.choice(len(drifts),(bsit,len(drifts)))
+	samples = []
+	sampleavs = []
+	for i in numpy.arange(bsit):
+		sample = [drifts[k] for k in samplesind[i]]
+		samples.append(sample)
+		sampleavs.append(numpy.mean(sample))
+	delta = [j - mean for j in sampleavs]
+	delta.sort()
+	tenpt = math.ceil(0.1*len(drifts))
+	nintypt = math.ceil(0.9*(len(drifts)))
+	error = [delta[tenpt-1],delta[nintypt-1]]
+	return error, mean
+
+bs = bootstrap(drifts)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
