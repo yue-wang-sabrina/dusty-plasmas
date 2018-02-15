@@ -1,13 +1,13 @@
 ##This file is mainly for looking at B field effects of crystals that are already formed.
 import numpy
 import scipy
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import math
-from matplotlib import animation
-from mpl_toolkits.mplot3d import Axes3D
-import matplotlib.animation
+# from matplotlib import animation
+# from mpl_toolkits.mplot3d import Axes3D
+# import matplotlib.animation
 import pandas as pd
-import mpl_toolkits.mplot3d.axes3d as p3
+# import mpl_toolkits.mplot3d.axes3d as p3
 import itertools
 import time
 from scipy import special
@@ -49,6 +49,7 @@ Bmomhat=numpy.array(Bmom)/magBmom
 dipolepos=[0,0,-0.0005] 
 
 omegatau=0.01 #Referenced by konopka in his experiments for ion collisions
+omega = e*0.014/mi #Tau_i (nu_i) is the one changing i.e. time between collisions (collisional frequency)
 
 class ion:
 	def __init__(self,pos,vel,acc):
@@ -209,10 +210,12 @@ def compareFEM(iterations=500):
 
 #compareFEM()
 
-def thermalkickexb(iterations=20000):
+def thermalkickexb(iterations,tau):
 	iterations = iterations
-	tau=10**(-6)
+	tau = tau
 	tkick=int(tau/dt) #Every tkick iterations give particle a thermal kick
+	if (tau/dt)-tkick>=0.5:
+		tkick+=1 #Round upwards if decimal values >0.5
 	if tkick==0:
 		raise ValueError("Error: dt>tau")	
 	vinit=numpy.sqrt(kb*Ti/mi)
@@ -250,23 +253,27 @@ def thermalkickexb(iterations=20000):
 	# plt.title("Thermal kick included at every dt=%s seconds"%tau)
 	# plt.show()
 
-#thermalkickexb(20000)
-def averagekickeffect(iterations=20000):
+# drift = thermalkickexb(iterations=2*10**7) #2 seconds
+# ion1=ion(pos=[0,0,0],vel=[numpy.sqrt(kb*Ti/mi),0,0],acc=[0,0,0])
+# driftnocol=-dt*2*10**7*numpy.linalg.norm(ion1.constE())/numpy.linalg.norm(ion1.constB())
+# print(drift/driftnocol)
+
+def averagekickeffect(iterations,tau,runs):
 	driftdistancecol=[]
-	for i in tqdm(numpy.arange(2000)):
-		driftdistancecol.append(thermalkickexb(iterations))
+	for i in tqdm(numpy.arange(runs),desc="run number for specific tau"):
+		driftdistancecol.append(thermalkickexb(iterations,tau))
 	ion1=ion(pos=[0,0,0],vel=[numpy.sqrt(kb*Ti/mi),0,0],acc=[0,0,0])
 	driftnocol=-dt*iterations*numpy.linalg.norm(ion1.constE())/numpy.linalg.norm(ion1.constB())
 	driftdistancecol=numpy.array(driftdistancecol)/driftnocol
 	return driftdistancecol
 
-drifts=averagekickeffect()
-fig = plt.figure()
-plt.scatter(numpy.arange(len(drifts)),drifts)
-plt.xlabel("Iteration number")
-plt.ylabel("driftlength_collision/driftlength_nocollision")
-plt.title("Plot of ratio of drift with thermal kicks to drift using pure EXB")
-fig.show()
+# drifts=averagekickeffect(iterations = 2*10**7, tau = 10**(-5), runs = 1)
+# fig = plt.figure()
+# plt.scatter(numpy.arange(len(drifts)),drifts)
+# plt.xlabel("Iteration number")
+# plt.ylabel("driftlength_collision/driftlength_nocollision")
+# plt.title("Plot of ratio of drift with thermal kicks to drift using pure EXB")
+# fig.show()
 
 def bootstrap(drifts,bsit=2000): #Bootstrap iteration is to take bsit resamplings.
 	drifts.sort()
@@ -283,16 +290,79 @@ def bootstrap(drifts,bsit=2000): #Bootstrap iteration is to take bsit resampling
 	tenpt = math.ceil(0.1*len(drifts))
 	nintypt = math.ceil(0.9*(len(drifts)))
 	error = [delta[tenpt-1],delta[nintypt-1]]
-	return error, mean
+	return mean, error
 
-bs = bootstrap(drifts)
+#bs = bootstrap(drifts)
 
+######################Compare different values of omega*tau and saving the drift values
+# taulist = [0.01/omega, 0.05/omega, 0.1/omega, 0.5/omega]
+# filehandler = open(b"drifts.obj",'wb')
+# iterations=2*10**7
+# runs = 10
+# for i in tqdm(taulist,desc="Taus"):
+# 	tau=i
+# 	drifts=averagekickeffect(iterations = iterations, tau = tau, runs = runs)
+# 	bs = bootstrap(drifts, bsit = 2000)
+# 	pickle.dump(drifts,filehandler)
+# 	pickle.dump(bs,filehandler)
+# pickle.dump(numpy.array(taulist)*omega,filehandler)
+# filehandler.close()
 
+######################### Take a look at the saved object for drifts at different tau's
+# filehandler = open("drifts.obj",'rb')
+# drifts=[]
+# bs=[]
+# for i in numpy.arange(4):
+# 	drifts.append(pickle.load(filehandler))
+# 	bs.append(pickle.load(filehandler))
+# taulist = pickle.load(filehandler)
+# filehandler.close()
 
+#So for omegatau is 0.01 the drift ratio after 1s is 0.0225916 (one run)
+#So for omegatau is 0.01 the drift ratio after 2s is  0.01847764(one run)
 
+################ At different time steps for a fixed omega*tau
+iterationslist = [0.5/dt, 1./dt, 2./dt]
+filehandler = open(b"driftsconsttau2.obj",'wb')
+runs = 5
+for i in iterationslist:
+	tau=10**(-6)
+	drifts=averagekickeffect(iterations = i, tau = tau, runs = runs)
+	bs = bootstrap(drifts,bsit = 2000)
+	pickle.dump(drifts,filehandler)
+	pickle.dump(bs,filehandler)
+pickle.dump(numpy.array(iterationslist)*omega,filehandler)
+filehandler.close()
 
+##############Take a look at the saved object for drifts with different times ####
+# filehandler = open("driftsconsttau2.obj",'rb')
+# tau = 10**(-6)
+# drifts = []
+# bs = []
 
+# for i in numpy.arange(3):
+# 	drifts.append(pickle.load(filehandler))
+# 	bs.append(pickle.load(filehandler))
+# iterationslist=pickle.load(filehandler)
+# filehandler.close()
+# timelist = numpy.array(iterationslist)/omega*dt
+# driftsav = [i[0] for i in bs]
+# poserr = [i[1][0] for i in bs]
+# negerr = [i[1][1] for i in bs]
 
+# func = lambda n : (omega*tau)**n/(1+(omega*tau)**n) - driftsav[-1] 
+# n=scipy.optimize.fsolve(func,3)
+
+# fig = plt.figure()
+# plt.errorbar(timelist,driftsav,xerr = poserr, yerr = negerr,fmt='o', ecolor='g',label='Average drifts')
+# plt.xlabel("Runtime (s)")
+# plt.ylabel("Simualted drift/theoretical drift")
+# plt.legend()
+# plt.title(
+# 	r"Constant $\tau=%.2f$ drift results for different length of runtime, ($\omega*\tau=%.2f)^n$, where n=%.2f" %
+# 		(tau, omega*tau, n)
+# )
+# fig.show()
 
 
 

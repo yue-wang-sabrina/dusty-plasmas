@@ -364,37 +364,37 @@ zinit=pickle.load(filehandler)
 filehandler.close()
 initpositions=[[i,j,k] for i,j,k in zip(xinit,yinit,zinit)]
 
-## Test scipy's inbuilt interpolator
-tck = interp2d(gridhor, gridlinesheath, Evalsr,kind='cubic') #Using interp2d
-tck2 = interp2d(gridhor, gridlinesheath, Evalsz,kind='cubic')
-# tck = bisplrep(gridr,gridz,Evalsr) #Using bisplrev
-# tck2 = bisplrep(gridr,gridz,Evalsz)
-plt.figure()
-for p in numpy.arange(len(xinit)):
-	if numpy.sqrt(xinit[p]**2+yinit[p]**2)<rmax:
-		Etestr=tck(xinit[p], yinit[p]) #Using interp2d
-		Etestz=tck2(xinit[p], yinit[p])
-		# Etestr = bisplev(xinit[p], yinit[p],tck) #Using bisplrev
-		# Etestz = bisplev(xinit[p], yinit[p],tck2)
-		#plt.scatter(numpy.array(numpy.mat(gridpointstest).T[0]),numpy.array(numpy.mat(gridpointstest).T[1]),color='k',s=5)
-		plt.quiver(numpy.sqrt(xinit[p]**2+yinit[p]**2),zinit[p],Etestr,Etestz,width=0.002,color='m')
-	else:
-		pass
-plt.plot(numpy.array(rnormalize)*LAMBDA,numpy.array(znormalize)*LAMBDA,'r-',label='Inaccessible region for all p0')
-plt.quiver(gridr,gridz,Evalsr,Evalsz,color='b',label='modified field')
-# plt.quiver(gridr,gridz,Evalsradial,Evalsradialz,color='k',label='radial field')
-# plt.quiver(gridr,gridz,Evalsheathr,Evalsheath,color='g',label='sheath field')
-# plt.plot(chargepos.T[:,0],chargepos.T[:,1],'r.')
-# plt.plot(numpy.arange(len(gridr[0])),numpy.ones(len(gridr[0]))*0.00038257340070632558,'m-',label='crystal plane')
-plt.xlabel("r")
-plt.ylabel("z")
-plt.title("Purple arrows = Interpolated E fields at crystal equilibrium positions")
-plt.legend()
-plt.xlim([0,rmax])
-plt.ylim([0,sheathd*1.5])
-plt.show()
+# ## Test scipy's inbuilt interpolator
+# tck = interp2d(gridhor, gridlinesheath, Evalsr,kind='cubic') #Using interp2d
+# tck2 = interp2d(gridhor, gridlinesheath, Evalsz,kind='cubic')
+# # tck = bisplrep(gridr,gridz,Evalsr) #Using bisplrev
+# # tck2 = bisplrep(gridr,gridz,Evalsz)
+# plt.figure()
+# for p in numpy.arange(len(xinit)):
+# 	if numpy.sqrt(xinit[p]**2+yinit[p]**2)<rmax:
+# 		Etestr=tck(xinit[p], yinit[p]) #Using interp2d
+# 		Etestz=tck2(xinit[p], yinit[p])
+# 		# Etestr = bisplev(xinit[p], yinit[p],tck) #Using bisplrev
+# 		# Etestz = bisplev(xinit[p], yinit[p],tck2)
+# 		#plt.scatter(numpy.array(numpy.mat(gridpointstest).T[0]),numpy.array(numpy.mat(gridpointstest).T[1]),color='k',s=5)
+# 		plt.quiver(numpy.sqrt(xinit[p]**2+yinit[p]**2),zinit[p],Etestr,Etestz,width=0.002,color='m')
+# 	else:
+# 		pass
+# plt.plot(numpy.array(rnormalize)*LAMBDA,numpy.array(znormalize)*LAMBDA,'r-',label='Inaccessible region for all p0')
+# plt.quiver(gridr,gridz,Evalsr,Evalsz,color='b',label='modified field')
+# # plt.quiver(gridr,gridz,Evalsradial,Evalsradialz,color='k',label='radial field')
+# # plt.quiver(gridr,gridz,Evalsheathr,Evalsheath,color='g',label='sheath field')
+# # plt.plot(chargepos.T[:,0],chargepos.T[:,1],'r.')
+# # plt.plot(numpy.arange(len(gridr[0])),numpy.ones(len(gridr[0]))*0.00038257340070632558,'m-',label='crystal plane')
+# plt.xlabel("r")
+# plt.ylabel("z")
+# plt.title("Purple arrows = Interpolated E fields at crystal equilibrium positions")
+# plt.legend()
+# plt.xlim([0,rmax])
+# plt.ylim([0,sheathd*1.5])
+# plt.show()
 
-
+########################################################################################
 ##Test my interpolator
 plt.figure()
 for p in numpy.arange(len(xinit)):

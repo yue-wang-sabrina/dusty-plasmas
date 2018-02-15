@@ -99,7 +99,7 @@ def finitesolenoid(r,N=50,L=0.5,rad=0.1,I=1000): #N coils over length of solenoi
 	return numpy.array([x,y,0])
 
 
-##Plot for solenoid
+##Plot 3D quiver B field
 heightbox=sheathd
 widthbox=0.002
 dx=0.
@@ -140,26 +140,34 @@ U=numpy.array(U)
 V=numpy.array(V)
 W=numpy.array(W)
 
-fig=plt.figure()
-ax=fig.gca(projection='3d')
-Ulist=abs(numpy.hstack(numpy.hstack(U)))
-Vlist=abs(numpy.hstack(numpy.hstack(V)))
-Wlist=abs(numpy.hstack(numpy.hstack(W)))
-maximumarrow=max(max(Ulist),max(Vlist),max(Wlist))
-Q = ax.quiver3D(X,Y, Z, U, V, W,length=boxz*0.1,arrow_length_ratio=0.5,normalize=True) #length is just a multiplication factor
-#P = ax.scatter(X,Y,Z)
-# maxx=max(Ulist)
-# maxy=max(Vlist)
-# maxz=max(Wlist)
-# ax.set_xlim([-widthbox,widthbox])
-# ax.set_ylim([-widthbox,widthbox])
-# ax.set_zlim([-heightbox,heightbox+dx])
-ax.set_xlabel("x")
-ax.set_ylabel("y")
-ax.set_zlabel("z")
-plt.show()
+# fig=plt.figure()
+# ax=fig.gca(projection='3d')
+# #ax.view_init(elev=90., azim=90)
+# Ulist=abs(numpy.hstack(numpy.hstack(U)))
+# Vlist=abs(numpy.hstack(numpy.hstack(V)))
+# Wlist=abs(numpy.hstack(numpy.hstack(W)))
+# maximumarrow=max(max(Ulist),max(Vlist),max(Wlist))
+# Q = ax.quiver3D(X,Y, Z, U, V, W,length=0.0001,arrow_length_ratio=0.5,normalize=True) #length is just a multiplication factor
+# #P = ax.scatter(X,Y,Z)
+# # maxx=max(Ulist)
+# # maxy=max(Vlist)
+# # maxz=max(Wlist)
+# # ax.set_xlim([-widthbox,widthbox])
+# # ax.set_ylim([-widthbox,widthbox])
+# # ax.set_zlim([-heightbox,heightbox+dx])
+# ax.set_xlabel("x")
+# ax.set_ylabel("y")
+# ax.set_zlabel("z")
+# plt.show()
 
 
+# ################2D quiver plot?
+# plt.figure()
+# X(axis=0)
+# plt.quiver(X,Y,U,V)
+# set_xlabel("x")
+# set_ylabel("y")
+# plt.show()
 
 
 

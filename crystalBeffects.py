@@ -649,7 +649,7 @@ for i in tqdm(numpy.arange(iterationsB)):
 		dustdict[j[0]].selffieldmany(interactfield)
 		dustdict[j[1]].selffieldmany(-interactfield)
 	for k in dustdict:	
-		dustdict[k].steptest(numpy.array(dustdict[k].multifields))#+interpolate(dustdict[k].getselfpos()))
+		dustdict[k].steptest(numpy.array(dustdict[k].multifields))#+interpolate(dustdict[k].getselfpos())) #Comment out interpolate function if want to turn of Gibson modified E field
 		# acc.append(dustdict[k].getselfacc())
 		# vel.append(dustdict[k].getselfvel())
 		position.append(dustdict[k].getselfpos())
