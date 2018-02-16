@@ -39,7 +39,7 @@ dt=0.0001 #Much longer than charging time which is order nanoseconds
 sheathd=10*lambdaD
 electrodeV=abs((kb*Te/(2*e))*(numpy.log(2*math.pi*me/mi))) #potential at electrode
 wallV=electrodeV #cylindrical sides of wall same potential
-radinfluence=0.002#10*lambdaD
+radinfluence=20*lambdaD
 dipolea=boxr/100.
 mu0=4*math.pi*10**(-7) #Permeaility free space
 Bmom=((2*math.pi*(0.003)**3)*0.014/mu0)*numpy.array([0,0,1]) #Nm/T #At 1cm away I want the B to be 0.014T
@@ -577,7 +577,7 @@ def interpolate(r):
 
 ##Create dictionary of particles from pickle object
 position=[]
-numparticles=10
+numparticles=450
 names=[]
 for i in numpy.arange(numparticles):
 	names.append('g%s'%i)
@@ -606,8 +606,8 @@ pairs=[i for i in pairs if i not in removelist]
 
 
 ##Interact and iterate 
-iterationsB=10
-inititerations=100
+iterationsB=2000
+inititerations=1000
 g9velcheck=[]
 g9poscheck=[]
 g9acccheck=[]
@@ -699,7 +699,7 @@ plt.cla()
 # 	circy=((-1)**(i[1]))*numpy.sqrt(boxr**2-circx**2)
 # 	ax.plot(circx,circy,'r-')
 ani = matplotlib.animation.FuncAnimation(fig, update_graph, frames=iterationsB+inititerations,interval=1, blit=True)
-#ani.save('rotationwithBfieldonly.mp4', fps=30,extra_args=['-vcodec', 'libx264'])
+#ani.save('RotationnoGibs.mp4', fps=30,extra_args=['-vcodec', 'libx264'])
 plt.show()
 
 

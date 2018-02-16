@@ -1,13 +1,13 @@
 ##This file is mainly for looking at B field effects of crystals that are already formed.
 import numpy
 import scipy
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 import math
-# from matplotlib import animation
-# from mpl_toolkits.mplot3d import Axes3D
-# import matplotlib.animation
+from matplotlib import animation
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.animation
 import pandas as pd
-# import mpl_toolkits.mplot3d.axes3d as p3
+import mpl_toolkits.mplot3d.axes3d as p3
 import itertools
 import time
 from scipy import special
@@ -62,7 +62,7 @@ class ion:
 		self.dr=0
 	def constB(self):
 		return numpy.array([0,0.014,0])
-	def constE(self,E=[0,0,1]):
+	def constE(self,E=[0,0,0]):
 		return numpy.array(E)
 	def updateeulerforward(self,B,E=[0,0,1]):
 		##Euler forward - should be unstable!
@@ -71,7 +71,7 @@ class ion:
 	def updateeulerback(self,B,E=[0,0,1]): #Also unstable?
 		self.pos = self.pos - dt*self.vel
 		self.vel = self.vel - ((self.charge/mi)*numpy.cross(self.vel,B)*dt + numpy.array(E)*(self.charge/mi))
-	def updateRK4(self,B,E=[0,0,1]):
+	def updateRK4(self,B,E=[0,0,0]):
 		##RK4 integration
 		fv1=(self.charge/mi)*numpy.cross(self.vel1,B) + numpy.array(E)*(self.charge/mi)
 		fy1=self.vel1
@@ -239,35 +239,34 @@ def thermalkickexb(iterations,tau):
 	newx=[i[0] for i in position]
 	newy=[i[1] for i in position]
 	newz=[i[2] for i in position]
-	return newx[-1]-newx[0] ##Note need to return in whatever direction we're drifting!
+	#return newx[-1]-newx[0] ##Note need to return in whatever direction we're drifting!
 	
-	# fig = plt.figure()
-	# ax = fig.add_subplot(111, projection='3d')
-	# ax.plot(newx,newy,newz,'r--',label="RK4")
-	# ax.scatter(newx[-1],newy[-1],newz[-1],'ro',label="End")
-	# ax.scatter(newx[0],newy[0],newz[0],'bo',label="Start")
-	# plt.legend()
-	# ax.set_xlabel("x")
-	# ax.set_ylabel("y")
-	# ax.set_zlabel("z")
-	# plt.title("Thermal kick included at every dt=%s seconds"%tau)
-	# plt.show()
+	fig = plt.figure()
+	ax = fig.add_subplot(111, projection='3d')
+	ax.plot(newx,newy,newz,'r--',label="RK4")
+	ax.scatter(newx[-1],newy[-1],newz[-1],'ro',label="End")
+	ax.scatter(newx[0],newy[0],newz[0],'bo',label="Start")
+	plt.legend()
+	ax.set_xlabel("x")
+	ax.set_ylabel("y")
+	ax.set_zlabel("z")
+	plt.title("Thermal kick included at every dt=%s seconds"%tau)
+	plt.show()
 
-# drift = thermalkickexb(iterations=2*10**7) #2 seconds
-# ion1=ion(pos=[0,0,0],vel=[numpy.sqrt(kb*Ti/mi),0,0],acc=[0,0,0])
-# driftnocol=-dt*2*10**7*numpy.linalg.norm(ion1.constE())/numpy.linalg.norm(ion1.constB())
-# print(drift/driftnocol)
+drift = thermalkickexb(iterations=20000,tau=10**(-5)) 
+#ion1=ion(pos=[0,0,0],vel=[numpy.sqrt(kb*Ti/mi),0,0],acc=[0,0,0])
+#driftnocol=-dt*2*10**7*numpy.linalg.norm(ion1.constE())/numpy.linalg.norm(ion1.constB())
 
 def averagekickeffect(iterations,tau,runs):
 	driftdistancecol=[]
 	for i in tqdm(numpy.arange(runs),desc="run number for specific tau"):
 		driftdistancecol.append(thermalkickexb(iterations,tau))
 	ion1=ion(pos=[0,0,0],vel=[numpy.sqrt(kb*Ti/mi),0,0],acc=[0,0,0])
-	driftnocol=-dt*iterations*numpy.linalg.norm(ion1.constE())/numpy.linalg.norm(ion1.constB())
-	driftdistancecol=numpy.array(driftdistancecol)/driftnocol
+	#driftnocol=-dt*iterations*numpy.linalg.norm(ion1.constE())/numpy.linalg.norm(ion1.constB())
+	driftdistancecol=numpy.array(driftdistancecol)#/driftnocol
 	return driftdistancecol
 
-# drifts=averagekickeffect(iterations = 2*10**7, tau = 10**(-5), runs = 1)
+# drifts=averagekickeffect(iterations = 10**7, tau = 10**(-5), runs = 1)
 # fig = plt.figure()
 # plt.scatter(numpy.arange(len(drifts)),drifts)
 # plt.xlabel("Iteration number")
@@ -321,12 +320,12 @@ def bootstrap(drifts,bsit=2000): #Bootstrap iteration is to take bsit resampling
 #So for omegatau is 0.01 the drift ratio after 1s is 0.0225916 (one run)
 #So for omegatau is 0.01 the drift ratio after 2s is  0.01847764(one run)
 
-################ At different time steps for a fixed omega*tau
+# ################ At different time steps for a fixed omega*tau
 iterationslist = [0.5/dt, 1./dt, 2./dt]
-filehandler = open(b"driftsconsttau2.obj",'wb')
-runs = 5
+filehandler = open(b"driftsconsttaunoE.obj",'wb')
+runs = 2
 for i in iterationslist:
-	tau=10**(-6)
+	tau=10**(-5)
 	drifts=averagekickeffect(iterations = i, tau = tau, runs = runs)
 	bs = bootstrap(drifts,bsit = 2000)
 	pickle.dump(drifts,filehandler)
@@ -335,12 +334,12 @@ pickle.dump(numpy.array(iterationslist)*omega,filehandler)
 filehandler.close()
 
 ##############Take a look at the saved object for drifts with different times ####
-# filehandler = open("driftsconsttau2.obj",'rb')
-# tau = 10**(-6)
+# filehandler = open("driftsconsttaunoE.obj",'rb')
+# tau = 10**(-5)
 # drifts = []
 # bs = []
 
-# for i in numpy.arange(3):
+# for i in numpy.arange(1):
 # 	drifts.append(pickle.load(filehandler))
 # 	bs.append(pickle.load(filehandler))
 # iterationslist=pickle.load(filehandler)

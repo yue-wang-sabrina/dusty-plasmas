@@ -163,7 +163,7 @@ W=numpy.array(W)
 
 # ################2D quiver plot?
 # plt.figure()
-# X(axis=0)
+# X=np.mean(X,axis=2)
 # plt.quiver(X,Y,U,V)
 # set_xlabel("x")
 # set_ylabel("y")
