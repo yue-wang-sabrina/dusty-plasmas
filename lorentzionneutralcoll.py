@@ -226,7 +226,7 @@ def thermalkickexb(iterations,tau):
 	for i in tqdm(numpy.arange(int(iterations/tkick))):
 		theta=math.pi*numpy.random.random_sample()
 		phi=2*math.pi*numpy.random.random_sample()
-		rhat = numpy.array([numpy.sin(theta)*numpy.cos(phi),numpy.cos(theta)*numpy.sin(phi),numpy.cos(theta)])
+		rhat = numpy.array([numpy.sin(theta)*numpy.cos(phi),numpy.sin(theta)*numpy.sin(phi),numpy.cos(theta)])
 		ion1.vel1=rhat*numpy.sqrt(kb*Ti/mi)
 		ion1.updateRK4(B=ion1.constB())
 		position.append(ion1.getselfpos())
@@ -239,21 +239,21 @@ def thermalkickexb(iterations,tau):
 	newx=[i[0] for i in position]
 	newy=[i[1] for i in position]
 	newz=[i[2] for i in position]
-	#return newx[-1]-newx[0] ##Note need to return in whatever direction we're drifting!
+	return newx[-1]-newx[0] ##Note need to return in whatever direction we're drifting!
 	
-	fig = plt.figure()
-	ax = fig.add_subplot(111, projection='3d')
-	ax.plot(newx,newy,newz,'r--',label="RK4")
-	ax.scatter(newx[-1],newy[-1],newz[-1],'ro',label="End")
-	ax.scatter(newx[0],newy[0],newz[0],'bo',label="Start")
-	plt.legend()
-	ax.set_xlabel("x")
-	ax.set_ylabel("y")
-	ax.set_zlabel("z")
-	plt.title("Thermal kick included at every dt=%s seconds"%tau)
-	plt.show()
+	# fig = plt.figure()
+	# ax = fig.add_subplot(111, projection='3d')
+	# ax.plot(newx,newy,newz,'r--',label="RK4")
+	# ax.scatter(newx[-1],newy[-1],newz[-1],'ro',label="End",s=50)
+	# ax.scatter(newx[0],newy[0],newz[0],'bo',label="Start",s=50)
+	# plt.legend()
+	# ax.set_xlabel("x")
+	# ax.set_ylabel("y")
+	# ax.set_zlabel("z")
+	# plt.title("Thermal kick included at every dt=%s seconds"%tau)
+	# plt.show()
 
-drift = thermalkickexb(iterations=20000,tau=10**(-5)) 
+#drift = thermalkickexb(iterations=20000,tau=10**(-7)) 
 #ion1=ion(pos=[0,0,0],vel=[numpy.sqrt(kb*Ti/mi),0,0],acc=[0,0,0])
 #driftnocol=-dt*2*10**7*numpy.linalg.norm(ion1.constE())/numpy.linalg.norm(ion1.constB())
 
@@ -321,9 +321,9 @@ def bootstrap(drifts,bsit=2000): #Bootstrap iteration is to take bsit resampling
 #So for omegatau is 0.01 the drift ratio after 2s is  0.01847764(one run)
 
 # ################ At different time steps for a fixed omega*tau
-iterationslist = [0.5/dt, 1./dt, 2./dt]
+iterationslist = [0.5/dt, 1/dt,2/dt,3/dt]
 filehandler = open(b"driftsconsttaunoE.obj",'wb')
-runs = 2
+runs = 5
 for i in iterationslist:
 	tau=10**(-5)
 	drifts=averagekickeffect(iterations = i, tau = tau, runs = runs)
@@ -334,34 +334,34 @@ pickle.dump(numpy.array(iterationslist)*omega,filehandler)
 filehandler.close()
 
 ##############Take a look at the saved object for drifts with different times ####
-# filehandler = open("driftsconsttaunoE.obj",'rb')
-# tau = 10**(-5)
-# drifts = []
-# bs = []
+filehandler = open("driftsconsttaunoE.obj",'rb')
+tau = 10**(-5)
+drifts = []
+bs = []
 
-# for i in numpy.arange(1):
-# 	drifts.append(pickle.load(filehandler))
-# 	bs.append(pickle.load(filehandler))
-# iterationslist=pickle.load(filehandler)
-# filehandler.close()
-# timelist = numpy.array(iterationslist)/omega*dt
-# driftsav = [i[0] for i in bs]
-# poserr = [i[1][0] for i in bs]
-# negerr = [i[1][1] for i in bs]
+for i in numpy.arange(4):
+	drifts.append(pickle.load(filehandler))
+	bs.append(pickle.load(filehandler))
+iterationslist=pickle.load(filehandler)
+filehandler.close()
+timelist = numpy.array(iterationslist)/omega*dt
+driftsav = [i[0] for i in bs]
+poserr = [i[1][0] for i in bs]
+negerr = [i[1][1] for i in bs]
 
-# func = lambda n : (omega*tau)**n/(1+(omega*tau)**n) - driftsav[-1] 
-# n=scipy.optimize.fsolve(func,3)
+func = lambda n : (omega*tau)**n/(1+(omega*tau)**n) - driftsav[-1] 
+n=scipy.optimize.fsolve(func,3)
 
-# fig = plt.figure()
-# plt.errorbar(timelist,driftsav,xerr = poserr, yerr = negerr,fmt='o', ecolor='g',label='Average drifts')
-# plt.xlabel("Runtime (s)")
-# plt.ylabel("Simualted drift/theoretical drift")
-# plt.legend()
-# plt.title(
-# 	r"Constant $\tau=%.2f$ drift results for different length of runtime, ($\omega*\tau=%.2f)^n$, where n=%.2f" %
-# 		(tau, omega*tau, n)
-# )
-# fig.show()
+fig = plt.figure()
+plt.errorbar(timelist,driftsav,xerr = poserr, yerr = negerr,fmt='o', ecolor='g',label='Average drifts')
+plt.xlabel("Runtime (s)")
+plt.ylabel("Simualted drift/theoretical drift")
+plt.legend()
+plt.title(
+	r"Constant $\tau=%.2f$ drift results for different length of runtime, ($\omega*\tau=%.2f)^n$, where n=%.2f" %
+		(tau, omega*tau, n)
+)
+fig.show()
 
 
 
