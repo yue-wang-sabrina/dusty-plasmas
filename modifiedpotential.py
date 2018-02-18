@@ -20,7 +20,7 @@ from scipy.interpolate import interp2d
 from scipy.interpolate import bisplrep
 from scipy.interpolate import bisplev
 
-
+# cleaning
 radd=1.5*10**(-6) #radius of dust particle
 e=1.60217662*10**(-19) #electron charge
 e0=8.85418782*10**(-12) #perimittivity free space
