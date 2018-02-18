@@ -31,6 +31,7 @@ ne0=1.*10**(15) #initial electron density
 ni0=ne0 #Quasi-neutral initial conditions
 md=1000.*(4/3)*math.pi*radd**3 #Mass of dust particle
 mi=39.948*1.66053904*10**(-27) #argon mass ion
+
 me=9.10938356*10**(-31) #electron mass
 cs=numpy.sqrt(kb*Te/mi) #Bohm speed = sound speed
 lambdade=(kb*Te*e0/(ne0*e**2))**0.5 #Electron debye rad

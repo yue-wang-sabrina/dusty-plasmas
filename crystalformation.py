@@ -14,6 +14,11 @@ from scipy import special
 import pickle
 from tqdm import tqdm
 
+from IPython import get_ipython
+ipython = get_ipython()
+ipython.magic('load_ext autoreload')
+ipython.magic('autoreload 2')
+
 ##To do list:
 #Solve for width of sheath? sheathphenom.pdf calculate sheath width, childs law
 

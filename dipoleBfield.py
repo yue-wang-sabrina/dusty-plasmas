@@ -11,6 +11,7 @@ import itertools
 import time
 from scipy import special
 
+
 #Some constants
 radd=1.5*10**(-6) #radius of dust particle
 e=1.60217662*10**(-19) #electron charge

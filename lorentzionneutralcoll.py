@@ -62,7 +62,7 @@ class ion:
 		self.dr=0
 	def constB(self):
 		return numpy.array([0,0.014,0])
-	def constE(self,E=[0,0,0]):
+	def constE(self,E=[0,0,1]):
 		return numpy.array(E)
 	def updateeulerforward(self,B,E=[0,0,1]):
 		##Euler forward - should be unstable!
@@ -71,7 +71,7 @@ class ion:
 	def updateeulerback(self,B,E=[0,0,1]): #Also unstable?
 		self.pos = self.pos - dt*self.vel
 		self.vel = self.vel - ((self.charge/mi)*numpy.cross(self.vel,B)*dt + numpy.array(E)*(self.charge/mi))
-	def updateRK4(self,B,E=[0,0,0]):
+	def updateRK4(self,B,E=[0,0,1]):
 		##RK4 integration
 		fv1=(self.charge/mi)*numpy.cross(self.vel1,B) + numpy.array(E)*(self.charge/mi)
 		fy1=self.vel1
@@ -296,8 +296,8 @@ def bootstrap(drifts,bsit=2000): #Bootstrap iteration is to take bsit resampling
 ######################Compare different values of omega*tau and saving the drift values
 # taulist = [0.01/omega, 0.05/omega, 0.1/omega, 0.5/omega]
 # filehandler = open(b"drifts.obj",'wb')
-# iterations=2*10**7
-# runs = 10
+# iterations=10**5
+# runs = 2
 # for i in tqdm(taulist,desc="Taus"):
 # 	tau=i
 # 	drifts=averagekickeffect(iterations = iterations, tau = tau, runs = runs)
@@ -308,34 +308,34 @@ def bootstrap(drifts,bsit=2000): #Bootstrap iteration is to take bsit resampling
 # filehandler.close()
 
 ######################### Take a look at the saved object for drifts at different tau's
-# filehandler = open("drifts.obj",'rb')
+# filehandler = open("driftschangetautom.obj",'rb')
 # drifts=[]
 # bs=[]
 # for i in numpy.arange(4):
 # 	drifts.append(pickle.load(filehandler))
 # 	bs.append(pickle.load(filehandler))
-# taulist = pickle.load(filehandler)
+# omegataulist = pickle.load(filehandler)
 # filehandler.close()
 
 #So for omegatau is 0.01 the drift ratio after 1s is 0.0225916 (one run)
 #So for omegatau is 0.01 the drift ratio after 2s is  0.01847764(one run)
 
 # ################ At different time steps for a fixed omega*tau
-iterationslist = [0.5/dt, 1/dt,2/dt,3/dt]
-filehandler = open(b"driftsconsttaunoE.obj",'wb')
-runs = 5
-for i in iterationslist:
-	tau=10**(-5)
-	drifts=averagekickeffect(iterations = i, tau = tau, runs = runs)
-	bs = bootstrap(drifts,bsit = 2000)
-	pickle.dump(drifts,filehandler)
-	pickle.dump(bs,filehandler)
-pickle.dump(numpy.array(iterationslist)*omega,filehandler)
-filehandler.close()
+# iterationslist = [0.5/dt, 1/dt,2/dt,3/dt]
+# filehandler = open(b"driftsconsttauwithEtauE6.obj",'wb')
+# runs = 2
+# for i in iterationslist:
+# 	tau=10**(-6)
+# 	drifts=averagekickeffect(iterations = i, tau = tau, runs = runs)
+# 	bs = bootstrap(drifts,bsit = 2000)
+# 	pickle.dump(drifts,filehandler)
+# 	pickle.dump(bs,filehandler)
+# pickle.dump(numpy.array(iterationslist)*omega,filehandler)
+# filehandler.close()
 
 ##############Take a look at the saved object for drifts with different times ####
-filehandler = open("driftsconsttaunoE.obj",'rb')
-tau = 10**(-5)
+filehandler = open("driftsconsttauwithEtauE6.obj",'rb')
+tau = 10**(-6)
 drifts = []
 bs = []
 
@@ -346,21 +346,23 @@ iterationslist=pickle.load(filehandler)
 filehandler.close()
 timelist = numpy.array(iterationslist)/omega*dt
 driftsav = [i[0] for i in bs]
+#driftsav=numpy.array(driftsav)/(-dt*(1/0.014)*numpy.array([0.5/dt,1/dt,2/dt,3/dt]))
 poserr = [i[1][0] for i in bs]
 negerr = [i[1][1] for i in bs]
+#poserr=numpy.array(poserr)/(dt*(1/0.014)*numpy.array([0.5/dt,1/dt,2/dt,3/dt]))
+#negerr=numpy.array(negerr)/(dt*(1/0.014)*numpy.array([0.5/dt,1/dt,2/dt,3/dt]))
+
 
 func = lambda n : (omega*tau)**n/(1+(omega*tau)**n) - driftsav[-1] 
-n=scipy.optimize.fsolve(func,3)
+n=scipy.optimize.fsolve(func,2)
 
 fig = plt.figure()
-plt.errorbar(timelist,driftsav,xerr = poserr, yerr = negerr,fmt='o', ecolor='g',label='Average drifts')
-plt.xlabel("Runtime (s)")
-plt.ylabel("Simualted drift/theoretical drift")
+plt.errorbar(timelist,driftsav, yerr = [poserr,negerr] ,fmt='o', ecolor='g',label='Average drifts')
+plt.xlabel("Run time(s)")
+plt.ylabel("Simualted drift (m)")
 plt.legend()
 plt.title(
-	r"Constant $\tau=%.2f$ drift results for different length of runtime, ($\omega*\tau=%.2f)^n$, where n=%.2f" %
-		(tau, omega*tau, n)
-)
+	r"Changing $\tau$ drift results for same length of runtime 1s")
 fig.show()
 
 
