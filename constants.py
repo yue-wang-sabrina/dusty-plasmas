@@ -25,10 +25,16 @@ dt = 0.0001  # Much longer than charging time which is order nanoseconds
 sheathd = 10 * lambdaD
 electrodeV = abs((kb * Te / (2 * e)) * (numpy.log(2 * math.pi * me / mi)))  # potential at electrode
 wallV = electrodeV  # cylindrical sides of wall same potential
-radinfluence = 5 * lambdaD
+radinfluence = 10 * lambdaD
 dipolea = boxr / 100.
 mu0 = 4 * math.pi * 10 ** (-7)  # Permeability free space
 gamma = 5000.  # damping gamma
+mu0 = 4 * math.pi * 10 ** (-7)  # Permeaility free space
+Bmom = ((2 * math.pi * (0.003) ** 3) * 0.014 / mu0) * numpy.array(
+    [0, 0, 1])  # Nm/T #At 1cm away I want the B to be 0.014T
+magBmom = numpy.sqrt(Bmom[0] ** 2 + Bmom[1] ** 2 + Bmom[2] ** 2)
+Bmomhat = numpy.array(Bmom) / magBmom
+dipolepos = [0, 0, -0.0005]
 
 
 def OLMsol():  # Solve for dust grain surface potential and dust grain charge

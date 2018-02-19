@@ -1,8 +1,9 @@
-import numpy
 import math
-import constants as const
 
+import numpy
 from scipy import special
+
+import constants as const
 
 
 class Dust:
@@ -363,9 +364,9 @@ class Dust:
             mach = numpy.array([vdrift[0] - self.vel[0], vdrift[1] - self.vel[1], vdrift[2] - self.vel[2]]) / vT
             machmag = numpy.sqrt(mach[0] ** 2 + mach[1] ** 2 + mach[2] ** 2)
             LAMBDA = numpy.sqrt(1. / (numpy.exp(-machmag ** 2 / 2.) * const.lambdadi ** (-2) + const.lambdade ** (-2)))
-            beta = abs(Zd * const.e ** 2 / (LAMBDA * const.Ti * const.kb))
+            beta = abs(const.Zd * const.e ** 2 / (LAMBDA * const.Ti * const.kb))
             u = numpy.sqrt(vdrift[0] ** 2 + vdrift[1] ** 2 + vdrift[2] ** 2) / vT
-            z = abs(Zd) * const.e ** 2 / (4 * math.pi * const.e0 * const.radd * const.Te * const.kb)
+            z = abs(const.Zd) * const.e ** 2 / (4 * math.pi * const.e0 * const.radd * const.Te * const.kb)
             tau = const.Te / const.Ti
             coloumblog = 5.
             force = numpy.sqrt(2 * math.pi) * const.radd ** 2 * const.ni0 * const.mi * vT ** 2 * \
@@ -391,9 +392,9 @@ class Dust:
             machmag = numpy.sqrt(mach[0] ** 2 + mach[1] ** 2 + mach[2] ** 2)
 
             LAMBDA = numpy.sqrt(1. / (numpy.exp(-machmag ** 2 / 2.) * const.lambdadi ** (-2) + const.lambdade ** (-2)))
-            beta = abs(Zd * const.e ** 2 / (LAMBDA * const.Ti * const.kb))
+            beta = abs(const.Zd * const.e ** 2 / (LAMBDA * const.Ti * const.kb))
             u = numpy.sqrt(vdrift[0] ** 2 + vdrift[1] ** 2 + vdrift[2] ** 2) / vT
-            z = abs(Zd) * const.e ** 2 / (const.radd * const.Te * const.kb)
+            z = abs(const.Zd) * const.e ** 2 / (const.radd * const.Te * const.kb)
             tau = const.Te / const.Ti
             coloumblog = 5.
             force = 2 * math.pi * const.radd ** 2 * const.mi * const.ni0 * vT * numpy.sqrt(2) * (
