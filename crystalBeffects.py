@@ -39,7 +39,7 @@ dt=0.0001 #Much longer than charging time which is order nanoseconds
 sheathd=10*lambdaD
 electrodeV=abs((kb*Te/(2*e))*(numpy.log(2*math.pi*me/mi))) #potential at electrode
 wallV=electrodeV #cylindrical sides of wall same potential
-radinfluence=20*lambdaD
+radinfluence=7*lambdaD
 dipolea=boxr/100.
 mu0=4*math.pi*10**(-7) #Permeaility free space
 Bmom=((2*math.pi*(0.003)**3)*0.014/mu0)*numpy.array([0,0,1]) #Nm/T #At 1cm away I want the B to be 0.014T
@@ -345,8 +345,8 @@ class Dust:
 
 			##Just blindly multiplying by factor
 			omega=abs(e*magB/mi)
-			tau=0.00284/omega			
-			vdrift[0]*=(omega*tau)**2/(1+(omega*tau)**2)
+			tau=0.01/omega		
+			vdrift[0]*=(omega*tau)**2/(1+(omega*tau)**2) #Multiplication by factor just to make simulation faster
 			vdrift[1]*=(omega*tau)**2/(1+(omega*tau)**2)
 			vdrift[2]*=(omega*tau)**2/(1+(omega*tau)**2)
 
@@ -372,14 +372,13 @@ class Dust:
 			LAMBDA=numpy.sqrt(1./(numpy.exp(-machmag**2/2.)*lambdadi**(-2)+lambdade**(-2)))
 			beta=abs(Zd*e**2/(LAMBDA*Ti*kb))
 			u=numpy.sqrt(vdrift[0]**2+vdrift[1]**2+vdrift[2]**2)/vT
-			z=abs(Zd)*e**2/(radd*Te*kb)
+			z=abs(Zd)*e**2/(4*math.pi*e0*radd*Te*kb)
 			tau=Te/Ti
 			coloumblog=5.
 			force=numpy.sqrt(2*math.pi)*radd**2*ni0*mi*vT**2*\
 				(numpy.sqrt(math.pi/2)*special.erf(u/numpy.sqrt(2))*\
-					(1+u**2+(1-u**2)*(1+2*z*tau)+4*z**2*tau**2*u**(-2)*numpy.log(coloumblog))+\
+					(1+u**2+(1-u**(-2))*(1+2*z*tau)+4*z**2*tau**2*u**(-2)*numpy.log(coloumblog))+\
 						(u**(-1)*(1+2*z*tau+u**2-4*z**2*tau**2*numpy.log(coloumblog))*numpy.exp(-u**2/2.)))*mach/machmag
-			#print(force/self.m)
 			return force/self.m
 
 		else:
@@ -577,7 +576,7 @@ def interpolate(r):
 
 ##Create dictionary of particles from pickle object
 position=[]
-numparticles=450
+numparticles=400
 names=[]
 for i in numpy.arange(numparticles):
 	names.append('g%s'%i)
@@ -606,8 +605,8 @@ pairs=[i for i in pairs if i not in removelist]
 
 
 ##Interact and iterate 
-iterationsB=2000
-inititerations=1000
+iterationsB=5000
+inititerations=100
 g9velcheck=[]
 g9poscheck=[]
 g9acccheck=[]
@@ -693,13 +692,13 @@ ax.set_ylim([-rmax*1.5,rmax*1.5])
 
 data=df[df['time']==0]
 point, = ax.plot(data.x, data.y, data.z, linestyle="", marker=".")
-plt.cla()
+#plt.cla()
 # for i in [[0,0],[0,1],[1,0],[1,1]]:
 # 	circx=((-1)**(i[0]))*numpy.arange(100)*boxr*0.9
 # 	circy=((-1)**(i[1]))*numpy.sqrt(boxr**2-circx**2)
 # 	ax.plot(circx,circy,'r-')
 ani = matplotlib.animation.FuncAnimation(fig, update_graph, frames=iterationsB+inititerations,interval=1, blit=True)
-#ani.save('RotationnoGibs.mp4', fps=30,extra_args=['-vcodec', 'libx264'])
+ani.save('RotationnoGibsvdrifttimes1.mp4', fps=30,extra_args=['-vcodec', 'libx264'])
 plt.show()
 
 

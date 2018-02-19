@@ -60,17 +60,22 @@ class ion:
 		self.vel1=numpy.array(vel)
 		self.charge=e
 		self.dr=0
+
 	def constB(self):
 		return numpy.array([0,0.014,0])
+
 	def constE(self,E=[0,0,1]):
 		return numpy.array(E)
+
 	def updateeulerforward(self,B,E=[0,0,1]):
 		##Euler forward - should be unstable!
 		self.pos = self.pos + dt*self.vel
 		self.vel = ((self.charge/mi)*numpy.cross(self.vel,B) + numpy.array(E)*(self.charge/mi))*dt+self.vel
+
 	def updateeulerback(self,B,E=[0,0,1]): #Also unstable?
 		self.pos = self.pos - dt*self.vel
 		self.vel = self.vel - ((self.charge/mi)*numpy.cross(self.vel,B)*dt + numpy.array(E)*(self.charge/mi))
+
 	def updateRK4(self,B,E=[0,0,1]):
 		##RK4 integration
 		fv1=(self.charge/mi)*numpy.cross(self.vel1,B) + numpy.array(E)*(self.charge/mi)
@@ -97,6 +102,7 @@ class ion:
 
 	def getselfvel(self):
 		return self.vel
+
 	def getselfpos(self):
 		return self.pos
 
@@ -334,7 +340,7 @@ def bootstrap(drifts,bsit=2000): #Bootstrap iteration is to take bsit resampling
 # filehandler.close()
 
 ##############Take a look at the saved object for drifts with different times ####
-filehandler = open("driftsconsttauwithEtauE6.obj",'rb')
+filehandler = open("nodriftschangetautom.obj",'rb')
 tau = 10**(-6)
 drifts = []
 bs = []
@@ -346,11 +352,11 @@ iterationslist=pickle.load(filehandler)
 filehandler.close()
 timelist = numpy.array(iterationslist)/omega*dt
 driftsav = [i[0] for i in bs]
-#driftsav=numpy.array(driftsav)/(-dt*(1/0.014)*numpy.array([0.5/dt,1/dt,2/dt,3/dt]))
+driftsav=numpy.array(driftsav)/(-dt*(1/0.014)*numpy.array([0.5/dt,1/dt,2/dt,3/dt]))
 poserr = [i[1][0] for i in bs]
 negerr = [i[1][1] for i in bs]
-#poserr=numpy.array(poserr)/(dt*(1/0.014)*numpy.array([0.5/dt,1/dt,2/dt,3/dt]))
-#negerr=numpy.array(negerr)/(dt*(1/0.014)*numpy.array([0.5/dt,1/dt,2/dt,3/dt]))
+poserr=numpy.array(poserr)/(dt*(1/0.014)*numpy.array([0.5/dt,1/dt,2/dt,3/dt]))
+negerr=numpy.array(negerr)/(dt*(1/0.014)*numpy.array([0.5/dt,1/dt,2/dt,3/dt]))
 
 
 func = lambda n : (omega*tau)**n/(1+(omega*tau)**n) - driftsav[-1] 
