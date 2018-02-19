@@ -83,7 +83,7 @@ class Dust:
                 self.acc) * const.dt ** 2
             self.multifields = numpy.array([0, 0, 0])
 
-        if method == 'leap frog':
+        elif method == 'leap frog':
             # Leapfrog - unstable
             self.vel = numpy.array(self.vel2) + 2 * const.dt * numpy.array(self.acc1)
             self.pos = numpy.array(self.pos2) + 2 * const.dt * numpy.array(self.vel1)
@@ -93,7 +93,7 @@ class Dust:
             self.pos2 = self.pos1
             self.pos1 = self.pos
 
-        if method == 'rk4':
+        elif method == 'rk4':
             # RK4 - also unstable?
             fv1 = numpy.array(self.acc1)
             fy1 = numpy.array(self.vel1)
@@ -114,6 +114,9 @@ class Dust:
             self.acc1 = self.acc
             self.vel1 = self.vel
             self.pos1 = self.pos
+
+        else:
+            raise Exception('Method does not exist!')
 
     def damping(self):
         magvel = numpy.sqrt(self.vel[0] ** 2 + self.vel[1] ** 2 + self.vel[2] ** 2)
@@ -209,7 +212,7 @@ class Dust:
                 vdrift[2] *= (omega * tau) ** 2 / (1 + (omega * tau) ** 2)
 
             # Ion-neutral collision drift velocity new D.D. Millar 1976
-            if method == 'derivation':
+            elif method == 'derivation':
                 omega = abs(const.e * magB / const.mi)
                 tau = 0.05 / omega
                 Br = numpy.sqrt(B[0] ** 2 + B[1] ** 2)
@@ -227,6 +230,9 @@ class Dust:
                 theta = numpy.arctan(self.pos[2] / self.pos[0])
                 vdrift[0] = abs(drift1 * r * numpy.sin(theta)) * numpy.sign(vdrift[0])
                 vdrift[1] = abs(drift1 * r * numpy.cos(theta)) * numpy.sign(vdrift[1])
+
+            else:
+                raise Exception('Method does not exist!')
 
             # Calculate total acceleration on dust particle due to ion and neutral drag
             mach = numpy.array([vdrift[0] - self.vel[0], vdrift[1] - self.vel[1], vdrift[2] - self.vel[2]]) / vT
@@ -332,7 +338,7 @@ class Dust:
                 vdrift[2] *= (omega * tau) ** 2 / (1 + (omega * tau) ** 2)
 
             # Ion-neutral collision drift velocity new D.D. Millar 1976
-            if method == 'derivation':
+            elif method == 'derivation':
                 omega = abs(const.e * magB / const.mi)
                 tau = 0.05 / omega
                 Br = numpy.sqrt(B[0] ** 2 + B[1] ** 2)
@@ -350,6 +356,9 @@ class Dust:
                 vdrift[0] = abs((drift1) * r * numpy.sin(theta)) * numpy.sign(vdrift[0])
                 vdrift[1] = abs((drift1) * r * numpy.cos(theta)) * numpy.sign(vdrift[1])
                 vdrift[2] = abs(drift2) * numpy.sign(vdrift[2])
+
+            else:
+                raise Exception('Method does not exist!')
 
             mach = numpy.array([vdrift[0] - self.vel[0], vdrift[1] - self.vel[1], vdrift[2] - self.vel[2]]) / vT
             machmag = numpy.sqrt(mach[0] ** 2 + mach[1] ** 2 + mach[2] ** 2)
