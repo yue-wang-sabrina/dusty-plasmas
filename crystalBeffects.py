@@ -151,6 +151,8 @@ for i in pairs:
 pairs = [i for i in pairs if i not in removelist]
 
 # Interact and iterate
+method = 'Gibs'
+
 iterationsB = 5000
 inititerations = 100
 g9velcheck = []
