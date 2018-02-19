@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt
 import scipy.integrate as integrate
 import matplotlib.animation as animation
 
+
 class DoublePendulum:
     """Double Pendulum Class
 
@@ -26,21 +27,22 @@ class DoublePendulum:
     where theta1, omega1 is the angular position and velocity of the first
     pendulum arm, and theta2, omega2 is that of the second pendulum arm
     """
+
     def __init__(self,
-                 init_state = [120, 0, -20, 0],
+                 init_state=[120, 0, -20, 0],
                  L1=1.0,  # length of pendulum 1 in m
                  L2=1.0,  # length of pendulum 2 in m
                  M1=1.0,  # mass of pendulum 1 in kg
                  M2=1.0,  # mass of pendulum 2 in kg
                  G=9.8,  # acceleration due to gravity, in m/s^2
-                 origin=(0, 0)): 
+                 origin=(0, 0)):
         self.init_state = np.asarray(init_state, dtype='float')
         self.params = (L1, L2, M1, M2, G)
         self.origin = origin
         self.time_elapsed = 0
 
         self.state = self.init_state * np.pi / 180.
-    
+
     def position(self):
         """compute the current x,y positions of the pendulum arms"""
         (L1, L2, M1, M2, G) = self.params
@@ -93,7 +95,7 @@ class DoublePendulum:
                    + (M1 + M2) * G * sin(state[0]) * cos_delta
                    - (M1 + M2) * L1 * state[1] * state[1] * sin_delta
                    - (M1 + M2) * G * sin(state[2])) / den2
-        
+
         return dydx
 
     def step(self, dt):
@@ -101,12 +103,13 @@ class DoublePendulum:
         self.state = integrate.odeint(self.dstate_dt, self.state, [0, dt])[1]
         self.time_elapsed += dt
 
-#------------------------------------------------------------
+
+# ------------------------------------------------------------
 # set up initial state and global variables
 pendulum = DoublePendulum([180., 0.0, -20., 0.0])
-dt = 1./30 # 30 fps
+dt = 1. / 30  # 30 fps
 
-#------------------------------------------------------------
+# ------------------------------------------------------------
 # set up figure and animation
 fig = plt.figure()
 ax = fig.add_subplot(111, aspect='equal', autoscale_on=False,
@@ -117,6 +120,7 @@ line, = ax.plot([], [], 'o-', lw=2)
 time_text = ax.text(0.02, 0.95, '', transform=ax.transAxes)
 energy_text = ax.text(0.02, 0.90, '', transform=ax.transAxes)
 
+
 def init():
     """initialize animation"""
     line.set_data([], [])
@@ -124,18 +128,21 @@ def init():
     energy_text.set_text('')
     return line, time_text, energy_text
 
+
 def animate(i):
     """perform animation step"""
     global pendulum, dt
     pendulum.step(dt)
-    
+
     line.set_data(*pendulum.position())
     time_text.set_text('time = %.1f' % pendulum.time_elapsed)
     energy_text.set_text('energy = %.3f J' % pendulum.energy())
     return line, time_text, energy_text
 
+
 # choose the interval based on dt and the time to animate one step
 from time import time
+
 t0 = time()
 animate(0)
 t1 = time()
