@@ -5,8 +5,26 @@
 \paperw11900\paperh16840\margl1440\margr1440\vieww10800\viewh8400\viewkind0
 \pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
 
-\f0\fs24 \cf0 driftsconsttaunoE.obj: No E field, changing time constant tau, 4 trials of time, tau = 10^(-5)\
-driftsconsttauwithE.obj: With E field, changing time constant tau, 2 trials of time, tau = 10^(-5)\
-driftsconsttauwithEtauE6.obj: With E field, changing time constant tau, 2 trials of time, tau = 10^(-6) 4 values of time.\
+\f0\b\fs24 \cf0 Pickle objects:\
+
+\b0 driftsconsttaunoE.obj: No E field, changing time constant tau, 4 trials of time, tau = 10^(-5)\
 nodriftschangetautom.obj: No E field, changing tau 4 values each over 1s with 2 runs.\
-}
+driftsconsttauwithE.obj: With E field, changing time constant tau, 2 trials of time, tau = 10^(-5). (0.5,1,2, and 3s). Iterationslist dumped is (time/dt)*omega for some reason. \
+driftsconsttauwithEtauE6.obj: With E field, changing time constant tau, 2 trials of time, tau = 10^(-6) 4 values of time. (0.5,1,2, and 3s). Iterationslist dumped is (time/dt)*omega for some reason\
+driftsconsttauwithEomegataupt1.obj: With E field, changing time constant tau, 2 trials of time, omega*tau = 0.01. Used 3 values of time: (1,2, and 3s). Iterationslist dumped is just time/dt.\
+driftsconsttauwithEomegataupt15.obj: With E field, changing time constant tau, 2 trials of time, omega*tau = 0.15. Used 1 values of time: (3s). Iterationslist dumped is just time/dt.\
+driftsconsttauwithEomegataupt25.obj: With E field, changing time constant tau, 2 trials of time, omega*tau = 0.25. Used 1 values of time: (3s). Iterationslist dumped is just time/dt.\
+driftsconsttauwithEomegataupt3.obj: With E field, changing time constant tau, 2 trials of time, omega*tau = 0.3. Used 1 values of time: (3s). Iterationslist dumped is just time/dt.\
+driftsconsttauwithEomegataupt1real.obj: With E field, changing time constant tau, 2 trials of time, omega*tau = 0.1. Used 1 values of time: (3s). Iterationslist dumped is just time/dt.\
+driftsconsttauwithEomegataupt2.obj: With E field, changing time constant tau, 2 trials of time, omega*tau = 0.2. Used 1 values of time: (3s). Iterationslist dumped is just time/dt.\
+driftsconsttauwithEomegataupt07.obj: With E field, changing time constant tau, 2 trials of time, omega*tau = 0.07. Used 1 values of time: (3s). Iterationslist dumped is just time/dt.\
+driftsconsttauwithEomegataupt325.obj: With E field, changing time constant tau, 2 trials of time, omega*tau = 0.325. Used 1 values of time: (3s). Iterationslist dumped is just time/dt.\
+driftsconsttauwithEomegataupt275.obj: With E field, changing time constant tau, 2 trials of time, omega*tau = 0.275. Used 1 values of time: (3s). Iterationslist dumped is just time/dt.\
+\
+
+\b Videos:\
+
+\b0 RotationnoGibsvdrifttimes10E2.mp4 : No gibs field, the hybrid model used for ion drag and vdrift is multiplied by factor (omega*tau)**2/(1+(omega*tau)**2)  * 10^2 where the 10^2 is to speed up the motion, time simulated is 0.02s.\
+RotationwithGibsvdrifttimes10E2.mp4: Everything is same as before, but with gibs field.\
+RotationwithGibsvdrifttimes1.mp4: With gibs field, multiplied by factor (omega*tau)**2/(1+(omega*tau)**2) only, time simulated is 0.5s.\
+RotationnoGibsvdrifttimes1.mp4: No gibs field, multiplied by factor (omega*tau)**2/(1+(omega*tau)**2) only, time simulated is 0.5s.}

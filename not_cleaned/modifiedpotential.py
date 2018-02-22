@@ -72,7 +72,6 @@ def OLMsol():  # Solve for dust grain surface potential and dust grain charge
     chargedust = (surfpot * radd * 4 * math.pi * e0) * (Te * kb / e) / e
     return surfpot * (Te * kb / e), chargedust  # This is in Volts and Coloumbs, i.e. SI units
 
-
 phia, Zd = OLMsol()  # phi at surface of dust and the corresponding dust charge
 
 # Moving the magnet up and down will change the strength of the dipole at the bottom
@@ -102,8 +101,9 @@ curlyM = magBmom * mu0 / (4 * math.pi)
 VeT = numpy.sqrt(kb * Te * 3 / me)  # Thermal velocity of electrons
 critp0 = 2 * numpy.sqrt(e * me * VeT * curlyM)  # Critical p0 value determining regimes
 
-##Variables that can change when calculating the region of electron accessibility
-##NB: e drift velocity is used for p0 calculation whilst VeT+edrift is used for Z calculation 
+# Variables that can change when calculating the region of electron accessibility
+# NB: e drift velocity is used for p0 calculation whilst VeT+edrift is used for Z calculation
+
 electrondriftpos = [boxr, 0, 0]  # Position to calculate the drift in electron velocity
 rvalp0 = numpy.sqrt(electrondriftpos[0] ** 2 + electrondriftpos[1] ** 2 + electrondriftpos[
     2] ** 2)  # The r value at which we are calculating p0
@@ -129,8 +129,8 @@ electrondriftvel = numpy.sqrt(edriftvel[0] ** 2 + edriftvel[1] ** 2 + edriftvel[
 
 # Define z+/- function for determining accessible/inaccessible electron regions
 def Zpm(r, p, pm):
-    if math.isnan(e * curlyM * r ** 2 / (p + pm * me * r * (VeT + electrondriftvel)) ** (2. / 3.)) == True:
-        return 0
+    if math.isnan(e * curlyM * r ** 2 / (p + pm * me * r * (VeT + electrondriftvel)) ** (2. / 3.)):
+        return 10
     elif (e * curlyM * r ** 2 / (p + pm * me * r * (VeT + electrondriftvel))) ** (2. / 3.) - r ** 2 <= 0:
         return 0
     else:
@@ -139,22 +139,22 @@ def Zpm(r, p, pm):
 
 # ##Test different values of r effect on p0
 
-# term1=me*rvalp0*electrondriftvel #As boxr is the maximum r that the electron can come from
-# term2=e*mu0*magBmom/(4*math.pi*rvalp0) #when electron is at boxr this term is at its minimum
-# p0=term1+term2 #As p0 is always very tiny, P0=0 essentially 
-# print("Difference p0-critp0 = ",p0-critp0)
+term1=me*rvalp0*electrondriftvel #As boxr is the maximum r that the electron can come from
+term2=e*mu0*magBmom/(4*math.pi*rvalp0) #when electron is at boxr this term is at its minimum
+p0=term1+term2 #As p0 is always very tiny, P0=0 essentially
+print("Difference p0-critp0 = ",p0-critp0)
 
-# ##Get inaccessble zone at current p0
-# r2=numpy.arange(lambdaD,boxr,boxr/10000)
-# zinaccesspos=[]
-# zinaccessneg=[]
-# for i in r2:
-# 	zinaccessneg.append(Zpm(i,p0,-1))
-# 	zinaccesspos.append(Zpm(i,p0,+1))
+##Get inaccessble zone at current p0
+r2=numpy.arange(lambdaD,boxr,boxr/10000)
+zinaccesspos=[]
+zinaccessneg=[]
+for i in r2:
+	zinaccessneg.append(Zpm(i,p0,-1))
+	zinaccesspos.append(Zpm(i,p0,+1))
 
-# rnorm=numpy.array(r2)/LAMBDA
-# znormpos=numpy.array(zinaccesspos)/LAMBDA
-# znormneg=numpy.array(zinaccessneg)/LAMBDA
+rnorm=numpy.array(r2)/LAMBDA
+znormpos=numpy.array(zinaccesspos)/LAMBDA
+znormneg=numpy.array(zinaccessneg)/LAMBDA
 
 # #Get inaccessible zone at any p0
 
@@ -166,22 +166,30 @@ rnormalize = numpy.array(r) / LAMBDA
 znormalize = numpy.array(zcrit) / LAMBDA
 
 
-# ##Plot inaccessibility regions
-
+# # ##Plot inaccessibility regions
+# import matplotlib
+# font = {'family' : 'normal',
+#         'weight' : 'bold',
+#         'size'   : 17}
+#
+# matplotlib.rc('font', **font)
 # fig, ax = plt.subplots(1,1)
-# ax.plot(rnorm,znormpos,'b.-',label='Inaccessble below this for this p0, zinaccesspos')
-# ax.plot(rnorm,znormneg,'k.-',label='Inaccessble above this for this p0, zinaccessneg')
+# ax.plot(rnorm,znormpos,'b.-',label='Region below inaccessble to electrons')#for this p0, zinaccesspos')
+# ax.plot(rnorm,znormneg,'k.-',label='Region above inaccessible to electrons')#for this p0, zinaccessneg')
 # ax.fill_between(rnorm,znormpos,znormneg,where=znormneg>znormpos,interpolate=True, color='pink')
-# ax.plot(rnormalize,znormalize,'r.-',label="inaccessible for all p0 below curve")
-# ax.plot(rnormalize,numpy.ones(len(rnormalize))*sheathd/LAMBDA,'m-',label="Sheath top")
+# ax.plot(rnormalize,znormalize,'r.-',label="Region below is inaccessible for electrons of all velocities")#p0 below curve")
+# ax.plot(rnormalize,numpy.ones(len(rnormalize))*sheathd/LAMBDA,'m-',label="Region of interest is below this line (Sheath top)")
 # ax.fill_between(rnormalize,0,znormalize,interpolate=True,color='red')
-# plt.xlabel("r/LAMBDA")
-# plt.ylabel("z/LAMBDA")
+# plt.xlabel(r"$\frac{r}{\Lambda}$",fontsize = 25)
+# plt.ylabel(r"$\frac{z}{\Lambda}$", fontsize = 25)
 # plt.xlim([0,max(rnormalize)])
 # plt.ylim([0,1])
-# plt.title("Regions of electron acessibility with B field presense")
+# plt.title("Regions accessible to electrons with magnetic field presence")
 # plt.legend()
-# plt.show()
+# from pylab import rcParams
+# rcParams['figure.figsize'] = 20, 20
+# # plt.show()
+# plt.savefig('inaccessible', format='eps')
 
 ############################################################################################
 ##Find the total charge inside the void assuming only protons present
@@ -227,7 +235,7 @@ def voidQ(rmax):
     return voidcharge
 
 
-##Create function for modified potential and hence electric field
+# Create function for modified potential and hence electric field
 def pospos():  # positive charge positions
     separation = lambdaD / 2
     chargepos = []  # positive charge positions
@@ -355,7 +363,7 @@ def interpolate(r):
     Efinal = (d3 ** 2 / dvertsq) * Ebottom + (d4 ** 2 / dvertsq) * Etop
     return Efinal, gridpoints
 
-
+# Create the grids of positive charges and the corresponding radial and vertical fields.
 func = lambda rmax: 1. - e * curlyM / (rmax * (2 * numpy.sqrt(e * curlyM * me * VeT) + me * rmax * VeT))
 rmax = fsolve(func, 0.4 * LAMBDA)
 voidchargeguess = voidvol(rmax) * ne0 * e
@@ -402,7 +410,7 @@ def checkedenofm():  # Run this function to calculate ratio of charge in the voi
 
 ########################################################################################
 ##Generate particles in their equilibrium position
-filehandler = open("crystalpositions2,5K.obj",
+filehandler = open("/Users/yuewang/Dropbox/Msci-DustyPlasmas/Code/objects/crystalpositions2,5K.obj",
                    'rb')  ##2k particles 5.5hrs to run 2500 iterations just for settling down
 xinit = pickle.load(filehandler)
 yinit = pickle.load(filehandler)
@@ -443,13 +451,13 @@ initpositions = [[i, j, k] for i, j, k in zip(xinit, yinit, zinit)]
 ########################################################################################
 ##Test my interpolator
 plt.figure()
-for p in numpy.arange(len(xinit)):
-    if numpy.sqrt(xinit[p] ** 2 + yinit[p] ** 2) < rmax:
-        Etest, gridpointstest = interpolate([numpy.sqrt(xinit[p] ** 2 + yinit[p] ** 2), zinit[p]])
-        # plt.scatter(numpy.array(numpy.mat(gridpointstest).T[0]),numpy.array(numpy.mat(gridpointstest).T[1]),color='k',s=5)
-        plt.quiver(numpy.sqrt(xinit[p] ** 2 + yinit[p] ** 2), zinit[p], Etest[0], Etest[1], width=0.002, color='m')
-    else:
-        pass
+# for p in numpy.arange(len(xinit)):
+#     if numpy.sqrt(xinit[p] ** 2 + yinit[p] ** 2) < rmax:
+#         Etest, gridpointstest = interpolate([numpy.sqrt(xinit[p] ** 2 + yinit[p] ** 2), zinit[p]])
+#         # plt.scatter(numpy.array(numpy.mat(gridpointstest).T[0]),numpy.array(numpy.mat(gridpointstest).T[1]),color='k',s=5)
+#         plt.quiver(numpy.sqrt(xinit[p] ** 2 + yinit[p] ** 2), zinit[p], Etest[0], Etest[1], width=0.002, color='m')
+#     else:
+#         pass
 plt.plot(numpy.array(rnormalize) * LAMBDA, numpy.array(znormalize) * LAMBDA, 'r-',
          label='Inaccessible region for all p0')
 plt.quiver(gridr, gridz, Evalsr, Evalsz, color='b', label='modified field')
@@ -457,16 +465,23 @@ plt.quiver(gridr, gridz, Evalsr, Evalsz, color='b', label='modified field')
 # plt.quiver(gridr,gridz,Evalsheathr,Evalsheath,color='g',label='sheath field')
 # plt.plot(chargepos.T[:,0],chargepos.T[:,1],'r.')
 # plt.plot(numpy.arange(len(gridr[0])),numpy.ones(len(gridr[0]))*0.00038257340070632558,'m-',label='crystal plane')
-plt.xlabel("r")
-plt.ylabel("z")
-plt.title("Purple arrows = Interpolated E fields at crystal equilibrium positions")
-plt.legend()
+plt.xlabel("r (m) ")
+plt.ylabel("z (m) ")
+plt.title("Modified E fields inside \n electron inaccessible region")
+plt.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
+plt.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
+
+plt.legend(loc=2)
 plt.xlim([0, rmax])
 plt.ylim([0, sheathd * 1.5])
-plt.show()
+# plt.show()
+from pylab import rcParams
+rcParams['figure.figsize'] = 16, 10
+# plt.show()
+plt.savefig('fig', format='eps')
 
-##Save the modified potential in pickle
-
+# #Save the modified potential in pickle
+#
 # filehandler = open(b"modifiedfield.obj",'wb') ##2k particles 5.5hrs to run 2500 iterations just for settling down
 # pickle.dump(gridr,filehandler)
 # pickle.dump(gridz,filehandler)
