@@ -3,12 +3,6 @@ import itertools
 import numpy
 import pandas as pd
 
-import matplotlib.pyplot as plt
-from matplotlib import animation
-from mpl_toolkits.mplot3d import Axes3D
-import matplotlib.animation
-import mpl_toolkits.mplot3d.axes3d as p3
-
 from tqdm import tqdm
 
 import constants as const
@@ -29,6 +23,7 @@ class BEffectsAnalysis:
         self.init_iterations = None
         self.position_array = None
         self.modified_b_field = None
+        self.const = const
 
     def create_particles(self, numparticles, initpositions):
         # Create dictionary of particles from pickle object
@@ -137,66 +132,3 @@ class BEffectsAnalysis:
             "z": self.position_array[:, 2]
         })
 
-    def plot(self):
-        # import matplotlib
-        # font = {'family': 'normal',
-        #         'weight': 'bold',
-        #         'size': 25}
-        #
-        # fig2 = plt.figure()
-        # ax2 = fig2.add_subplot(111)
-        # data = self.positions_df[self.positions_df['time'] == max(self.positions_df['time'])]
-        # ax2.scatter(data.x,data.y,color='r',marker = ".")
-        # plt.xlabel("x (m)")
-        # plt.ylabel("y (m)")
-        # plt.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
-        # plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
-        # plt.title("Crystal without Gibson's modified E field")
-        # plt.xlim([-max(data.x)*1.1,max(data.x)*1.1])
-        # plt.ylim([-max(data.y)*1.1,max(data.y)*1.1])
-        # from pylab import rcParams
-        # plt.savefig('fig', format='eps')
-        # plt.show()
-
-
-        def _update_graph(n_iter):
-            data = self.positions_df[self.positions_df['time'] == n_iter]
-            point.set_data(data.x, data.y)
-            point.set_3d_properties(data.z)
-            return point,
-
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
-        ax.view_init(elev=90., azim=90)
-        if min(self.position_array[:, 0]) == max(self.position_array[:, 0]):
-            ax.set_xlim([-10 * const.lambdaD, 10 * const.lambdaD])
-        else:
-            ax.set_xlim([min(self.position_array[:, 0]), max(self.position_array[:, 0])])
-        if min(self.position_array[:, 1]) == max(self.position_array[:, 1]):
-            ax.set_ylim([-10 * const.lambdaD, 10 * const.lambdaD])
-        else:
-            ax.set_ylim([min(self.position_array[:, 1]), max(self.position_array[:, 1])])
-        if min(self.position_array[:, 2]) == max(self.position_array[:, 2]):
-            ax.set_zlim([-10 * const.lambdaD, 10 * const.lambdaD])
-        else:
-            ax.set_zlim([min(self.position_array[:, 2]) - 0.5 * min(self.position_array[:, 2]), max(self.position_array[:, 2])])
-
-        ax.set_xlim([-self.modified_b_field['rmax'] * 1.5, self.modified_b_field['rmax'] * 1.5])
-        ax.set_ylim([-self.modified_b_field['rmax'] * 1.5, self.modified_b_field['rmax'] * 1.5])
-        plt.xlabel("x (m)")
-        plt.ylabel("y (m)")
-
-        data = self.positions_df[self.positions_df['time'] == 0]
-        point, = ax.plot(data.x, data.y, data.z, linestyle="", marker=".")
-        plt.cla()
-
-        ani = matplotlib.animation.FuncAnimation(
-            fig,
-            _update_graph,
-            frames=self.iterationsB + self.init_iterations,
-            interval=1,
-            blit=True
-        )
-
-        # ani.save('RotationnoGibsvdrifttimes1.mp4', fps=30, extra_args=['-vcodec', 'libx264'])
-        fig.show()

@@ -166,7 +166,7 @@ def plotrunsim(newx, newy, newz):
     plt.show()
 
 
-# plotrunsim(newx,newy,newz)
+# (newx,newy,newz)
 
 def checkdrift():
     iterations = numpy.arange(200, 20000, 500)

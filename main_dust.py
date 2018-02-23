@@ -2,8 +2,10 @@
 
 from analysis_dust import BEffectsAnalysis
 from utils.utils import generate_particle_equilibrium_positions, prepare_modified_b_field
+from plots import dustplots
 
 from IPython import get_ipython
+
 
 ipython = get_ipython()
 ipython.magic('load_ext autoreload')
@@ -12,16 +14,16 @@ ipython.magic('autoreload 2')
 
 beffect1 = BEffectsAnalysis()
 beffect1.create_particles(
-    numparticles=50,
+    numparticles=10,
     initpositions=generate_particle_equilibrium_positions()
 )
 beffect1.create_pairs()
 beffect1.interact_and_iterate(
-    iterationsB=3000,
+    iterationsB=500,
     init_iterations=500,
     method='NoGibs',
     modified_b_field=prepare_modified_b_field()
 )
 beffect1.sort_positions_of_particles()
-beffect1.plot()
+dustplots.plot(beffect1, False)
 
