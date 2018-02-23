@@ -398,196 +398,222 @@ filehandler9 = open("/Users/yuewang/Dropbox/Msci-DustyPlasmas/Code/objects/drift
 filehandler10 = open("/Users/yuewang/Dropbox/Msci-DustyPlasmas/Code/objects/driftsconsttauwithEomegataupt325.obj",'rb')
 filehandler11 = open("/Users/yuewang/Dropbox/Msci-DustyPlasmas/Code/objects/driftsconsttauwithEomegataupt275.obj",'rb')
 
-drifts = []
-drifts2 = []
-drifts3 = []
-drifts4= []
-drifts5 = []
-drifts6 = []
-drifts7= []
-drifts8 = []
-drifts9 = []
-drifts10 = []
-drifts11 = []
+# drifts = []
+# drifts2 = []
+# drifts3 = []
+# drifts4= []
+# drifts5 = []
+# drifts6 = []
+# drifts7= []
+# drifts8 = []
+# drifts9 = []
+# drifts10 = []
+# drifts11 = []
+#
+# bs = []
+# bs2 =[]
+# bs3 = []
+# bs4 =[]
+# bs5 =[]
+# bs6 = []
+# bs7 = []
+# bs8 = []
+# bs9 = []
+# bs10 = []
+# bs11 = []
 
-bs = []
-bs2 =[]
-bs3 = []
-bs4 =[]
-bs5 =[]
-bs6 = []
-bs7 = []
-bs8 = []
-bs9 = []
-bs10 = []
-bs11 = []
+driftobjects = [
+    {'name': 'driftobject0', 'drifts': [], 'bs': [],  'num_of_runs': 1, 'filename': 'driftsconsttauwithEomegataupt275.obj'},
+    {'name': 'driftobject1', 'drifts': [], 'bs': [],  'num_of_runs': 4, 'filename': 'driftsconsttauwithEtauE6.obj'},
+    {'name': 'driftobject2', 'drifts': [], 'bs': [],  'num_of_runs': 2, 'filename': 'driftsconsttauwithE.obj'},
+]
 
-for i in numpy.arange(3):
-    drifts.append(pickle.load(filehandler))
-    bs.append(pickle.load(filehandler))
-iterationslist = pickle.load(filehandler)
-filehandler.close()
-timelist = numpy.array(iterationslist) * dt
-driftsavx = [i[0] for i in bs]
-driftsav = numpy.array(driftsavx) / (-dt * (1 / 0.014) * numpy.array([1/dt,2/dt,3/dt]))
-poserr = [i[1][0] for i in bs]
-negerr = [i[1][1] for i in bs]
-poserr = numpy.array(poserr) / (dt * (1 / 0.014) * numpy.array([1/dt,2/dt,3/dt]))
-negerr = numpy.array(negerr) / (dt * (1 / 0.014) * numpy.array([1/dt,2/dt,3/dt]))
+for driftobject in tqdm(driftobjects):
+    filehandler = open(
+        "/Users/yuewang/Dropbox/Msci-DustyPlasmas/Code/objects/{}".format(driftobject['filename']),
+        'rb'
+    )
 
-for i in numpy.arange(4):
-    drifts2.append(pickle.load(filehandler2))
-    bs2.append(pickle.load(filehandler2))
-iterationslist2 = pickle.load(filehandler2)
-filehandler2.close()
-timelist2 = numpy.array(iterationslist2) * dt/omega
-driftsav2x = [i[0] for i in bs2]
-driftsav2 = numpy.array(driftsav2x) / (-dt * (1 / 0.014) * numpy.array([0.5/dt,1/dt,2/dt,3/dt]))
-poserr2 = [i[1][0] for i in bs2]
-negerr2 = [i[1][1] for i in bs2]
-poserr2 = numpy.array(poserr2) / (dt * (1 / 0.014) * numpy.array([0.5/dt,1/dt,2/dt,3/dt]))
-negerr2 = numpy.array(negerr2) / (dt * (1 / 0.014) * numpy.array([0.5/dt,1/dt,2/dt,3/dt]))
+    for i in numpy.arange(driftobject['num_of_runs']):
+        driftobject['drifts'].append(pickle.load(filehandler))
+        driftobject['bs'].append(pickle.load(filehandler))
 
-for i in numpy.arange(2):
-    drifts3.append(pickle.load(filehandler3))
-    bs3.append(pickle.load(filehandler3))
-iterationslist3 = pickle.load(filehandler3)
-filehandler3.close()
-timelist3 = numpy.array(iterationslist3) * dt/omega
-driftsav3x = [i[0] for i in bs3]
-driftsav3 = numpy.array(driftsav3x) / (-dt * (1 / 0.014) * numpy.array([0.5/dt,1/dt]))
-poserr3 = [i[1][0] for i in bs3]
-negerr3 = [i[1][1] for i in bs3]
-poserr3 = numpy.array(poserr3) / (dt * (1 / 0.014) * numpy.array([0.5/dt,1/dt]))
-negerr3 = numpy.array(negerr3) / (dt * (1 / 0.014) * numpy.array([0.5/dt,1/dt]))
+    driftobject['iterations'] = pickle.load(filehandler)
+    filehandler.close()
+    driftobject['timelist'] = numpy.array(driftobject['iterations']) * dt
+    driftobject['avx'] = [i[0] for i in driftobject['bs']]
+    driftobject['av'] = numpy.array(driftobject['avx']) / (-dt * (1 / 0.014) * numpy.array(driftobject['timelist']) / dt)
+    driftobject['poserr'] = [i[1][0] for i in driftobject['bs']]
+    driftobject['negerr'] = [i[1][1] for i in driftobject['bs']]
+    driftobject['poserr'] = numpy.array(driftobject['poserr']) / (dt * (1 / 0.014) * numpy.array(driftobject['timelist']) / dt)
+    driftobject['negerr'] = numpy.array(driftobject['negerr']) / (dt * (1 / 0.014) * numpy.array(driftobject['timelist']) / dt)
 
-for i in numpy.arange(1):
-    drifts4.append(pickle.load(filehandler4))
-    bs4.append(pickle.load(filehandler4))
-iterationslist4 = pickle.load(filehandler4)
-filehandler4.close()
-timelist4 = numpy.array(iterationslist4) * dt
-driftsav4x = [i[0] for i in bs4]
-driftsav4 = numpy.array(driftsav4x) / (-dt * (1 / 0.014) * numpy.array([3/dt]))
-poserr4 = [i[1][0] for i in bs4]
-negerr4 = [i[1][1] for i in bs4]
-poserr4 = numpy.array(poserr4) / (dt * (1 / 0.014) * numpy.array([3/dt]))
-negerr4 = numpy.array(negerr4) / (dt * (1 / 0.014) * numpy.array([3/dt]))
-
-for i in numpy.arange(1):
-    drifts5.append(pickle.load(filehandler5))
-    bs5.append(pickle.load(filehandler5))
-iterationslist5 = pickle.load(filehandler5)
-filehandler5.close()
-timelist5 = numpy.array(iterationslist4) * dt
-driftsav5x = [i[0] for i in bs5]
-driftsav5 = numpy.array(driftsav5x) / (-dt * (1 / 0.014) * numpy.array([3/dt]))
-poserr5 = [i[1][0] for i in bs5]
-negerr5 = [i[1][1] for i in bs5]
-poserr5 = numpy.array(poserr5) / (dt * (1 / 0.014) * numpy.array([3/dt]))
-negerr5 = numpy.array(negerr5) / (dt * (1 / 0.014) * numpy.array([3/dt]))
-
-for i in numpy.arange(1):
-    drifts6.append(pickle.load(filehandler6))
-    bs6.append(pickle.load(filehandler6))
-iterationslist6 = pickle.load(filehandler6)
-filehandler6.close()
-timelist6 = numpy.array(iterationslist6) * dt
-driftsav6x = [i[0] for i in bs6]
-driftsav6 = numpy.array(driftsav6x) / (-dt * (1 / 0.014) * numpy.array([3/dt]))
-poserr6 = [i[1][0] for i in bs6]
-negerr6 = [i[1][1] for i in bs6]
-poserr6 = numpy.array(poserr6) / (dt * (1 / 0.014) * numpy.array([3/dt]))
-negerr6 = numpy.array(negerr6) / (dt * (1 / 0.014) * numpy.array([3/dt]))
-
-for i in numpy.arange(1):
-    drifts7.append(pickle.load(filehandler7))
-    bs7.append(pickle.load(filehandler7))
-iterationslist7 = pickle.load(filehandler7)
-filehandler7.close()
-timelist7 = numpy.array(iterationslist7) * dt
-driftsav7x = [i[0] for i in bs7]
-driftsav7 = numpy.array(driftsav7x) / (-dt * (1 / 0.014) * numpy.array([3/dt]))
-poserr7 = [i[1][0] for i in bs7]
-negerr7 = [i[1][1] for i in bs7]
-poserr7 = numpy.array(poserr7) / (dt * (1 / 0.014) * numpy.array([3/dt]))
-negerr7 = numpy.array(negerr7) / (dt * (1 / 0.014) * numpy.array([3/dt]))
-
-
-for i in numpy.arange(1):
-    drifts8.append(pickle.load(filehandler8))
-    bs8.append(pickle.load(filehandler8))
-iterationslist8 = pickle.load(filehandler8)
-filehandler8.close()
-timelist8 = numpy.array(iterationslist8) * dt
-driftsav8x = [i[0] for i in bs8]
-driftsav8 = numpy.array(driftsav8x) / (-dt * (1 / 0.014) * numpy.array([3/dt]))
-poserr8 = [i[1][0] for i in bs8]
-negerr8 = [i[1][1] for i in bs8]
-poserr8 = numpy.array(poserr8) / (dt * (1 / 0.014) * numpy.array([3/dt]))
-negerr8 = numpy.array(negerr8) / (dt * (1 / 0.014) * numpy.array([3/dt]))
-
-
-for i in numpy.arange(1):
-    drifts9.append(pickle.load(filehandler9))
-    bs9.append(pickle.load(filehandler9))
-iterationslist9 = pickle.load(filehandler9)
-filehandler9.close()
-timelist9 = numpy.array(iterationslist9) * dt
-driftsav9x = [i[0] for i in bs9]
-driftsav9 = numpy.array(driftsav9x) / (-dt * (1 / 0.014) * numpy.array([3/dt]))
-poserr9 = [i[1][0] for i in bs9]
-negerr9 = [i[1][1] for i in bs9]
-poserr9 = numpy.array(poserr9) / (dt * (1 / 0.014) * numpy.array([3/dt]))
-negerr9 = numpy.array(negerr9) / (dt * (1 / 0.014) * numpy.array([3/dt]))
-
-
-for i in numpy.arange(1):
-    drifts10.append(pickle.load(filehandler10))
-    bs10.append(pickle.load(filehandler10))
-iterationslist10 = pickle.load(filehandler10)
-filehandler10.close()
-timelist10 = numpy.array(iterationslist10) * dt
-driftsav10x = [i[0] for i in bs10]
-driftsav10 = numpy.array(driftsav10x) / (-dt * (1 / 0.014) * numpy.array([3/dt]))
-poserr10 = [i[1][0] for i in bs10]
-negerr10 = [i[1][1] for i in bs10]
-poserr10 = numpy.array(poserr10) / (dt * (1 / 0.014) * numpy.array([3/dt]))
-negerr10 = numpy.array(negerr10) / (dt * (1 / 0.014) * numpy.array([3/dt]))
-
-for i in numpy.arange(1):
-    drifts11.append(pickle.load(filehandler11))
-    bs11.append(pickle.load(filehandler11))
-iterationslist11 = pickle.load(filehandler11)
-filehandler11.close()
-timelist11 = numpy.array(iterationslist10) * dt
-driftsav11x = [i[0] for i in bs11]
-driftsav11 = numpy.array(driftsav11x) / (-dt * (1 / 0.014) * numpy.array([3/dt]))
-poserr11 = [i[1][0] for i in bs11]
-negerr11 = [i[1][1] for i in bs11]
-poserr11 = numpy.array(poserr11) / (dt * (1 / 0.014) * numpy.array([3/dt]))
-negerr11 = numpy.array(negerr11) / (dt * (1 / 0.014) * numpy.array([3/dt]))
-
-import matplotlib
-font = {'family' : 'normal',
-        'weight' : 'bold',
-        'size'   : 25}
-
-matplotlib.rc('font', **font)
-fig=plt.figure()
-finalratios = [driftsav[-1],driftsav2[-1],driftsav3[-1],driftsav4[-1],driftsav5[-1],driftsav6[-1],driftsav7[-1],driftsav8[-1],driftsav9[-1],driftsav10[-1],driftsav11[-1]]
-omegatau = [0.01,0.033813824472513944,0.3381382447251395, 0.15,0.25,0.3,0.1,0.2,0.07,0.325,0.275]
-plt.errorbar(omegatau,finalratios,yerr=[poserr3[-1]*numpy.array(omegatau)*1.5/(numpy.linalg.norm(omegatau)),negerr3[-1]*1.5*numpy.array(omegatau)/numpy.linalg.norm(omegatau)] ,fmt='o',capthick=2)
-theoryx=numpy.arange(0,max(omegatau),10**(-2))
-plt.plot(theoryx, theoryx**3/(1+theoryx)**3,'r-',label = r'$y = \frac{(\omega*\tau)^3}{1+(\omega*\tau)^3}$')
-# plt.plot(theoryx, theoryx**2/(1+theoryx)**2, label='n=2')
-plt.xlabel(r"$\omega*\tau$",fontsize = 25)
-plt.ylabel("simulated drift velocity / theoretical drift velocity", fontsize = 25)
-plt.title("Reduction factor for ion-drift velocity \n due to ion-neutral collisions")
-plt.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
-plt.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
-plt.legend(loc=2)
-from pylab import rcParams
-rcParams['figure.figsize'] = 16, 10
-# plt.show()
-plt.savefig('fig', format='eps')
+# for i in numpy.arange(3):
+#     drifts.append(pickle.load(filehandler))
+#     bs.append(pickle.load(filehandler))
+# iterationslist = pickle.load(filehandler)
+# filehandler.close()
+# timelist = numpy.array(iterationslist) * dt
+# driftsavx = [i[0] for i in bs]
+# driftsav = numpy.array(driftsavx) / (-dt * (1 / 0.014) * numpy.array([1/dt,2/dt,3/dt]))
+# poserr = [i[1][0] for i in bs]
+# negerr = [i[1][1] for i in bs]
+# poserr = numpy.array(poserr) / (dt * (1 / 0.014) * numpy.array([1/dt,2/dt,3/dt]))
+# negerr = numpy.array(negerr) / (dt * (1 / 0.014) * numpy.array([1/dt,2/dt,3/dt]))
+#
+# for i in numpy.arange(4):
+#     drifts2.append(pickle.load(filehandler2))
+#     bs2.append(pickle.load(filehandler2))
+# iterationslist2 = pickle.load(filehandler2)
+# filehandler2.close()
+# timelist2 = numpy.array(iterationslist2) * dt/omega
+# driftsav2x = [i[0] for i in bs2]
+# driftsav2 = numpy.array(driftsav2x) / (-dt * (1 / 0.014) * numpy.array([0.5/dt,1/dt,2/dt,3/dt]))
+# poserr2 = [i[1][0] for i in bs2]
+# negerr2 = [i[1][1] for i in bs2]
+# poserr2 = numpy.array(poserr2) / (dt * (1 / 0.014) * numpy.array([0.5/dt,1/dt,2/dt,3/dt]))
+# negerr2 = numpy.array(negerr2) / (dt * (1 / 0.014) * numpy.array([0.5/dt,1/dt,2/dt,3/dt]))
+#
+# for i in numpy.arange(2):
+#     drifts3.append(pickle.load(filehandler3))
+#     bs3.append(pickle.load(filehandler3))
+# iterationslist3 = pickle.load(filehandler3)
+# filehandler3.close()
+# timelist3 = numpy.array(iterationslist3) * dt/omega
+# driftsav3x = [i[0] for i in bs3]
+# driftsav3 = numpy.array(driftsav3x) / (-dt * (1 / 0.014) * numpy.array([0.5/dt,1/dt]))
+# poserr3 = [i[1][0] for i in bs3]
+# negerr3 = [i[1][1] for i in bs3]
+# poserr3 = numpy.array(poserr3) / (dt * (1 / 0.014) * numpy.array([0.5/dt,1/dt]))
+# negerr3 = numpy.array(negerr3) / (dt * (1 / 0.014) * numpy.array([0.5/dt,1/dt]))
+#
+# for i in numpy.arange(1):
+#     drifts4.append(pickle.load(filehandler4))
+#     bs4.append(pickle.load(filehandler4))
+# iterationslist4 = pickle.load(filehandler4)
+# filehandler4.close()
+# timelist4 = numpy.array(iterationslist4) * dt
+# driftsav4x = [i[0] for i in bs4]
+# driftsav4 = numpy.array(driftsav4x) / (-dt * (1 / 0.014) * numpy.array([3/dt]))
+# poserr4 = [i[1][0] for i in bs4]
+# negerr4 = [i[1][1] for i in bs4]
+# poserr4 = numpy.array(poserr4) / (dt * (1 / 0.014) * numpy.array([3/dt]))
+# negerr4 = numpy.array(negerr4) / (dt * (1 / 0.014) * numpy.array([3/dt]))
+#
+# for i in numpy.arange(1):
+#     drifts5.append(pickle.load(filehandler5))
+#     bs5.append(pickle.load(filehandler5))
+# iterationslist5 = pickle.load(filehandler5)
+# filehandler5.close()
+# timelist5 = numpy.array(iterationslist4) * dt
+# driftsav5x = [i[0] for i in bs5]
+# driftsav5 = numpy.array(driftsav5x) / (-dt * (1 / 0.014) * numpy.array([3/dt]))
+# poserr5 = [i[1][0] for i in bs5]
+# negerr5 = [i[1][1] for i in bs5]
+# poserr5 = numpy.array(poserr5) / (dt * (1 / 0.014) * numpy.array([3/dt]))
+# negerr5 = numpy.array(negerr5) / (dt * (1 / 0.014) * numpy.array([3/dt]))
+#
+# for i in numpy.arange(1):
+#     drifts6.append(pickle.load(filehandler6))
+#     bs6.append(pickle.load(filehandler6))
+# iterationslist6 = pickle.load(filehandler6)
+# filehandler6.close()
+# timelist6 = numpy.array(iterationslist6) * dt
+# driftsav6x = [i[0] for i in bs6]
+# driftsav6 = numpy.array(driftsav6x) / (-dt * (1 / 0.014) * numpy.array([3/dt]))
+# poserr6 = [i[1][0] for i in bs6]
+# negerr6 = [i[1][1] for i in bs6]
+# poserr6 = numpy.array(poserr6) / (dt * (1 / 0.014) * numpy.array([3/dt]))
+# negerr6 = numpy.array(negerr6) / (dt * (1 / 0.014) * numpy.array([3/dt]))
+#
+# for i in numpy.arange(1):
+#     drifts7.append(pickle.load(filehandler7))
+#     bs7.append(pickle.load(filehandler7))
+# iterationslist7 = pickle.load(filehandler7)
+# filehandler7.close()
+# timelist7 = numpy.array(iterationslist7) * dt
+# driftsav7x = [i[0] for i in bs7]
+# driftsav7 = numpy.array(driftsav7x) / (-dt * (1 / 0.014) * numpy.array([3/dt]))
+# poserr7 = [i[1][0] for i in bs7]
+# negerr7 = [i[1][1] for i in bs7]
+# poserr7 = numpy.array(poserr7) / (dt * (1 / 0.014) * numpy.array([3/dt]))
+# negerr7 = numpy.array(negerr7) / (dt * (1 / 0.014) * numpy.array([3/dt]))
+#
+#
+# for i in numpy.arange(1):
+#     drifts8.append(pickle.load(filehandler8))
+#     bs8.append(pickle.load(filehandler8))
+# iterationslist8 = pickle.load(filehandler8)
+# filehandler8.close()
+# timelist8 = numpy.array(iterationslist8) * dt
+# driftsav8x = [i[0] for i in bs8]
+# driftsav8 = numpy.array(driftsav8x) / (-dt * (1 / 0.014) * numpy.array([3/dt]))
+# poserr8 = [i[1][0] for i in bs8]
+# negerr8 = [i[1][1] for i in bs8]
+# poserr8 = numpy.array(poserr8) / (dt * (1 / 0.014) * numpy.array([3/dt]))
+# negerr8 = numpy.array(negerr8) / (dt * (1 / 0.014) * numpy.array([3/dt]))
+#
+#
+# for i in numpy.arange(1):
+#     drifts9.append(pickle.load(filehandler9))
+#     bs9.append(pickle.load(filehandler9))
+# iterationslist9 = pickle.load(filehandler9)
+# filehandler9.close()
+# timelist9 = numpy.array(iterationslist9) * dt
+# driftsav9x = [i[0] for i in bs9]
+# driftsav9 = numpy.array(driftsav9x) / (-dt * (1 / 0.014) * numpy.array([3/dt]))
+# poserr9 = [i[1][0] for i in bs9]
+# negerr9 = [i[1][1] for i in bs9]
+# poserr9 = numpy.array(poserr9) / (dt * (1 / 0.014) * numpy.array([3/dt]))
+# negerr9 = numpy.array(negerr9) / (dt * (1 / 0.014) * numpy.array([3/dt]))
+#
+#
+# for i in numpy.arange(1):
+#     drifts10.append(pickle.load(filehandler10))
+#     bs10.append(pickle.load(filehandler10))
+# iterationslist10 = pickle.load(filehandler10)
+# filehandler10.close()
+# timelist10 = numpy.array(iterationslist10) * dt
+# driftsav10x = [i[0] for i in bs10]
+# driftsav10 = numpy.array(driftsav10x) / (-dt * (1 / 0.014) * numpy.array([3/dt]))
+# poserr10 = [i[1][0] for i in bs10]
+# negerr10 = [i[1][1] for i in bs10]
+# poserr10 = numpy.array(poserr10) / (dt * (1 / 0.014) * numpy.array([3/dt]))
+# negerr10 = numpy.array(negerr10) / (dt * (1 / 0.014) * numpy.array([3/dt]))
+#
+# for i in numpy.arange(1):
+#     drifts11.append(pickle.load(filehandler11))
+#     bs11.append(pickle.load(filehandler11))
+# iterationslist11 = pickle.load(filehandler11)
+# filehandler11.close()
+# timelist11 = numpy.array(iterationslist10) * dt
+# driftsav11x = [i[0] for i in bs11]
+# driftsav11 = numpy.array(driftsav11x) / (-dt * (1 / 0.014) * numpy.array([3/dt]))
+# poserr11 = [i[1][0] for i in bs11]
+# negerr11 = [i[1][1] for i in bs11]
+# poserr11 = numpy.array(poserr11) / (dt * (1 / 0.014) * numpy.array([3/dt]))
+# negerr11 = numpy.array(negerr11) / (dt * (1 / 0.014) * numpy.array([3/dt]))
+#
+# import matplotlib
+# font = {'family' : 'normal',
+#         'weight' : 'bold',
+#         'size'   : 25}
+#
+# matplotlib.rc('font', **font)
+# fig=plt.figure()
+# finalratios = [driftsav[-1],driftsav2[-1],driftsav3[-1],driftsav4[-1],driftsav5[-1],driftsav6[-1],driftsav7[-1],driftsav8[-1],driftsav9[-1],driftsav10[-1],driftsav11[-1]]
+# omegatau = [0.01,0.033813824472513944,0.3381382447251395, 0.15,0.25,0.3,0.1,0.2,0.07,0.325,0.275]
+# plt.errorbar(omegatau,finalratios,yerr=[poserr3[-1]*numpy.array(omegatau)*1.5/(numpy.linalg.norm(omegatau)),negerr3[-1]*1.5*numpy.array(omegatau)/numpy.linalg.norm(omegatau)] ,fmt='o',capthick=2)
+# theoryx=numpy.arange(0,max(omegatau),10**(-2))
+# plt.plot(theoryx, theoryx**3/(1+theoryx)**3,'r-',label = r'$y = \frac{(\omega*\tau)^3}{1+(\omega*\tau)^3}$')
+# # plt.plot(theoryx, theoryx**2/(1+theoryx)**2, label='n=2')
+# plt.xlabel(r"$\omega*\tau$",fontsize = 25)
+# plt.ylabel("simulated drift velocity / theoretical drift velocity", fontsize = 25)
+# plt.title("Reduction factor for ion-drift velocity \n due to ion-neutral collisions")
+# plt.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
+# plt.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
+# plt.legend(loc=2)
+# from pylab import rcParams
+# rcParams['figure.figsize'] = 16, 10
+# # plt.show()
+# plt.savefig('fig', format='eps')

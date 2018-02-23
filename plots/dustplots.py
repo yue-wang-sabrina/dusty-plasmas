@@ -8,7 +8,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import animation
 
 
-def plot(dustanalysis, save, name='Dust_rotation'):
+def plot(dustanalysis, save, name='Dust_rotation', jn=False):
     def _update_graph(n_iter):
         data = dustanalysis.positions_df[dustanalysis.positions_df['time'] == n_iter]
         point.set_data(data.x, data.y)
@@ -40,7 +40,9 @@ def plot(dustanalysis, save, name='Dust_rotation'):
 
     data = dustanalysis.positions_df[dustanalysis.positions_df['time'] == 0]
     point, = ax.plot(data.x, data.y, data.z, linestyle="", marker=".")
-    plt.cla()
+
+    if not jn:
+        plt.cla()
 
     ani = matplotlib.animation.FuncAnimation(
         fig,
@@ -52,7 +54,11 @@ def plot(dustanalysis, save, name='Dust_rotation'):
 
     if save:
         ani.save('{}.mp4'.format(name), fps=30, extra_args=['-vcodec', 'libx264'])
-    fig.show()
+
+    if jn:
+        return ani
+    else:
+        fig.show()
 
 
 def plotgibson2d(dustanalysis, save):
