@@ -584,6 +584,8 @@ plt.plot(theoryx, theoryx**3/(1+theoryx)**3,'r-',label = r'$y = \frac{(\omega*\t
 plt.xlabel(r"$\omega*\tau$",fontsize = 25)
 plt.ylabel("simulated drift velocity / theoretical drift velocity", fontsize = 25)
 plt.title("Reduction factor for ion-drift velocity \n due to ion-neutral collisions")
+plt.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
+plt.ticklabel_format(style='sci', axis='y', scilimits=(0,0))
 plt.legend(loc=2)
 from pylab import rcParams
 rcParams['figure.figsize'] = 16, 10

@@ -12,13 +12,13 @@ ipython.magic('autoreload 2')
 
 beffect1 = BEffectsAnalysis()
 beffect1.create_particles(
-    numparticles=100,
+    numparticles=50,
     initpositions=generate_particle_equilibrium_positions()
 )
 beffect1.create_pairs()
 beffect1.interact_and_iterate(
-    iterationsB=100,
-    init_iterations=100,
+    iterationsB=3000,
+    init_iterations=500,
     method='NoGibs',
     modified_b_field=prepare_modified_b_field()
 )
