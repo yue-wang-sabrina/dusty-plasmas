@@ -273,7 +273,7 @@ def thermalkickexb(iterations, tau):
 
 def averagekickeffect(iterations, tau, runs):
     driftdistancecol = []
-    for i in tqdm(numpy.arange(runs), desc="run number for specific tau"):
+    for i in tqdm(numpy.arange(runs), desc="Doing run {} for tau={}".format(i,tau)):
         driftdistancecol.append(thermalkickexb(iterations, tau))
     ion1 = ion(pos=[0, 0, 0], vel=[numpy.sqrt(kb * Ti / mi), 0, 0], acc=[0, 0, 0])
     # driftnocol=-dt*iterations*numpy.linalg.norm(ion1.constE())/numpy.linalg.norm(ion1.constB())
@@ -289,7 +289,7 @@ def averagekickeffect(iterations, tau, runs):
 # plt.title("Plot of ratio of drift with thermal kicks to drift using pure EXB")
 # fig.show()
 
-def bootstrap(drifts, bsit=2000):  # Bootstrap iteration is to take bsit resamplings.
+def bootstrap(drifts, bsit):  # Bootstrap iteration is to take bsit resamplings.
     drifts.sort()
     mean = numpy.mean(drifts)
     samplesind = numpy.random.choice(len(drifts), (bsit, len(drifts)))
@@ -389,7 +389,6 @@ filehandler = open("/Users/yuewang/Dropbox/Msci-DustyPlasmas/Code/objects/drifts
 filehandler2 = open("/Users/yuewang/Dropbox/Msci-DustyPlasmas/Code/objects/driftsconsttauwithEtauE6.obj", 'rb')
 filehandler3 = open("/Users/yuewang/Dropbox/Msci-DustyPlasmas/Code/objects/driftsconsttauwithE.obj", 'rb')
 filehandler4 = open("/Users/yuewang/Dropbox/Msci-DustyPlasmas/Code/objects/driftsconsttauwithEomegataupt15.obj",'rb')
-filehandler5 = open("/Users/yuewang/Dropbox/Msci-DustyPlasmas/Code/objects/driftsconsttauwithEomegataupt25.obj",'rb')
 filehandler5 = open("/Users/yuewang/Dropbox/Msci-DustyPlasmas/Code/objects/driftsconsttauwithEomegataupt25.obj",'rb')
 filehandler6 = open("/Users/yuewang/Dropbox/Msci-DustyPlasmas/Code/objects/driftsconsttauwithEomegataupt3.obj",'rb')
 filehandler7 = open("/Users/yuewang/Dropbox/Msci-DustyPlasmas/Code/objects/driftsconsttauwithEomegataupt1real.obj",'rb')

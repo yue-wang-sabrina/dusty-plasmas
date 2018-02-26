@@ -4,7 +4,7 @@ import constants as const
 
 
 class Ion:
-    def __init__(self, pos, vel, acc):
+    def __init__(self, pos, vel, acc, omega, tau, Babs=0.014, Eabs=1.):
         self.dt = 0.0000001
         self.pos = numpy.array(pos)
         self.vel = numpy.array(vel)
@@ -13,6 +13,10 @@ class Ion:
         self.vel1 = numpy.array(vel)
         self.charge = const.e
         self.dr = 0
+        self.omega = omega
+        self.tau = tau
+        self.Babs = Babs
+        self.Eabs = Eabs
 
     def constB(self):
         return numpy.array([0, 0.014, 0])
@@ -22,14 +26,14 @@ class Ion:
 
     def updateeulerforward(self, B, E=[0, 0, 1]):
         # Euler forward - should be unstable!
-        self.pos += self.dt * self.vel
+        self.pos = self.pos + self.dt * self.vel
         self.vel = ((self.charge / const.mi) * numpy.cross(self.vel, B) + numpy.array(E) * (
             self.charge / const.mi
         )) * const.dt + self.vel
 
     def updateeulerback(self, B, E=[0, 0, 1]):  # Also unstable?
-        self.pos -= self.dt * self.vel
-        self.vel -= (
+        self.pos = self.pos - self.dt * self.vel
+        self.vel = self.vel - (
             (self.charge / const.mi) * numpy.cross(self.vel, B) * self.dt + numpy.array(E) * (self.charge / const.mi)
         )
 
