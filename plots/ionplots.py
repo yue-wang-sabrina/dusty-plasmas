@@ -101,7 +101,7 @@ def plotratiomanytime(filename, lentimelist, omega, tau):
     fig.show()
 
 
-def plotolddrifts():
+def plotolddrifts(fontsize, figsize0, figsize1):
     ion = Ion(pos=[0, 0, 0], vel=[0, 0, 0], acc=[0, 0, 0], omega=None, tau=None)
     # filehandler1 = open(
     #     "/Users/yuewang/Dropbox/Msci-DustyPlasmas/Code/objects/objects_oldruns/driftsconsttauwithEomegataupt1.obj",
@@ -177,7 +177,6 @@ def plotolddrifts():
             driftobject['timelist'] = numpy.array(driftobject['iterations']) * ion.dt/(const.e*0.014/const.mi)
         else:
             driftobject['timelist'] = numpy.array(driftobject['iterations']) * ion.dt
-        print(driftobject['timelist'])
         driftobject['avx'] = [i[0] for i in driftobject['bs']]
         driftobject['av'] = numpy.array(driftobject['avx']) / (
         -ion.dt * (1 / 0.014) * numpy.array(driftobject['timelist']) / ion.dt)
@@ -190,7 +189,7 @@ def plotolddrifts():
 
     font = {'family': 'normal',
             'weight': 'bold',
-            'size': 25}
+            'size': fontsize}
 
     matplotlib.rc('font', **font)
     fig = plt.figure()
@@ -202,15 +201,15 @@ def plotolddrifts():
                  xerr=11 * [driftobjects[1]['negerr'][-1]], fmt='o', capthick=2)
 
     theoryx = numpy.arange(0, max(omegatau), 10 ** (-2))
-    plt.plot(theoryx, theoryx ** 3 / (1 + theoryx) ** 3, 'r-', label=r'$y = \frac{(\omega*\tau)^3}{1+(\omega*\tau)^3}$')
-    plt.xlabel(r"$\omega*\tau$", fontsize=25)
-    plt.ylabel("simulated drift velocity / theoretical drift velocity", fontsize=25)
+    plt.plot(theoryx, theoryx**3/ (1+theoryx)**3, 'r-', label=r'$y = \frac{(\omega*\tau)^3}{1+(\omega*\tau)^3}$')
+    plt.xlabel(r"$\omega*\tau$", fontsize=fontsize)
+    plt.ylabel("simulated drift velocity / \n theoretical drift velocity", fontsize=fontsize)
     plt.title("Reduction factor for ion-drift velocity \n due to ion-neutral collisions")
     plt.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
     plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
-    plt.ylim([0,max(finalratios)])
+    plt.ylim([0,max(finalratios)*1.5])
     plt.legend(loc=2)
     from pylab import rcParams
-    rcParams['figure.figsize'] = 5, 2
+    rcParams['figure.figsize'] = figsize0, figsize1
     fig.show()
     # plt.savefig('fig', format='eps')

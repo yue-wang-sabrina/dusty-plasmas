@@ -1,6 +1,6 @@
 from Gibsonmodification import ModifyBFieldAnalysis
 from utils.interpolate import interpolate
-import Gibsonmodificatonplots as Gplot
+import plots.Gibsonmodificatonplots as Gplot
 
 from IPython import get_ipython
 import constants as const
