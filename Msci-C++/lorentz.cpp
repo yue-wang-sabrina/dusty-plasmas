@@ -10,10 +10,13 @@
 #include <numeric>
 #include <fstream>
 #include <random>
+#include <chrono>
+#include <iomanip>
+#include <thread>
 
 float omega = (1.60217662 * pow(10,-19)) * 0.014 / (39.948 * 1.66053904 * pow(10,-27));
 float m = 39.948 * 1.66053904 * pow(10,-27);
-float tau = 1*pow(10,-5);
+// float tau = 1*pow(10,-5);
 float Babs = 0.014;
 float Eabs = 1.0;
 float dt = 1*pow(10,-7);
@@ -23,17 +26,30 @@ float vinit = sqrt(kb*T/m);
 float charge = 1.60217662 * pow(10,-19);
 float phia =  -9.0126016670216487;
 float Zd =  -9388.3579633332938;
+int iterations = 1*pow(10,7);
 std::vector<float> pos = {0,0,0};
-std::vector<float> vel = {vinit,0,0};
+std::vector<float> vel = {0,vinit,0};
 std::vector<float> acc = {0,0,0};
 std::vector<float> pos1 = {0,0,0};
-std::vector<float> vel1 = {vinit,0,0};
+std::vector<float> vel1 = {0,vinit,0};
 std::vector<float> acc1 = {0,0,0};
-std::vector<float> positionx;
-std::vector<float> positiony;
-std::vector<float> positionz;
-float iterations = 1000;
+std::vector<float> positionx(iterations+1);
+std::vector<float> positiony(iterations+1);
+std::vector<float> positionz(iterations+1);
 const double PI = std::atan(1.0)*4;
+
+
+std::vector<float> MUltiplyscalar(std::vector<float> v1, float scalar, std::vector<float> result_v){
+std::transform(v1.begin(), v1.end(), result_v.begin(), std::bind1st(std::multiplies<float>(),scalar));
+return result_v;
+};
+
+double RANDD() {
+	std::random_device rd;
+std::mt19937 gen(rd());
+std::uniform_real_distribution<> dis(0, 1);//uniform distribution between 0 and 1
+return dis(gen);
+};
 
 class Ion {
 	float omega, m, tau, Babs, Eabs, dt, charge;
@@ -66,7 +82,7 @@ class Ion {
 		return result_v;
 		}
 		void changevelocity(std::vector<float> newvel){
-		vel = newvel;
+		vel1 = newvel;
 		}
 		std::vector<float> getvel(){
 			return vel;
@@ -75,6 +91,22 @@ class Ion {
 			result_dot = v1[0]*v2[0] + v1[1]*v2[1] + v1[2]*v2[2];
 			return result_dot;
 		}
+
+		std::vector<float> elementwisemultiply(std::vector<float> v1, std::vector<float> v2, std::vector<float> output_v){
+		output_v[0] = v1[0]*v2[0];
+		output_v[1] = v1[1]*v2[1];
+		output_v[2] = v1[2]*v2[2];
+		return output_v;
+		}
+
+		float getEabs(){
+			return Eabs;
+		}
+
+		float getBabs(){
+			return Babs;
+		}
+
 		std::vector<float> updateRK4() {
 		std::vector<float> fv1(3);
 		std::vector<float> cross_p(3);
@@ -136,14 +168,48 @@ class Ion {
 
 class IonAnalysis {
 	int iterations;
-	float tau, omega, dt;
+	float tau, omega, dt, vinit;
 	// std::vector<float> KEERK, KEEF, KEEB, drift, driftdistancecol;
-	std::vector<float> positionx , positiony, positionz ;
+	std::vector<float> positionx, positiony, positionz;
 	Ion ion0;
 	// std::string method;
 
 public:
-	void set_values(int,float,float,float, std::vector<float>,std::vector<float>,std::vector<float>);
+	void set_values(int, float, float, float, float, std::vector<float>,std::vector<float>,std::vector<float>);
+	
+	float Dotproduct(std::vector<float> v1, std::vector<float> v2, float result_dot){
+			result_dot = v1[0]*v2[0] + v1[1]*v2[1] + v1[2]*v2[2];
+			return result_dot;
+	}
+
+	std::vector<float> Crossproduct(std::vector<float> v1, std::vector<float> v2, std::vector<float> cross_p) {
+	cross_p[0] = (v1[1]*v2[2]) - (v1[2]*v2[1]);
+ 	cross_p[1] = -((v1[0]*v2[2]) - (v1[2]*v2[0]));
+ 	cross_p[2] = (v1[0]*v2[1]) - (v1[1]*v2[0]);
+ 	return cross_p;
+	}
+
+	std::vector<float> Elementwisemultiply(std::vector<float> v1, std::vector<float> v2, std::vector<float> output_v){
+	output_v[0] = v1[0]*v2[0];
+	output_v[1] = v1[1]*v2[1];
+	output_v[2] = v1[2]*v2[2];
+	return output_v;
+	}
+
+	float Normalise(std::vector<float> v1, float output_float){
+		output_float = sqrt(1*pow(v1[0],2) + 1*pow(v1[1],2) + 1*pow(v1[2],2));
+		return output_float;
+	}
+
+	std::vector<float> Multiplyscalar(std::vector<float> v1, float scalar, std::vector<float> result_v){
+	std::transform(v1.begin(), v1.end(), result_v.begin(), std::bind1st(std::multiplies<float>(),scalar));
+	return result_v;
+	}
+
+	std::vector<float> ABS(std::vector<float> v1, std::vector<float> out_v){
+		out_v = {abs(v1[0]), abs(v1[1]), abs(v1[2])};
+		return out_v;
+	}
 
 	void runsim(){
 		float vinit = sqrt(kb * T / m);
@@ -152,13 +218,13 @@ public:
         for (int i=0; i<iterations; i++){
         std::vector<float> updated;
         updated = ion0.updateRK4();
-        positionx.push_back(updated[0]);
-        positiony.push_back(updated[1]);
-		positionz.push_back(updated[2]);	
-  		
+        positionx[i] = updated[0];
+        positiony[i] = updated[1];
+		positionz[i] = updated[2];	
         }          
 
 	}
+
 	void savepositions(){
 		std::ofstream testfile1;
 		std::ofstream testfile2;
@@ -181,70 +247,162 @@ public:
 	}
 
 	double randd() {
-  	return (double)rand() / ((double)RAND_MAX + 1);
+  	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_real_distribution<> dis(0, 1);//uniform distribution between 0 and 1
+	return dis(gen);
 	}
 
-	float thermalkick(){
+	std::vector<float> thermalkick() {
 		int tkick = floor(tau / dt);
 		ion0.set_values(omega, tau, Babs, Eabs, dt, charge, m, pos, vel, acc, pos1, vel1, acc1);
-		for (int i=0; i<floor(iterations/tkick); i++){
+		std::vector<float> updated(3);
+		int index = 0;
+		std::vector<float> newvelocity(3);
+
+		positionx[0] = pos1[0];
+		positiony[0] = pos1[1];
+		positionz[0] = pos1[2];
+
+		for (int i=1; i<int(iterations/tkick)+2; i++){
+			index = index + 1 ;
 			float theta = PI*randd();
 			float phi = 2*PI*randd();
 			std::vector<float> rhat = {sin(theta)*cos(phi), sin(theta)*sin(phi), cos(theta)};
-			std::vector<float> newvelocity;
-			newvelocity = multiplyscalar(rhat,vinit)
+			newvelocity[0] = vinit*rhat[0];
+			newvelocity[1] = vinit*rhat[1];
+			newvelocity[2] = vinit*rhat[2];
 			ion0.changevelocity(newvelocity);
-			ion0.updateRK4();
-			for (k=0; k< tkick-1; k++){
-				ion0.updateRK4();
+			updated = ion0.updateRK4();
+
+			positionx[index] = updated[0];
+	        positiony[index] = updated[1];
+			positionz[index] = updated[2];
+
+			for (int k=1; k< tkick; k++){
+				index = index + 1;
+				updated = ion0.updateRK4();
+				positionx[index] = updated[0];
+				positiony[index] = updated[1];
+				positionz[index] = updated[2];
 			}
-		std::vector<float> direction;
-		direction = crossproduct(ion0.constE(),ion0.constB());
-		std::vector<float> drift;
-		float driftabs;
-		std::vector<float>diffdist;
-		std::vector<float> finalposx;
-		std::vector<float> finalposy;
-		std::vector<float> finalposz;
-		std::vector<float> initposx;
-		std::vector<float> initposy;
-		std::vector<float> initposz;
-		finalposx = positionx.back();
-		finalposy = positiony.back();
-		finalposz = positionz.back();
-		initposx = positionx[0];
-		initposy = positiony[0];
-		initposz = positionz[0];
-
-		std::vector<float> diffdist = {finalposx-initposx, finalposy-initposy, finalposz-initposz};
-		driftabs = dotproduct(direction, diffdist, driftabs);
-		drift = multiplyscalar(direction,diffdist);
-		return drift;
-
 		}
 
-        // for i in tqdm(numpy.arange(int(iterations / tkick))):
-        //     theta = math.pi * numpy.random.random_sample()
-        //     phi = 2 * math.pi * numpy.random.random_sample()
-        //     rhat = numpy.array([numpy.sin(theta) * numpy.cos(phi), numpy.sin(theta) * numpy.sin(phi), numpy.cos(theta)])
-        //     ion1.vel1 = rhat * numpy.sqrt(const.kb * const.Ti / const.mi)
-        //     ion1.updateRK4(B=ion1.constB())
-        //     position.append(list(ion1.getselfpos()))
-        //     velocity.append(numpy.linalg.norm(ion1.getselfvel()))
-        //     for j in numpy.arange(tkick - 1):
-        //         ion1.updateRK4(B=ion1.constB())
-        //         position.append(list(ion1.getselfpos()))
-        //         velocity.append(numpy.linalg.norm(ion1.getselfvel()))
-        // direction = numpy.cross(ion1.constE(), ion1.constB())
-        // drift = numpy.dot(numpy.array(position[-1]) - numpy.array(position[0]), direction)
-        // self.drift = drift
-        // self.position = position
+		std::vector<float> directionnonorm(3);
+		float Norm;
+		directionnonorm = Crossproduct(ion0.constE(),ion0.constB(), directionnonorm);
+		Norm = Normalise(directionnonorm,Norm);
+		std::vector<float> direction(3);
+		direction = Multiplyscalar(directionnonorm,1./Norm,direction);
+		direction = ABS(direction,direction);
+		std::vector<float> drift(3);
+		float driftabs;
+		std::vector<float> diffdist;
+		float finalposx;
+		// float finalposy;
+		// float finalposz;
+		float initposx;
+		// float initposy;
+		// float initposz;
+		finalposx = positionx[iterations];
+
+		// finalposy = positiony.back();
+		// finalposz = positionz.back();
+		initposx = positionx[0];
+		// initposy = positiony[0];
+		// initposz = positionz[0];
+
+		diffdist = {finalposx-initposx, 0,0}; //finalposy-initposy, finalposz-initposz};
+		drift = Elementwisemultiply(direction,diffdist,drift);
+		
+		float driftnocol;
+		driftnocol = (ion0.getEabs()/ion0.getBabs())*(iterations-1)*dt;
+		std::vector<float> driftnocolvec;
+		driftnocolvec = {-drift[0]/driftnocol, 0, 0};
+
+		return driftnocolvec;
+
+	}
+
+	std::vector<float> thermalkickexponential() {
+		int tkick = floor(tau / dt);
+		ion0.set_values(omega, tau, Babs, Eabs, dt, charge, m, pos, vel, acc, pos1, vel1, acc1);
+		std::vector<float> updated(3);
+		int index = 0;
+		std::vector<float> newvelocity(3);
+
+		positionx[0] = pos1[0];
+		positiony[0] = pos1[1];
+		positionz[0] = pos1[2];
+
+		for (int i=1; i<iterations+1; i++){
+			index = index + 1 ;
+
+			float probcol;
+			probcol = 1.0 - 1*pow(exp(1),-dt/tau);
+			float detcol;
+			detcol=randd();
+			
+			if (detcol <= probcol){
+			float theta = PI*randd();
+			float phi = 2*PI*randd();
+			std::vector<float> rhat = {sin(theta)*cos(phi), sin(theta)*sin(phi), cos(theta)};
+			newvelocity[0] = vinit*rhat[0];
+			newvelocity[1] = vinit*rhat[1];
+			newvelocity[2] = vinit*rhat[2];
+			ion0.changevelocity(newvelocity);
+			updated = ion0.updateRK4();
+			}
+
+			else{
+			updated = ion0.updateRK4();
+			}
+		
+			positionx[index] = updated[0];
+	        positiony[index] = updated[1];
+			positionz[index] = updated[2];
+		}
+
+
+		std::vector<float> directionnonorm(3);
+		float Norm;
+		directionnonorm = Crossproduct(ion0.constE(),ion0.constB(), directionnonorm);
+		Norm = Normalise(directionnonorm,Norm);
+		std::vector<float> direction(3);
+		direction = Multiplyscalar(directionnonorm,1./Norm,direction);
+		direction = ABS(direction,direction);
+		std::vector<float> drift(3);
+		float driftabs;
+		std::vector<float> diffdist;
+		float finalposx;
+		// float finalposy;
+		// float finalposz;
+		float initposx;
+		// float initposy;
+		// float initposz;
+		finalposx = positionx[iterations];
+
+		// finalposy = positiony.back();
+		// finalposz = positionz.back();
+		initposx = positionx[0];
+		// initposy = positiony[0];
+		// initposz = positionz[0];
+
+		diffdist = {finalposx-initposx, 0,0}; //finalposy-initposy, finalposz-initposz};
+		drift = Elementwisemultiply(direction,diffdist,drift);
+		
+		float driftnocol;
+		driftnocol = (ion0.getEabs()/ion0.getBabs())*(iterations-1)*dt;
+		std::vector<float> driftnocolvec;
+		driftnocolvec = {-drift[0]/driftnocol, 0, 0};
+
+		return driftnocolvec;
 
 	}
 
 
-
 };
+
 
 void Ion::set_values(float x, float y, float z, float h, float deltat, float Q, float mass, std::vector<float> a, std::vector<float> b, std::vector<float>c, std::vector<float>d, std::vector<float>e, std::vector<float>f){
 	omega = x;
@@ -260,47 +418,113 @@ void Ion::set_values(float x, float y, float z, float h, float deltat, float Q, 
 	pos1 = d;
 	vel1 = e;
 	acc1 = f;
-}
+};
 
-void IonAnalysis::set_values(int a, float b, float c, float d, std::vector<float> e, std::vector<float> f, std::vector<float> g){
+void IonAnalysis::set_values(int a, float b, float c, float d, float p, std::vector<float> e, std::vector<float> f, std::vector<float> g){
 	iterations = a;
 	tau = b;
 	omega = c;
 	dt = d;
+	vinit = p;
 	positionx = e;
 	positiony = f;
 	positionz = g;
 
-}
-
+};
 
 int main() {   
-	IonAnalysis analysis;
-	analysis.set_values(iterations, tau, omega, dt, positionx, positiony, positionz);
-	analysis.runsim();
-	analysis.savepositions();
-	analysis.thermalkick();
+	// Test for one value of omega*tau with many trials
+	// IonAnalysis analysis;
+	// analysis.set_values(iterations, tau, omega, dt, vinit, positionx, positiony, positionz);
+	// // analysis.runsim();
+	// // analysis.savepositions();
+	// std::vector<float> test;
+	// std::ofstream DRIFT;
+ 	// DRIFT.open ("DRIFTRATIOtauEm5.txt");
+	// for (int i=0; i<50; i++){
+	// test = analysis.thermalkick();
+	// DRIFT << test[0] << std::endl;
+	// }
+	// DRIFT.close();
 
+
+	// Test for changing omega*tau for fixed time
+	// float trials = 5;
+	// std::vector<float> tauvals(trials);	
+	// tauvals = {float(8.9*pow(10,-6)), float(9.5*pow(10,-6)), float(1*pow(10,-5)),float(1.5*pow(10,-5)),float(1.7*pow(10,-5))};
+	// std::vector<std::string> names(trials);
+	// names = {"2DRIFT1.txt", "2DRIFT2.txt","2DRIFT3.txt","2DRIFT4.txt", "2DRIFT5.txt"};
+	// std::vector<float> omegatauvals(trials);
+	// omegatauvals =  MUltiplyscalar(tauvals,omega,omegatauvals);
+	// for (int j=0; j < names.size(); j++){
+	// IonAnalysis analysis;
+	// analysis.set_values(iterations, tauvals[j], omega, dt, vinit, positionx, positiony, positionz);
+	// std::vector<float> test;
+	// std::ofstream DRIFT;
+ 	// DRIFT.open(names[j]);
+	// for (int i=0; i<20; i++){
+	// test = analysis.thermalkick();
+	// DRIFT << test[0] << std::endl;
+	// }
+	// DRIFT.close();
+	// }
+
+	//Test new thermal kick method with exponential probabilistic implementation for tau = 10^(-5) to check it works ok
+	// float probcol;
+	// probcol = 1.0 - 1*pow(exp(1),-dt/(1*pow(10,-5)));
+	// float detcol;
+	// for (int l = 0; l <1000; l++){
+	// detcol=RANDD();
+	// if (detcol <= probcol){
+	// 	std::cout << detcol << std::endl;
+	// }
+	// else {}
+	// }
+
+	//Test single value of omega*tau using new thermal kick with exponential method
+	// IonAnalysis analysis;
+	// analysis.set_values(iterations, 1*pow(10,-5), omega, dt, vinit, positionx, positiony, positionz);
+	// std::vector<float> test;
+	// for (int i=0; i<10; i++){
+	// test = analysis.thermalkickexponential();
+	// std::cout << test[0] << std::endl;
+	// }
+
+	//Testing changing omega*tau using new thermal kick with exponential method 
+	float trials = 8;
+	std::vector<float> tauvals(trials);	
+	tauvals = {float(5*pow(10,-7)),float(4*pow(10,-6)),float(8*pow(10,-6)), float(9.5*pow(10,-6)), float(1*pow(10,-5)),float(1.2*pow(10,-5)),float(1.7*pow(10,-5)),float(2*pow(10,-5))};
+	std::vector<std::string> names(trials);
+	names = {"NEWDRIFT1.txt", "NEWDRIFT2.txt","NEWDRIFT3.txt","NEWDRIFT4.txt", "NEWDRIFT5.txt","NEWDRIFT6.txt","NEWDRIFT7.txt","NEWDRIFT8.txt"};
+	std::vector<float> omegatauvals(trials);
+	omegatauvals =  MUltiplyscalar(tauvals,omega,omegatauvals);
+	for (int j=0; j < names.size(); j++){
+	IonAnalysis analysis;
+	analysis.set_values(iterations, tauvals[j], omega, dt, vinit, positionx, positiony, positionz);
+	std::vector<float> test;
+	std::ofstream DRIFT;
+ 	DRIFT.open(names[j]);
+	for (int i=0; i<20; i++){
+	test = analysis.thermalkickexponential();
+	DRIFT << test[0] << std::endl;
+	}
+	DRIFT.close();
+	}
+
+
+
+	// Ion ion0;
+	// ion0.set_values(omega, tau, Babs, Eabs, dt, charge, m, pos, vel, acc, pos1, vel1, acc1);
+	// for (int i=0; i<100; i++) {
+	// 	std::vector<float> test(3);
+	// 	test = ion0.updateRK4();
+	// 	std::cout << test[0] <<","<< test[1]<<","<< test[2] << std::endl;
+	// }
 
 
 	//auto lambda = [](auto x){ return x; 
 	//};     
-	//std::cout << lambda("Hello generic lambda!\n");  
-
-	// Ion ion0;
-	// ion0.set_values(omega, tau, Babs, Eabs, dt, charge, m, pos, vel, acc, pos1, vel1, acc1);
-
-	// for (int i=0; i<100; i++) {
-		// std::vector<float> test(3);
-		// test = ion0.updateRK4();
-		// std::vector<float> cross = {0,1,0};
-		// std::transform (cross.begin(), cross.end(), cross.begin(), cross.begin(), std::plus<float>());
-		// std::cout << test[0] <<","<< test[1]<<","<< test[2] << std::endl;
-		// std::cout<< v1[0] << v1[1] <<v1[2] << std::endl;
-		// std::cout << cross < std::endl;
-		// std::cout<< ion0.getomega() << std::endl;
-	// }
-
+	//std::cout << lambda("Hello generic lambda!\n"); 
 
 	return 0; 
 }

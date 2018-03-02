@@ -35,3 +35,4 @@ plotratiomanytime('testchangetime.obj', len(iterationlist), ioneffect1.omega, io
 # Analysis old drift from long runs of different omega*tau for time = 3s
 
 plotolddrifts(fontsize = 20)
+

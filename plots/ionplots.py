@@ -201,7 +201,8 @@ def plotolddrifts(fontsize, figsize0, figsize1):
                  xerr=11 * [driftobjects[1]['negerr'][-1]], fmt='o', capthick=2)
 
     theoryx = numpy.arange(0, max(omegatau), 10 ** (-2))
-    plt.plot(theoryx, theoryx**3/ (1+theoryx)**3, 'r-', label=r'$y = \frac{(\omega*\tau)^3}{1+(\omega*\tau)^3}$')
+    plt.plot(theoryx, theoryx**3/ (1+theoryx**3), 'r-', label=r'$y = \frac{(\omega*\tau)^3}{1+(\omega*\tau)^3}$')
+    plt.plot(theoryx, theoryx**2/3, 'g-', label=r'$y = \frac{(\omega*\tau)^2}{3}$')
     plt.xlabel(r"$\omega*\tau$", fontsize=fontsize)
     plt.ylabel("simulated drift velocity / \n theoretical drift velocity", fontsize=fontsize)
     plt.title("Reduction factor for ion-drift velocity \n due to ion-neutral collisions")
