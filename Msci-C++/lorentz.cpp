@@ -13,10 +13,11 @@
 #include <chrono>
 #include <iomanip>
 #include <thread>
+#include <sstream>
 
 float omega = (1.60217662 * pow(10,-19)) * 0.014 / (39.948 * 1.66053904 * pow(10,-27));
 float m = 39.948 * 1.66053904 * pow(10,-27);
-// float tau = 1*pow(10,-5);
+float tau = 1*pow(10,-5);
 float Babs = 0.014;
 float Eabs = 1.0;
 float dt = 1*pow(10,-7);
@@ -39,17 +40,20 @@ std::vector<float> positionz(iterations+1);
 const double PI = std::atan(1.0)*4;
 
 
+
 std::vector<float> MUltiplyscalar(std::vector<float> v1, float scalar, std::vector<float> result_v){
-std::transform(v1.begin(), v1.end(), result_v.begin(), std::bind1st(std::multiplies<float>(),scalar));
-return result_v;
+	std::transform(v1.begin(), v1.end(), result_v.begin(), std::bind1st(std::multiplies<float>(),scalar));
+	return result_v;
 };
+
 
 double RANDD() {
 	std::random_device rd;
-std::mt19937 gen(rd());
-std::uniform_real_distribution<> dis(0, 1);//uniform distribution between 0 and 1
-return dis(gen);
+	std::mt19937 gen(rd());
+	std::uniform_real_distribution<> dis(0, 1);//uniform distribution between 0 and 1
+	return dis(gen);
 };
+
 
 class Ion {
 	float omega, m, tau, Babs, Eabs, dt, charge;
@@ -161,10 +165,8 @@ class Ion {
 		pos1 = pos;
 		return pos;
 		}
-
-
-
 };
+
 
 class IonAnalysis {
 	int iterations;
@@ -420,6 +422,7 @@ void Ion::set_values(float x, float y, float z, float h, float deltat, float Q, 
 	acc1 = f;
 };
 
+
 void IonAnalysis::set_values(int a, float b, float c, float d, float p, std::vector<float> e, std::vector<float> f, std::vector<float> g){
 	iterations = a;
 	tau = b;
@@ -429,10 +432,103 @@ void IonAnalysis::set_values(int a, float b, float c, float d, float p, std::vec
 	positionx = e;
 	positiony = f;
 	positionz = g;
-
 };
 
-int main() {   
+
+int main(int argc, char* argv[]) {   
+
+	int c_num =0;
+	
+	switch(c_num) {
+	    case 1 : {
+	    	// Test for one value of omega*tau with many trials
+	    	std::cout << "Single tau value old thermal kick method" << std::endl;
+		    IonAnalysis analysis;
+			analysis.set_values(iterations, tau, omega, dt, vinit, positionx, positiony, positionz);
+			std::vector<float> test;
+			std::ofstream DRIFT;
+		 	DRIFT.open ("DRIFTRATIOtauEm5.txt");
+			for (int i=0; i<50; i++){
+			test = analysis.thermalkick();
+			DRIFT << test[0] << std::endl;
+			}
+			DRIFT.close();
+			break;
+		}
+		case 2 : {
+			//Test for changing omega*tau for fixed time
+			float trials = 5;
+			std::vector<float> tauvals(trials);	
+			tauvals = {float(8.9*pow(10,-6)), float(9.5*pow(10,-6)), float(1*pow(10,-5)),float(1.5*pow(10,-5)),float(1.7*pow(10,-5))};
+			std::vector<std::string> names(trials);
+			names = {"2DRIFT1.txt", "2DRIFT2.txt","2DRIFT3.txt","2DRIFT4.txt", "2DRIFT5.txt"};
+			std::vector<float> omegatauvals(trials);
+			omegatauvals =  MUltiplyscalar(tauvals,omega,omegatauvals);
+			for (int j=0; j < names.size(); j++){
+				IonAnalysis analysis;
+				analysis.set_values(iterations, tauvals[j], omega, dt, vinit, positionx, positiony, positionz);
+				std::vector<float> test;
+				std::ofstream DRIFT;
+			 	DRIFT.open(names[j]);
+				for (int i=0; i<20; i++){
+					test = analysis.thermalkick();
+					DRIFT << test[0] << std::endl;
+					}
+				DRIFT.close();
+			}	
+			break;
+		}
+		case 3: {
+			// Test new thermal kick method with exponential probabilistic implementation for tau = 10^(-5) to check it works ok
+			float probcol;
+			probcol = 1.0 - 1*pow(exp(1),-dt/(1*pow(10,-5)));
+			float detcol;
+			for (int l = 0; l <1000; l++){
+				detcol=RANDD();
+				if (detcol <= probcol){
+					std::cout << detcol << std::endl;
+				}
+				else {}
+			}
+			break;
+		}
+		
+		case 4: {
+			// Test single value of omega*tau using new thermal kick with exponential method
+			IonAnalysis analysis;
+			analysis.set_values(iterations, 1*pow(10,-5), omega, dt, vinit, positionx, positiony, positionz);
+			std::vector<float> test;
+			for (int i=0; i<10; i++){
+				test = analysis.thermalkickexponential();
+				std::cout << test[0] << std::endl;
+				}
+			break;	
+		}
+		case 5: {
+			//Testing changing omega*tau using new thermal kick with exponential method 
+			float trials = 8;
+			std::vector<float> tauvals(trials);	
+			tauvals = {float(1*pow(10,-6)), float(6*pow(10,-6)), float(1.1*pow(10,-5)), float(1.3*pow(10,-5)), float(1.4*pow(10,-5)), float(1.5*pow(10,-5)), float(1.6*pow(10,-5)), float(1.9*pow(10,-5))};
+			std::vector<std::string> names(trials);
+			names = {"2NEWDRIFT1.txt", "2NEWDRIFT2.txt","2NEWDRIFT3.txt","2NEWDRIFT4.txt", "2NEWDRIFT5.txt","2NEWDRIFT6.txt","2NEWDRIFT7.txt","2NEWDRIFT8.txt"};
+			std::vector<float> omegatauvals(trials);
+			omegatauvals =  MUltiplyscalar(tauvals,omega,omegatauvals);
+			for (int j=0; j < names.size(); j++){
+				IonAnalysis analysis;
+				analysis.set_values(iterations, tauvals[j], omega, dt, vinit, positionx, positiony, positionz);
+				std::vector<float> test;
+				std::ofstream DRIFT;
+			 	DRIFT.open(names[j]);
+				for (int i=0; i<20; i++){
+					test = analysis.thermalkickexponential();
+					DRIFT << test[0] << std::endl;
+				}
+				DRIFT.close();
+			}
+			break;
+
+		}
+		}
 	// Test for one value of omega*tau with many trials
 	// IonAnalysis analysis;
 	// analysis.set_values(iterations, tau, omega, dt, vinit, positionx, positiony, positionz);
@@ -491,25 +587,25 @@ int main() {
 	// }
 
 	//Testing changing omega*tau using new thermal kick with exponential method 
-	float trials = 8;
-	std::vector<float> tauvals(trials);	
-	tauvals = {float(5*pow(10,-7)),float(4*pow(10,-6)),float(8*pow(10,-6)), float(9.5*pow(10,-6)), float(1*pow(10,-5)),float(1.2*pow(10,-5)),float(1.7*pow(10,-5)),float(2*pow(10,-5))};
-	std::vector<std::string> names(trials);
-	names = {"NEWDRIFT1.txt", "NEWDRIFT2.txt","NEWDRIFT3.txt","NEWDRIFT4.txt", "NEWDRIFT5.txt","NEWDRIFT6.txt","NEWDRIFT7.txt","NEWDRIFT8.txt"};
-	std::vector<float> omegatauvals(trials);
-	omegatauvals =  MUltiplyscalar(tauvals,omega,omegatauvals);
-	for (int j=0; j < names.size(); j++){
-	IonAnalysis analysis;
-	analysis.set_values(iterations, tauvals[j], omega, dt, vinit, positionx, positiony, positionz);
-	std::vector<float> test;
-	std::ofstream DRIFT;
- 	DRIFT.open(names[j]);
-	for (int i=0; i<20; i++){
-	test = analysis.thermalkickexponential();
-	DRIFT << test[0] << std::endl;
-	}
-	DRIFT.close();
-	}
+	// float trials = 8;
+	// std::vector<float> tauvals(trials);	
+	// tauvals = {float(1*pow(10,-6)), float(6*pow(10,-6)), float(1.1*pow(10,-5)), float(1.3*pow(10,-5)), float(1.4*pow(10,-5)), float(1.5*pow(10,-5)), float(1.6*pow(10,-5)), float(1.9*pow(10,-5))};
+	// std::vector<std::string> names(trials);
+	// names = {"2NEWDRIFT1.txt", "2NEWDRIFT2.txt","2NEWDRIFT3.txt","2NEWDRIFT4.txt", "2NEWDRIFT5.txt","2NEWDRIFT6.txt","2NEWDRIFT7.txt","2NEWDRIFT8.txt"};
+	// std::vector<float> omegatauvals(trials);
+	// omegatauvals =  MUltiplyscalar(tauvals,omega,omegatauvals);
+	// for (int j=0; j < names.size(); j++){
+	// IonAnalysis analysis;
+	// analysis.set_values(iterations, tauvals[j], omega, dt, vinit, positionx, positiony, positionz);
+	// std::vector<float> test;
+	// std::ofstream DRIFT;
+ // 	DRIFT.open(names[j]);
+	// for (int i=0; i<20; i++){
+	// test = analysis.thermalkickexponential();
+	// DRIFT << test[0] << std::endl;
+	// }
+	// DRIFT.close();
+	// }
 
 
 
