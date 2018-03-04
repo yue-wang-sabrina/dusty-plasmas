@@ -60,7 +60,7 @@ class Dust:
             self.vel[0] *= -1
             self.vel[1] *= -1
 
-        if numpy.array(self.pos[2]) + numpy.array(self.vel[2]) * cdt + 0.5 * numpy.array(self.acc[2]) * dt ** 2 < 0:
+        if numpy.array(self.pos[2]) + numpy.array(self.vel[2]) * dt + 0.5 * numpy.array(self.acc[2]) * dt ** 2 < 0:
             self.vel[2] = abs(self.vel[2])
             print("Particle is vertically scattered")
 
@@ -341,7 +341,7 @@ class Dust:
             # Ion-neutral collision drift velocity new D.D. Millar 1976
             elif method == 'derivation':
                 omega = abs(const.e * magB / const.mi)
-                tau = 0.05 / omega
+                tau = 0.01 / omega
                 Br = numpy.sqrt(B[0] ** 2 + B[1] ** 2)
                 Er = numpy.sqrt(E[0] ** 2 + E[1] ** 2)
                 k = ((const.e / const.mi) ** 2) * (B[2] * Er - Br * E[2])
