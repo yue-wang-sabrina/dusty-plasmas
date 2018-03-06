@@ -1,9 +1,9 @@
-from Gibsonmodification import ModifyBFieldAnalysis
-from utils.interpolate import interpolate
-import plots.Gibsonmodificatonplots as Gplot
+from msci.analysis.Gibsonmodification import ModifyBFieldAnalysis
+from msci.utils.interpolate import interpolate
+import msci.plots.Gibsonmodificatonplots as Gplot
 
 from IPython import get_ipython
-import constants as const
+import msci.analysis.constants as const
 
 ipython = get_ipython()
 ipython.magic('load_ext autoreload')

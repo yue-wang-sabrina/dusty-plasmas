@@ -1,6 +1,6 @@
 import numpy
 import matplotlib.pyplot as plt
-import constants as const
+import msci.analysis.constants as const
 import math
 from scipy import special
 from mpl_toolkits.mplot3d import Axes3D

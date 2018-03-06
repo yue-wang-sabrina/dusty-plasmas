@@ -5,7 +5,7 @@ import math
 import matplotlib.pyplot as plt
 from scipy.spatial import Delaunay
 import itertools
-import constants as const
+import msci.analysis.constants as const
 import matplotlib
 
 

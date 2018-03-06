@@ -6,7 +6,7 @@ import pickle
 from numpy import isclose
 
 from tqdm import tqdm
-from utils.utils import pointdipoleB
+from msci.utils.utils import pointdipoleB
 from scipy.optimize import fsolve
 
 

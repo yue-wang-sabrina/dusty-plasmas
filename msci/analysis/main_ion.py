@@ -1,12 +1,12 @@
 # This file is mainly for looking at B field effects of crystals that are already formed.
 
-from analysis_ion import IonAnalysis
-from plots.ionplots import *
-from utils.utils import bootstrap
-from plots import ionplots
+from msci.analysis.analysis_ion import IonAnalysis
+from msci.plots.ionplots import *
+from msci.utils.utils import bootstrap
+from msci.plots import ionplots
 
 from IPython import get_ipython
-import constants as const
+import msci.analysis.constants as const
 
 ipython = get_ipython()
 ipython.magic('load_ext autoreload')

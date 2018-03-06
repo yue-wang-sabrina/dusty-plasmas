@@ -5,9 +5,9 @@ import pickle
 
 from tqdm import tqdm
 
-import constants as const
-from particles.ions import Ion
-from utils.utils import bootstrap
+import msci.analysis.constants as const
+from msci.particles.ions import Ion
+from msci.utils.utils import bootstrap
 
 dt = 0.0000001
 

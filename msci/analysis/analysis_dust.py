@@ -5,9 +5,9 @@ import pandas as pd
 
 from tqdm import tqdm
 
-import constants as const
-from particles.dust import Dust
-from utils.interpolate import interpolate
+import msci.analysis.constants as const
+from msci.particles.dust import Dust
+from msci.utils.interpolate import interpolate
 
 
 class BEffectsAnalysis:
