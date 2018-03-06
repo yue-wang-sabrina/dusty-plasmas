@@ -19,9 +19,9 @@ beffect1.create_particles(
 )
 beffect1.create_pairs()
 beffect1.interact_and_iterate(
-    iterationsB=500,
+    iterationsB=5000,
     init_iterations=500,
-    method='NoGibs',
+    method='Gibs',
     modified_b_field=prepare_modified_b_field()
 )
 beffect1.sort_positions_of_particles()

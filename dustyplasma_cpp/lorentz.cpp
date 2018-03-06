@@ -14,6 +14,7 @@
 #include <iomanip>
 #include <thread>
 #include <sstream>
+#include "progbar.h"
 
 float omega = (1.60217662 * pow(10,-19)) * 0.014 / (39.948 * 1.66053904 * pow(10,-27));
 float m = 39.948 * 1.66053904 * pow(10,-27);
@@ -337,6 +338,8 @@ public:
 		positiony[0] = pos1[1];
 		positionz[0] = pos1[2];
 
+		progbar bar(std::cerr, 36, '=', ' ');
+
 		for (int i=1; i<iterations+1; i++){
 			index = index + 1 ;
 
@@ -363,6 +366,11 @@ public:
 			positionx[index] = updated[0];
 	        positiony[index] = updated[1];
 			positionz[index] = updated[2];
+
+			if (i % 1000 == 0) {
+				bar.update(i, iterations+1);
+			}
+			
 		}
 
 
@@ -437,7 +445,7 @@ void IonAnalysis::set_values(int a, float b, float c, float d, float p, std::vec
 
 int main(int argc, char* argv[]) {   
 
-	int c_num =0;
+	int c_num =1;
 	
 	switch(c_num) {
 	    case 1 : {
@@ -448,8 +456,8 @@ int main(int argc, char* argv[]) {
 			std::vector<float> test;
 			std::ofstream DRIFT;
 		 	DRIFT.open ("DRIFTRATIOtauEm5.txt");
-			for (int i=0; i<50; i++){
-			test = analysis.thermalkick();
+			for (int i=0; i<1; i++){
+			test = analysis.thermalkickexponential();
 			DRIFT << test[0] << std::endl;
 			}
 			DRIFT.close();
@@ -526,7 +534,7 @@ int main(int argc, char* argv[]) {
 				DRIFT.close();
 			}
 			break;
-			
+
 		}
 		}
 

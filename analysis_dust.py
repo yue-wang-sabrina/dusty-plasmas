@@ -105,6 +105,7 @@ class BEffectsAnalysis:
             for k in self.dustdict:
                 if method == 'NoGibs':
                     self.dustdict[k].steptest(numpy.array(self.dustdict[k].multifields))
+                    self.position.append(self.dustdict[k].getselfpos())
                 elif method == 'Gibs':
                     Efield = numpy.array(self.dustdict[k].multifields) + interpolate(
                         self.dustdict[k].getselfpos(),
