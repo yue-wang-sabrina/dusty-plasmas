@@ -1,6 +1,6 @@
 import numpy
 
-import constants as const
+import msci.analysis.constants as const
 
 
 class Ion:

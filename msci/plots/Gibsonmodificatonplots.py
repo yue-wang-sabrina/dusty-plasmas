@@ -2,7 +2,7 @@
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy
-import constants as const
+import msci.analysis.constants as const
 import pickle
 
 font = {'family': 'normal',

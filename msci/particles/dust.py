@@ -3,7 +3,7 @@ import math
 import numpy
 from scipy import special
 
-import constants as const
+import msci.analysis.constants as const
 
 
 class Dust:

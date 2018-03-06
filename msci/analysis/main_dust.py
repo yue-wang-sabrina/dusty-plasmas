@@ -1,6 +1,6 @@
 # This file is mainly for looking at B field effects of crystals that are already formed.
 
-from analysis_dust import BEffectsAnalysis
+from msci.analysis.analysis_dust import BEffectsAnalysis
 from msci.utils.utils import generate_particle_equilibrium_positions, prepare_modified_b_field
 from msci.plots import dustplots
 

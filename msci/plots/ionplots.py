@@ -9,9 +9,9 @@ import mpl_toolkits.mplot3d.axes3d as p3
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import animation
 
-from particles.ions import Ion
+from msci.particles.ions import Ion
 from tqdm import tqdm
-import constants as const
+import msci.analysis.constants as const
 
 
 def plotthermalkick(position, tau):

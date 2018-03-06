@@ -4,7 +4,7 @@ import math
 from numpy import isclose
 
 
-import constants as const
+import msci.analysis.constants as const
 
 
 def interpolate(r, gridr, gridz, Evalsr, Evalsz, rmax, separationsheath, separationhor1, separationhor2, firstpoint):
