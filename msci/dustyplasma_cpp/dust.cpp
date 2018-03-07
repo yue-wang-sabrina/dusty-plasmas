@@ -676,7 +676,7 @@ int main(){
 	// testB = {0,0,0.014};
 	// test=dust1.combinedrift(testB);
 	// std::cout << test[0] << "," << test[1] << "," << test[2] << std::endl;
-	
+
 
 	// Testing analysis functions work
 	DustAnalysis analysis;
@@ -691,11 +691,11 @@ int main(){
 	analysis.interact_and_iterate();
 	std::vector<float> test;
 	test = analysis.getallpositionx();
-	// for (int i=0; i<positionx.size();i++){
-	// 	std::cout << test[i] << "," << std::endl;
-	// }
+	 for (int i=0; i<positionx.size();i++){
+	 	std::cout << test[i] << "," << std::endl;
+	 }
 
-	// std::vector<float> test;	
+	// std::vector<float> test;
 	// dust0.updateEuler();
 	// test = dust0.getselfacc();
 	// std::cout << test[0] << "," << test[1] << "," << test[2] << std::endl;

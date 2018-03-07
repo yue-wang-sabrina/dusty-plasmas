@@ -23,19 +23,6 @@
     </rect>
    </property>
   </widget>
-  <widget class="QRadioButton" name="radioButton">
-   <property name="geometry">
-    <rect>
-     <x>1290</x>
-     <y>100</y>
-     <width>111</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Magnetic field</string>
-   </property>
-  </widget>
   <widget class="QSlider" name="verticalSlider">
    <property name="geometry">
     <rect>
@@ -78,14 +65,53 @@
   <widget class="QPushButton" name="pushButton_3">
    <property name="geometry">
     <rect>
-     <x>1290</x>
-     <y>310</y>
-     <width>113</width>
+     <x>1260</x>
+     <y>370</y>
+     <width>171</width>
      <height>32</height>
     </rect>
    </property>
    <property name="text">
-    <string>Run sim</string>
+    <string>Run sim from equil</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="checkBox">
+   <property name="geometry">
+    <rect>
+     <x>1290</x>
+     <y>100</y>
+     <width>131</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Turn B field on</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="checkBox_2">
+   <property name="geometry">
+    <rect>
+     <x>1290</x>
+     <y>330</y>
+     <width>131</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Gibson E mod</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="pushButton_4">
+   <property name="geometry">
+    <rect>
+     <x>1260</x>
+     <y>400</y>
+     <width>171</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Run sim drop 1 by 1</string>
    </property>
   </widget>
  </widget>

@@ -8,7 +8,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib import animation
 
 
-def plot(dustanalysis, save, name='Dust_rotation', jn=False):
+def pplot(dustanalysis, name='Dust_rotation', save=False, jn=False):
     def _update_graph(n_iter):
         data = dustanalysis.positions_df[dustanalysis.positions_df['time'] == n_iter]
         point.set_data(data.x, data.y)

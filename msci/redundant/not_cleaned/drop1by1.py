@@ -96,7 +96,7 @@ while currentime < simtime:
         if dustdict[b[0]].intergraind(dustdict[b[1]]) == True:
             pairsfinal.append(b)
         else:
-            pass  # pairsfinal.append(b)
+            pass
     if len(timedrop) != 0:
         if abs(currentime - timedrop[0]) < 0.0000001:
             del timedrop[0]

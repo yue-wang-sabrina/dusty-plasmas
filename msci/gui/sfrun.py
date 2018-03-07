@@ -30,6 +30,7 @@ from pylab import rcParams
 
 from msci.analysis.analysis_dust import BEffectsAnalysis
 from msci.utils.utils import generate_particle_equilibrium_positions, prepare_modified_b_field
+from msci.plots.dustplots import pplot
 import msci.analysis.constants as const
 
 from IPython import get_ipython
@@ -45,15 +46,14 @@ class SpectrumCanvas(FigureCanvas):
     '''
 
     def __init__(self, parent=None, width=7.21, height=5.91, dpi=100):
-        self.fig = Figure(figsize=(width*3, height*3), dpi=dpi)
-
+        self.fig = Figure(figsize=(width * 3, height * 3), dpi=dpi)
         FigureCanvas.__init__(self, self.fig)
         self.setParent(parent)
         FigureCanvas.setSizePolicy(self, QtWidgets.QSizePolicy.Expanding,
                                    QtWidgets.QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)
 
-    def display(self, dustanalysis):
+    def display(self, dustanalysis, view):
         self.fig.clf()
         test = self.fig.add_subplot(111, projection='3d')
 
@@ -63,7 +63,9 @@ class SpectrumCanvas(FigureCanvas):
             point.set_3d_properties(data.z)
             return point,
 
-        # test.view_init(elev=90., azim=90)
+        if view:
+            test.view_init(elev=90., azim=90)
+
         if min(dustanalysis.position_array[:, 0]) == max(dustanalysis.position_array[:, 0]):
             test.set_xlim([-10 * dustanalysis.const.lambdaD, 10 * dustanalysis.const.lambdaD])
         else:
@@ -92,7 +94,7 @@ class SpectrumCanvas(FigureCanvas):
             _update_graph,
             frames=dustanalysis.iterationsB + dustanalysis.init_iterations,
             interval=1,
-            blit=False
+            blit=True
         )
         self.draw()
 
@@ -105,12 +107,31 @@ class SFGui(Ui_Dialog):  # Setting up/Connecting the gui buttons and connecting 
         self.graph.setObjectName("graph")
         self.pushButton.clicked.connect(self.simtime)
         self.pushButton_2.clicked.connect(self.particlenumber)
-        self.pushButton_3.clicked.connect(self.run)
+        self.pushButton_3.clicked.connect(self.runfromequil)
+        self.pushButton_4.clicked.connect(self.rundrop1by1)
+        self.checkBox.toggled.connect(self.Bfield)
+        self.checkBox_2.toggled.connect(self.Gfield)
         self.time = 0;
-        self.particlenumber = 0;
+        self.particlenumber = 0
+        self.Bswitch = False
+        self.Gibs = False
+        self.init_iterationsadd = 0
+        self.method = 'NoGibs'
+        self.Biterations = 0;
 
     # def addInputTextToListbox(self):  # Add user input
     #     txt = self.myTextInput.text()
+    def Bfield(self):
+        if self.checkBox.isChecked():
+            self.Bswitch = True
+        else:
+            self.Bswitch = False
+
+    def Gfield(self):
+        if self.checkBox_2.isChecked():
+            self.Gibs = True
+        else:
+            self.Gibs = False
 
     def simtime(self):
         text2, ok2 = QInputDialog.getText(dialog, 'User Input', 'Enter simulation time in seconds')
@@ -120,21 +141,55 @@ class SFGui(Ui_Dialog):  # Setting up/Connecting the gui buttons and connecting 
         text, ok = QInputDialog.getText(dialog, 'User Input', 'Enter particle number')
         self.particlenumber = int(text.split()[0])
 
-    def run(self):
+    def runfromequil(self):
+        self.Bfield()
+        self.Gfield()
         self.beffect1 = BEffectsAnalysis()
         self.beffect1.create_particles(
             numparticles=self.particlenumber,
             initpositions=generate_particle_equilibrium_positions()
         )
         self.beffect1.create_pairs()
+        if self.Bswitch:
+            self.Biterations = int(self.time / const.dt)
+        else:
+            self.init_iterationsadd = int(self.time / const.dt)
+        if self.Gibs:
+            self.method = "Gibs"
+        else:
+            self.method = "NoGibs"
         self.beffect1.interact_and_iterate(
-            iterationsB=100,
-            init_iterations=int(self.time / const.dt),
-            method='Gibs',
+            iterationsB=self.Biterations,
+            init_iterations=100 + self.init_iterationsadd,
+            method=self.method,
             modified_b_field=prepare_modified_b_field()
         )
         self.beffect1.sort_positions_of_particles()
-        self.graph.display(self.beffect1)
+        self.graph.display(self.beffect1, view = True)
+
+    def rundrop1by1(self):
+        self.Bfield()
+        self.Gfield()
+        self.beffect1 = BEffectsAnalysis()
+        self.beffect1.numparticles = self.particlenumber
+        if self.Bswitch:
+            self.Biterations = int(self.time/const.dt)
+        else:
+            self.init_iterationsadd = int(self.time/const.dt)
+        if self.Gibs:
+            self.method = "Gibs"
+        else:
+            self.method = "NoGibs"
+
+        self.beffect1.interact_and_iterate_drop_method(
+            iterationsB=int(self.Biterations),
+            init_iterations=int((10*self.particlenumber + 500) + self.init_iterationsadd),
+            method=self.method,
+            modified_b_field=prepare_modified_b_field())
+        self.beffect1.sort_posititions_drop_method()
+        self.graph.display(self.beffect1, view=False)
+
+
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
