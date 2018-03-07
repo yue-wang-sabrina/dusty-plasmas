@@ -22,7 +22,7 @@ class BEffectsAnalysis:
         self.iterationsB = None
         self.init_iterations = None
         self.position_array = None
-        self.modified_b_field = None
+        self.modified_b_field = {}
         self.const = const
         self.tindex = 0;
 
@@ -244,6 +244,4 @@ class BEffectsAnalysis:
             "y": self.position_array[:, 1],
             "z": self.position_array[:, 2]
         }
-
         )
-        print(self.t,self.position_array)

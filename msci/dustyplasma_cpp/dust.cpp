@@ -164,7 +164,7 @@ class Dust{
 		float multiplyfactor;
 		multiplyfactor = -1*gammadamp*pow(magvel,2);
 		std::vector<float> acctemp(3);
-		acctemp = Multiplyscalar(acctemp,1./magvel,acctemp);
+		acctemp = Multiplyscalar(vel,1./magvel,acctemp);
 		acctemp = Multiplyscalar(acctemp, multiplyfactor, acctemp);
 		return acctemp;
 	}
@@ -503,7 +503,7 @@ class Dust{
 };
 
 
-std::vector<Dust> dustlist(n_particles);
+
 class DustAnalysis{
 	std::vector<Dust> dustlist;
 	std::vector<std::vector<int>> pairs;
@@ -532,6 +532,7 @@ class DustAnalysis{
 
 	void create_particles(){
 		std::vector<std::string> names(n_particles);
+
 		for (int int_name=0; int_name < n_particles; int_name ++){
 			Dust dust;
 			std::vector<float> initzeros(3);
@@ -539,12 +540,12 @@ class DustAnalysis{
 			std::vector<float> INITPOS(3);
 			INITPOS[0] = initx[int_name];
 			INITPOS[1] = inity[int_name];
-			INITPOS[2] = initz[int_name];			
+			INITPOS[2] = initz[int_name];
 			dust.set_values(false, md, radd, lambdaD, phia, Zd*e, OMEGATAU, INITPOS, initzeros, initzeros, INITPOS, initzeros, initzeros, multifields);
 			dustlist[int_name] = dust;
-		}
 
-	} 
+		}
+	}
 
 	void create_pairs(){
 		for (int i=0; i<n_particles; i++){
@@ -658,6 +659,9 @@ void DustAnalysis::set_values(std::vector<Dust> a, std::vector<std::vector<int>>
 
 int main(){
 	// Testing dust functions work
+
+	std::vector<Dust> dustlist(n_particles);
+
 	Dust dust0, dust1;
 	std::vector<float> positiond0(3);
 	positiond0={-3*lambdaD,0,0.0003825734};
@@ -679,23 +683,23 @@ int main(){
 
 
 	// Testing analysis functions work
-	DustAnalysis analysis;
-	initpositionsx = {3*lambdaD,-3*lambdaD};
-	initpositionsy = {0,0};
-	initpositionsz = {0.0003825734,0.0003825734};
-	analysis.set_values(dustlist, pairs, initpositionsx, initpositionsy, initpositionsz, positionx, positiony, positionz,t, n_particles, iterationsB, init_iterations);
-	analysis.create_particles();
-	std::vector<Dust> testname(n_particles);
-	testname = analysis.getdustnames();
-	analysis.create_pairs();
-	analysis.interact_and_iterate();
-	std::vector<float> test;
-	test = analysis.getallpositionx();
-	 for (int i=0; i<positionx.size();i++){
-	 	std::cout << test[i] << "," << std::endl;
-	 }
+//	DustAnalysis analysis;
+//	initpositionsx = {3*lambdaD,-3*lambdaD};
+//	initpositionsy = {0,0};
+//	initpositionsz = {0.0003825734,0.0003825734};
+//	analysis.set_values(dustlist, pairs, initpositionsx, initpositionsy, initpositionsz, positionx, positiony, positionz,t, n_particles, iterationsB, init_iterations);
+//	analysis.create_particles();
+//	std::vector<Dust> testname(n_particles);
+//	testname = analysis.getdustnames();
+//	analysis.create_pairs();
+//	analysis.interact_and_iterate();
+//	std::vector<float> test;
+//	test = analysis.getallpositionx();
+//	 for (int i=0; i<positionx.size();i++){
+//	 	std::cout << test[i] << "," << std::endl;
+//	 }
 
-	// std::vector<float> test;
+    // std::vector<float> test;
 	// dust0.updateEuler();
 	// test = dust0.getselfacc();
 	// std::cout << test[0] << "," << test[1] << "," << test[2] << std::endl;

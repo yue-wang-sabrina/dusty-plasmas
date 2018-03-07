@@ -32,6 +32,7 @@ from msci.analysis.analysis_dust import BEffectsAnalysis
 from msci.utils.utils import generate_particle_equilibrium_positions, prepare_modified_b_field
 from msci.plots.dustplots import pplot
 import msci.analysis.constants as const
+import msci.dustyplasma_cpp.dustcpp_wrapper as dcpp
 
 from IPython import get_ipython
 
@@ -107,7 +108,7 @@ class SFGui(Ui_Dialog):  # Setting up/Connecting the gui buttons and connecting 
         self.graph.setObjectName("graph")
         self.pushButton.clicked.connect(self.simtime)
         self.pushButton_2.clicked.connect(self.particlenumber)
-        self.pushButton_3.clicked.connect(self.runfromequil)
+        self.pushButton_3.clicked.connect(self.runwithcpp)
         self.pushButton_4.clicked.connect(self.rundrop1by1)
         self.checkBox.toggled.connect(self.Bfield)
         self.checkBox_2.toggled.connect(self.Gfield)
@@ -188,6 +189,35 @@ class SFGui(Ui_Dialog):  # Setting up/Connecting the gui buttons and connecting 
             modified_b_field=prepare_modified_b_field())
         self.beffect1.sort_posititions_drop_method()
         self.graph.display(self.beffect1, view=False)
+
+    def runwithcpp(self):
+        self.Bfield()
+        self.Gfield()
+        self.beffect1 = BEffectsAnalysis()
+        particlenum = self.particlenumber;
+        if self.Bswitch:
+            self.Biterations = int(self.time/const.dt)
+        else:
+            self.init_iterationsadd = int(self.time/const.dt)
+        if self.Gibs:
+            self.method = "NoGibs"
+        else:
+            self.method = "NoGibs"
+        itB = self.Biterations
+        initit = 100 + self.init_iterationsadd
+        beffect2 = dcpp.DustAnalysisCpp(initit, itB, particlenum)
+        beffect2.get_equilibrium_positions()
+        beffect2.run()
+        self.beffect1.numparticles = particlenum
+        self.beffect1.iterationsB = itB
+        self.beffect1.init_iterations = initit
+        self.beffect1.method = self.method
+        self.beffect1.position = [[i, j, k] for i, j, k in
+                             zip(beffect2.positions_x, beffect2.positions_y, beffect2.positions_z)]
+        self.beffect1.position_array = numpy.array(self.beffect1.position)
+        self.beffect1.sort_positions_of_particles()
+        self.beffect1.modified_b_field = prepare_modified_b_field()
+        self.graph.display(self.beffect1,view=True)
 
 
 
