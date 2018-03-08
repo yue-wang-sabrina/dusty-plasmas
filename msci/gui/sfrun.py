@@ -99,6 +99,9 @@ class SpectrumCanvas(FigureCanvas):
         )
         self.draw()
 
+    def clearall(self):  # clear figure from gui
+        self.fig.clf()
+
 
 class SFGui(Ui_Dialog):  # Setting up/Connecting the gui buttons and connecting them to their associated functions
     def __init__(self, dialog):
@@ -108,8 +111,11 @@ class SFGui(Ui_Dialog):  # Setting up/Connecting the gui buttons and connecting 
         self.graph.setObjectName("graph")
         self.pushButton.clicked.connect(self.simtime)
         self.pushButton_2.clicked.connect(self.particlenumber)
-        self.pushButton_3.clicked.connect(self.runwithcpp)
+        self.pushButton_3.clicked.connect(self.runfromequil)
         self.pushButton_4.clicked.connect(self.rundrop1by1)
+        self.pushButton_5.clicked.connect(self.runwithcpp)
+        self.pushButton_6.clicked.connect(self.runwithcppdrop1by1)
+        self.pushButton_7.clicked.connect(self.resetall)
         self.checkBox.toggled.connect(self.Bfield)
         self.checkBox_2.toggled.connect(self.Gfield)
         self.time = 0;
@@ -166,7 +172,7 @@ class SFGui(Ui_Dialog):  # Setting up/Connecting the gui buttons and connecting 
             modified_b_field=prepare_modified_b_field()
         )
         self.beffect1.sort_positions_of_particles()
-        self.graph.display(self.beffect1, view = True)
+        self.graph.display(self.beffect1, view=True)
 
     def rundrop1by1(self):
         self.Bfield()
@@ -174,9 +180,9 @@ class SFGui(Ui_Dialog):  # Setting up/Connecting the gui buttons and connecting 
         self.beffect1 = BEffectsAnalysis()
         self.beffect1.numparticles = self.particlenumber
         if self.Bswitch:
-            self.Biterations = int(self.time/const.dt)
+            self.Biterations = int(self.time / const.dt)
         else:
-            self.init_iterationsadd = int(self.time/const.dt)
+            self.init_iterationsadd = int(self.time / const.dt)
         if self.Gibs:
             self.method = "Gibs"
         else:
@@ -184,7 +190,7 @@ class SFGui(Ui_Dialog):  # Setting up/Connecting the gui buttons and connecting 
 
         self.beffect1.interact_and_iterate_drop_method(
             iterationsB=int(self.Biterations),
-            init_iterations=int((10*self.particlenumber + 500) + self.init_iterationsadd),
+            init_iterations=int((10 * self.particlenumber + 500) + self.init_iterationsadd),
             method=self.method,
             modified_b_field=prepare_modified_b_field())
         self.beffect1.sort_posititions_drop_method()
@@ -196,16 +202,19 @@ class SFGui(Ui_Dialog):  # Setting up/Connecting the gui buttons and connecting 
         self.beffect1 = BEffectsAnalysis()
         particlenum = self.particlenumber;
         if self.Bswitch:
-            self.Biterations = int(self.time/const.dt)
+            self.Biterations = int(self.time / const.dt)
         else:
-            self.init_iterationsadd = int(self.time/const.dt)
+            self.init_iterationsadd = int(self.time / const.dt)
         if self.Gibs:
-            self.method = "NoGibs"
+            self.method = "Gibs"
+            cppgibs = 1
         else:
+            cppgibs = 0;
             self.method = "NoGibs"
         itB = self.Biterations
         initit = 100 + self.init_iterationsadd
-        beffect2 = dcpp.DustAnalysisCpp(initit, itB, particlenum)
+        beffect2 = dcpp.DustAnalysisCpp(initit, itB, particlenum,cppgibs)
+        beffect2.get_modified_field()
         beffect2.get_equilibrium_positions()
         beffect2.run()
         self.beffect1.numparticles = particlenum
@@ -213,12 +222,17 @@ class SFGui(Ui_Dialog):  # Setting up/Connecting the gui buttons and connecting 
         self.beffect1.init_iterations = initit
         self.beffect1.method = self.method
         self.beffect1.position = [[i, j, k] for i, j, k in
-                             zip(beffect2.positions_x, beffect2.positions_y, beffect2.positions_z)]
+                                  zip(beffect2.positions_x, beffect2.positions_y, beffect2.positions_z)]
         self.beffect1.position_array = numpy.array(self.beffect1.position)
         self.beffect1.sort_positions_of_particles()
         self.beffect1.modified_b_field = prepare_modified_b_field()
-        self.graph.display(self.beffect1,view=True)
+        self.graph.display(self.beffect1, view=True)
 
+    def runwithcppdrop1by1(self):
+        pass
+
+    def resetall(self):
+        self.graph.clearall()
 
 
 if __name__ == '__main__':

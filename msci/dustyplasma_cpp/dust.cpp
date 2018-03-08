@@ -66,7 +66,24 @@ int iterationsB = 10000;
 int init_iterations = 100;
 std::vector<float> initpositionsx(n_particles); 
 std::vector<float> initpositionsy(n_particles);
-std::vector<float> initpositionsz(n_particles); 
+std::vector<float> initpositionsz(n_particles);
+std::vector<float> EVALSR(1890);
+std::vector<float> EVALSZ(1890);
+std::vector<float> GRIDR(1890);
+std::vector<float> GRIDZ(1890);
+std::vector<std::vector<float>> newEVALSr;
+std::vector<std::vector<float>> newEVALSz;
+std::vector<std::vector<float>> newGRIDr;
+std::vector<std::vector<float>> newGRIDz;
+
+float FIRSTPOINT;
+float RMAX;
+float SEPARATIONSHEATH;
+float SEPARATIONHOR1;
+float SEPARATIONHOR2;
+int METH; // Gibs = 1, NoGibs = 0;
+
+
 float t = 1;
 std::vector<std::vector<int>> pairs;
 
@@ -507,12 +524,13 @@ class Dust{
 class DustAnalysis{
 	std::vector<Dust> dustlist;
 	std::vector<std::vector<int>> pairs;
-	std::vector<float> initx, inity, initz, positionsx, positionsy, positionsz;
-	float t;
+	std::vector<std::vector<float>> changeevalsr, changeevalsz, changegridr, changegridz;
+	std::vector<float> initx, inity, initz, positionsx, positionsy, positionsz, evalr, evalz, gridr, gridz;
+	float t, firstpoint, rmax, sheathsep, sephor1, sephor2;
 	int n_particles, iterationsB, init_iterations;
 	
 	public:
-	void set_values(std::vector<Dust>, std::vector<std::vector<int>>,std::vector<float>,std::vector<float>,std::vector<float>,std::vector<float>, std::vector<float>,std::vector<float>,float, int, int, int);
+	void set_values(std::vector<Dust>, std::vector<std::vector<int>>,std::vector<std::vector<float>>,std::vector<std::vector<float>>,std::vector<std::vector<float>>,std::vector<std::vector<float>>,std::vector<float>,std::vector<float>,std::vector<float>,std::vector<float>, std::vector<float>,std::vector<float>,std::vector<float>,std::vector<float>,std::vector<float>,std::vector<float>,float,float, float, float,float,float, int, int, int);
 
 	std::vector<Dust> getdustnames(){
 		return dustlist;
@@ -561,7 +579,144 @@ class DustAnalysis{
 		return pairs;
 	}
 
-	void interact_and_iterate(){
+
+    void changefieldshape(){
+        for (int ind=0; ind<15; ind++){
+            std::vector<float> evalsrtemp(126);
+            std::vector<float> evalsztemp(126);
+            std::vector<float> gridrtemp(126);
+            std::vector<float> gridztemp(126);
+            for (int i=0; i<126;i++){
+                evalsrtemp[i] = evalr[ind*126+i];
+                evalsztemp[i] = evalz[ind*126+i];
+                gridrtemp[i] = gridr[ind*126+i];
+                gridztemp[i] = gridz[ind*126+i];
+            }
+            changeevalsr.push_back(evalsrtemp);
+            changeevalsz.push_back(evalsztemp);
+            changegridr.push_back(gridrtemp);
+            changegridz.push_back(gridztemp);
+        }
+    }
+
+	std::vector<float> interpolate(std::vector<float> r){
+	    std::vector<float> Eout(3);
+        std::vector<std::vector<float>> gridEs;
+        std::vector<std::vector<float>> gridpoints;
+	    float r0 = sqrt(1*pow(r[0],2) + 1*pow(r[1],2));
+	    float z0 = r[2];
+	    if (z0 > sheathd){
+            Eout = {0,0,0};
+	    }
+	    else{
+            if (r0 < rmax){
+                int indleft = int((abs(r0) - abs(firstpoint))/sephor1);
+                int indlow = int((abs(z0)-abs(firstpoint))/sheathsep);
+                std::vector<float> temp1(2);
+                std::vector<float> temp2(2);
+                std::vector<float> temp3(2);
+                std::vector<float> temp4(2);
+                std::vector<float> temp5(2);
+                std::vector<float> temp6(2);
+                std::vector<float> temp7(2);
+                std::vector<float> temp8(2);
+
+                temp1 = {changeevalsr[indlow][indleft], changeevalsz[indlow][indleft]};
+                temp2 = {changeevalsr[indlow+1][indleft], changeevalsz[indlow+1][indleft]};
+                temp3 = {changeevalsr[indlow+1][indleft+1], changeevalsz[indlow+1][indleft+1]};
+                temp4 = {changeevalsr[indlow][indleft+1], changeevalsz[indlow][indleft+1]};
+                temp5 = {changegridr[indlow][indleft],changegridz[indlow][indleft]};
+                temp6 = {changegridr[indlow+1][indleft],changegridz[indlow+1][indleft]};
+                temp7 = {changegridr[indlow+1][indleft+1],changegridz[indlow+1][indleft+1]};
+                temp8 = {changegridr[indlow][indleft+1],changegridz[indlow][indleft+1]};
+                gridEs.push_back(temp1);
+                gridEs.push_back(temp2);
+                gridEs.push_back(temp3);
+                gridEs.push_back(temp4);
+                gridpoints.push_back(temp5);
+                gridpoints.push_back(temp6);
+                gridpoints.push_back(temp7);
+                gridpoints.push_back(temp8);
+
+
+            }
+            else if (r0>rmax){
+
+                int indleft = int((boxr - firstpoint - rmax)/sephor2);
+                int indlow = int((z0-firstpoint)/sheathsep);
+
+                std::vector<float> temp1(2);
+                std::vector<float> temp2(2);
+                std::vector<float> temp3(2);
+                std::vector<float> temp4(2);
+                std::vector<float> temp5(2);
+                std::vector<float> temp6(2);
+                std::vector<float> temp7(2);
+                std::vector<float> temp8(2);
+
+                temp1 = {changeevalsr[indlow][indleft], changeevalsz[indlow][indleft]};
+                temp2 = {changeevalsr[indlow+1][indleft], changeevalsz[indlow+1][indleft]};
+                temp3 = {changeevalsr[indlow+1][indleft+1], changeevalsz[indlow+1][indleft+1]};
+                temp4 = {changeevalsr[indlow][indleft+1], changeevalsz[indlow][indleft+1]};
+                temp5 = {changegridr[indlow][indleft],changegridz[indlow][indleft]};
+                temp6 = {changegridr[indlow+1][indleft],changegridz[indlow+1][indleft]};
+                temp7 = {changegridr[indlow+1][indleft+1],changegridz[indlow+1][indleft+1]};
+                temp8 = {changegridr[indlow][indleft+1],changegridz[indlow][indleft+1]};
+                gridEs.push_back(temp1);
+                gridEs.push_back(temp2);
+                gridEs.push_back(temp3);
+                gridEs.push_back(temp4);
+                gridpoints.push_back(temp5);
+                gridpoints.push_back(temp6);
+                gridpoints.push_back(temp7);
+                gridpoints.push_back(temp8);
+            }
+
+            float d1 = (abs(r0 - gridEs[0][0]));
+            float d4 = (abs(r0 - gridEs[0][1]));
+            float d2 = (abs(r0 - gridEs[2][0]));
+            float d3 = (abs(r0 - gridEs[2][1]));
+            float dhorsq = 1*pow(d1, 2) + 1*pow(d2, 2);
+            float dvertsq = 1*pow(d3 , 2) + 1*pow(d4, 2);
+            std::vector<float> Etop(3);
+            std::vector<float> Etopt2(3);
+            std::vector<float> Etopt1(3);
+            Etopt2 = Multiplyscalar(gridEs[1],(1*pow(d2,2) / dhorsq),Etopt2);
+            Etopt1 = Multiplyscalar(gridEs[2],(1*pow(d1, 2) / dhorsq),Etopt1);
+            Etop= Addvectors(Etopt1,Etopt2,Etop);
+            std::vector<float> Ebottom(3);
+            std::vector<float> Ebottom2(3);
+            std::vector<float> Ebottom1(3);
+            Ebottom2 = Multiplyscalar(gridEs[0],(1*pow(d2 , 2) / dhorsq),Ebottom2);
+            Ebottom1 = Multiplyscalar(gridEs[3],(1*pow(d1, 2) / dhorsq),Ebottom1);
+            Ebottom= Addvectors(Ebottom2,Ebottom1,Ebottom);
+            std::vector<float> Efinal(3);
+            std::vector<float> Efinal1(3);
+            std::vector<float> Efinal2(3);
+            Efinal1 = Multiplyscalar(Ebottom,(1*pow(d3,2) / dvertsq),Efinal1);
+            Efinal2 = Multiplyscalar(Etop,(1*pow(d4, 2) / dvertsq),Efinal2);
+            Efinal = Addvectors(Efinal1,Efinal2,Efinal);
+            float theta = atan(abs(r[1] / r[0]));
+
+        if (r[0]>0 & r[1]>0){
+        }
+        else if (r[0]<0 & r[1] >0){
+            theta = PI-theta;
+        }
+        else if(r[0]<0 & r[1]<0){
+            theta = theta + PI;
+        }
+        else if (r[0]>0 & r[1]<0){
+            theta = 2*PI-theta;
+        }
+
+        Eout ={Efinal[0]*cos(theta),Efinal[0]*sin(theta),0};
+	    }
+
+	    return Eout;
+	}
+
+	void interact_and_iterate(int method){
 		progbar bar(std::cerr, 36, '=', ' ');
 
 		for (int itone = 0; itone < init_iterations; itone ++){
@@ -599,12 +754,30 @@ class DustAnalysis{
 					pairsfinal.push_back(pairs[b]);
 				}		
 			}
-			for (int k = 0; k<pairsfinal.size(); k++){
-				std::vector<float> interactfield(3);
-				interactfield = dustlist[pairsfinal[k][0]].selffield(dustlist[pairsfinal[k][1]]);
-				dustlist[pairsfinal[k][0]].selffieldmany(interactfield);
-				dustlist[pairsfinal[k][1]].selffieldmany(Multiplyscalar(interactfield,-1,interactfield));
+
+			if (method == 0){
+                for (int k = 0; k<pairsfinal.size(); k++){
+                    std::vector<float> interactfield(3);
+                    interactfield = dustlist[pairsfinal[k][0]].selffield(dustlist[pairsfinal[k][1]]);
+                    dustlist[pairsfinal[k][0]].selffieldmany(interactfield);
+                    dustlist[pairsfinal[k][1]].selffieldmany(Multiplyscalar(interactfield,-1,interactfield));
+                }
 			}
+
+			else if (method == 1){
+                for (int k = 0; k<pairsfinal.size(); k++){
+                    std::vector<float> interactfield(3);
+
+                    interactfield = dustlist[pairsfinal[k][0]].selffield(dustlist[pairsfinal[k][1]]);
+                    dustlist[pairsfinal[k][0]].selffieldmany(interactfield);
+                    dustlist[pairsfinal[k][0]].selffieldmany(interpolate(dustlist[pairsfinal[k][0]].getselfpos()));
+                    dustlist[pairsfinal[k][1]].selffieldmany(Multiplyscalar(interactfield,-1,interactfield));
+                    dustlist[pairsfinal[k][1]].selffieldmany(interpolate(dustlist[pairsfinal[k][1]].getselfpos()));
+                }
+			}
+
+
+
 			for (int D=0; D<dustlist.size(); D++){
 				dustlist[D].updateEuler();
 				std::vector<float> selfpos(3);
@@ -639,16 +812,29 @@ void Dust::set_values(bool SWITCH, float a, float b, float c, float d, float e, 
 	multifields = l;
 };
 
-void DustAnalysis::set_values(std::vector<Dust> a, std::vector<std::vector<int>> b, std::vector<float> inx, std::vector<float> iny, std::vector<float> inz, std::vector<float> c, std::vector<float> y ,std::vector<float> z,float d, int f, int g, int h){
+void DustAnalysis::set_values(std::vector<Dust> a, std::vector<std::vector<int>> b,std::vector<std::vector<float>> cer,std::vector<std::vector<float>> cez,std::vector<std::vector<float>> cgr,std::vector<std::vector<float>> cgz, std::vector<float> inx, std::vector<float> iny, std::vector<float> inz, std::vector<float> c, std::vector<float> y ,std::vector<float> z, std::vector<float> Evalr, std::vector<float> Evalz, std::vector<float> Gridr, std::vector<float> Gridz,float d, float Firstpoint, float Rmax, float Sheathsep, float Sephor1, float Sephor2, int f, int g, int h){
 	dustlist = a;
 	pairs = b;
+	changeevalsr = cer;
+	changeevalsz = cez;
+	changegridr = cgr;
+	changegridz = cgz;
 	initx = inx;
 	inity = iny;
 	initz = inz;
 	positionsx = c;
 	positionsy = y;
 	positionsz = z;
+	evalr = Evalr;
+	evalz = Evalz;
+	gridr = Gridr;
+	gridz = Gridz;
 	t = d;
+	firstpoint = Firstpoint;
+	rmax = Rmax;
+	sheathsep = Sheathsep;
+	sephor1 = Sephor1;
+	sephor2 = Sephor2;
 	n_particles = f;
 	iterationsB = g;
 	init_iterations = h;
@@ -660,20 +846,20 @@ void DustAnalysis::set_values(std::vector<Dust> a, std::vector<std::vector<int>>
 int main(){
 	// Testing dust functions work
 
-	std::vector<Dust> dustlist(n_particles);
-
-	Dust dust0, dust1;
-	std::vector<float> positiond0(3);
-	positiond0={-3*lambdaD,0,0.0003825734};
-	std::vector<float> positiond1(3);
-	positiond1={3*lambdaD,3*lambdaD,0.0003825734};
-	std::vector<float> posd0 = positiond0;
-	std::vector<float> posd1 = positiond1;
-	std::vector<float> vel1 = {0,0,0};
-	std::vector<float> acc1 = {0,0,0};
-	std::vector<float> vel = vel1;
-	std::vector<float> acc = acc1;
-	dust0.set_values(true, md, radd, lambdaD, phia, Zd*e, OMEGATAU, posd0, vel1, acc1, positiond0, vel, acc, multifields);
+//	std::vector<Dust> dustlist(n_particles);
+//
+//	Dust dust0, dust1;
+//	std::vector<float> positiond0(3);
+//	positiond0={-3*lambdaD,0,0.0003825734};
+//	std::vector<float> positiond1(3);
+//	positiond1={3*lambdaD,3*lambdaD,0.0003825734};
+//	std::vector<float> posd0 = positiond0;
+//	std::vector<float> posd1 = positiond1;
+//	std::vector<float> vel1 = {0,0,0};
+//	std::vector<float> acc1 = {0,0,0};
+//	std::vector<float> vel = vel1;
+//	std::vector<float> acc = acc1;
+//	dust0.set_values(true, md, radd, lambdaD, phia, Zd*e, OMEGATAU, posd0, vel1, acc1, positiond0, vel, acc, multifields);
 	// dust1.set_values(true, md, radd, lambdaD, phia, Zd, OMEGATAU, posd1, vel1, acc1, positiond1, vel, acc, multifields);
 	// std::vector<float> test(3);
 	// std::vector<float> testB(3);

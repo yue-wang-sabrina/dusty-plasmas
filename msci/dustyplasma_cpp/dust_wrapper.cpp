@@ -1,10 +1,10 @@
 #include <iostream>
 #include <vector>
+#include <string>
 #include "dust.cpp"
 
-
-extern "C" void simulate (int init_iterationsInput, int iterationsBInput, int numParticles, double *x, double *y, double *z, double *output, double *output2, double *output3) {
-
+extern "C" void simulate (int meth, int init_iterationsInput, int iterationsBInput, int numParticles, double *x, double *y, double *z, double* gr, double * gz, double * evalr, double * evalz, float maxr, float sheathsep, float sephor1, float sephor2, float pointone, double *output, double *output2, double *output3) {
+    METH = meth;
     iterationsB = iterationsBInput;
     init_iterations = init_iterationsInput;
     n_particles = numParticles;
@@ -39,12 +39,25 @@ extern "C" void simulate (int init_iterationsInput, int iterationsBInput, int nu
 	std::vector<float> initpositionsy(y, y + arrlen);
 	std::vector<float> initpositionsz(z, z + arrlen);
 
-	analysis.set_values(dustlist, pairs, initpositionsx, initpositionsy, initpositionsz, positionx, positiony, positionz,t, n_particles, iterationsB, init_iterations);
+    RMAX = maxr;
+    SEPARATIONSHEATH = sheathsep;
+    SEPARATIONHOR1 =sephor1;
+    SEPARATIONHOR2 = sephor2;
+    FIRSTPOINT = pointone;
+
+    int flattenlen = int(15*126);
+    std::vector<float> GRIDR(gr, gr + flattenlen);
+    std::vector<float> GRIDZ(gz, gz + flattenlen);
+    std::vector<float> EVALSR(evalr, evalr + flattenlen);
+    std::vector<float> EVALSZ(evalz, evalz + flattenlen);
+
+	analysis.set_values(dustlist, pairs, newEVALSr, newEVALSz, newGRIDr, newGRIDz, initpositionsx, initpositionsy, initpositionsz, positionx, positiony, positionz,EVALSR, EVALSZ, GRIDR, GRIDZ, t, FIRSTPOINT, RMAX, SEPARATIONSHEATH, SEPARATIONHOR1, SEPARATIONHOR2, n_particles, iterationsB, init_iterations);
+	analysis.changefieldshape();
 	analysis.create_particles();
 	std::vector<Dust> testname(n_particles);
 	testname = analysis.getdustnames();
 	analysis.create_pairs();
-	analysis.interact_and_iterate();
+	analysis.interact_and_iterate(METH);
 
     // Output
 	std::vector<float> xpos;

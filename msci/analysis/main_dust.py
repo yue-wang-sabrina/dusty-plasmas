@@ -44,15 +44,17 @@ elif METHOD == "DROP":
 
 elif METHOD == "CPP":
     particlenum = 10;
-    itB=10000
+    itB=1000
     initit = 200
-    beffect2 = dcpp.DustAnalysisCpp(initit, itB, particlenum)
+    beffect2 = dcpp.DustAnalysisCpp(initit, itB, particlenum, 1)
+
+    beffect2.get_modified_field()
     beffect2.get_equilibrium_positions()
     beffect2.run()
     beffect1.numparticles = particlenum
     beffect1.iterationsB = itB
     beffect1.init_iterations = initit
-    beffect1.method = "NoGibs"
+    beffect1.method = "Gibs"
     beffect1.position=[[i,j,k] for i,j,k in zip(beffect2.positions_x,beffect2.positions_y,beffect2.positions_z)]
     beffect1.position_array = numpy.array(beffect1.position)
     beffect1.sort_positions_of_particles()
