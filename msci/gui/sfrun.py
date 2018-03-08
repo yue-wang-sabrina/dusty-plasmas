@@ -126,27 +126,35 @@ class SFGui(Ui_Dialog):  # Setting up/Connecting the gui buttons and connecting 
         self.method = 'NoGibs'
         self.Biterations = 0;
 
-    # def addInputTextToListbox(self):  # Add user input
-    #     txt = self.myTextInput.text()
+    def addInputTextToListbox(self):  # Add user input
+        txt = self.myTextInput.text()
+        self.listWidget.addItem(txt)
+
     def Bfield(self):
         if self.checkBox.isChecked():
             self.Bswitch = True
+            self.listWidget.addItem("B field is on")
         else:
             self.Bswitch = False
+            self.listWidget.addItem("B field is off")
 
     def Gfield(self):
         if self.checkBox_2.isChecked():
             self.Gibs = True
+            self.listWidget.addItem("Gibson field is on")
         else:
             self.Gibs = False
+            self.listWidget.addItem("Gibson field is on")
 
     def simtime(self):
         text2, ok2 = QInputDialog.getText(dialog, 'User Input', 'Enter simulation time in seconds')
         self.time = float(text2.split()[0])
+        self.listWidget.addItem("Simulation time = {}s".format(self.time))
 
     def particlenumber(self):
         text, ok = QInputDialog.getText(dialog, 'User Input', 'Enter particle number')
         self.particlenumber = int(text.split()[0])
+        self.listWidget.addItem("Number of particles = {}".format(self.particlenumber))
 
     def runfromequil(self):
         self.Bfield()
@@ -233,6 +241,7 @@ class SFGui(Ui_Dialog):  # Setting up/Connecting the gui buttons and connecting 
 
     def resetall(self):
         self.graph.clearall()
+        self.listWidget.clear()
 
 
 if __name__ == '__main__':
