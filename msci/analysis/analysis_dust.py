@@ -211,7 +211,7 @@ class BEffectsAnalysis:
             MASSDUST = self.dustdict['g0'].m
             dustwanted = self.dustdict[list(self.dustdict.keys())[-1]]
             self.vxbforces.append(MASSDUST*dustwanted.vxBforce())
-            self.hybridforces.append(MASSDUST*dustwanted.EXBacchybrid(B=dustwanted.dipoleB(const.dipolepos),method='factor'))
+            self.hybridforces.append(MASSDUST*dustwanted.EXBacchybrid(B=dustwanted.dipoleB(const.dipolepos),method='factor',combinedrifts=True))
             self.radialEforces.append(MASSDUST*dustwanted.radialfield())
             self.combinedriftvel.append(dustwanted.combinedrift(B=dustwanted.dipoleB(r=const.dipolepos)))
             self.exbdriftvel.append(dustwanted.EXBDRIFT(B=dustwanted.dipoleB(r=const.dipolepos)))

@@ -90,7 +90,7 @@ elif METHOD == "comparevxbwithotherdrifts":
         return numpy.sqrt(x[0]**2+x[1]**2+x[2]**2)
 
     beffect1.create_particles(
-        numparticles=300,
+        numparticles=100,
         initpositions=generate_particle_equilibrium_positions()
     )
     beffect1.create_pairs()
@@ -102,23 +102,23 @@ elif METHOD == "comparevxbwithotherdrifts":
     )
     beffect1.sort_positions_of_particles()
     dustplots.pplot(beffect1)
-    # vxbforcelist = []
-    # positions = []
-    # velocities = []
-    # radialfield=[]
-    # cross = []
-    # Bfield=[]
-    # driftforcelist = []
-    #
-    # for i in beffect1.dustdict:
-    #     positions.append(numpy.sqrt(beffect1.dustdict[i].pos[0]**2+beffect1.dustdict[i].pos[1]**2))
-    #     velocities.append(norm(beffect1.dustdict[i].vel))
-    #     radialfield.append(norm(beffect1.dustdict[i].radialfield()))
-    #     normB=norm(beffect1.dustdict[i].dipoleB(const.dipolepos))
-    #     Bfield.append(beffect1.dustdict[i].dipoleB(const.dipolepos)[2])
-    #     cross.append(norm(numpy.cross(beffect1.dustdict[i].radialfield(),beffect1.dustdict[i].dipoleB(const.dipolepos))/normB**2))
-    #     vxbforcelist.append(norm(beffect1.dustdict[i].vxBforce()))
-    #     driftforcelist.append(norm(beffect1.dustdict[i].EXBacchybrid(B=beffect1.dustdict[i].dipoleB(const.dipolepos),combinedrifts=True)))
+    vxbforcelist = []
+    positions = []
+    velocities = []
+    radialfield=[]
+    cross = []
+    Bfield=[]
+    driftforcelist = []
+
+    for i in beffect1.dustdict:
+        positions.append(numpy.sqrt(beffect1.dustdict[i].pos[0]**2+beffect1.dustdict[i].pos[1]**2))
+        velocities.append(norm(beffect1.dustdict[i].vel))
+        radialfield.append(norm(beffect1.dustdict[i].radialfield()))
+        normB=norm(beffect1.dustdict[i].dipoleB(const.dipolepos))
+        Bfield.append(beffect1.dustdict[i].dipoleB(const.dipolepos)[2])
+        cross.append(norm(numpy.cross(beffect1.dustdict[i].radialfield(),beffect1.dustdict[i].dipoleB(const.dipolepos))/normB**2))
+        vxbforcelist.append(norm(beffect1.dustdict[i].vxBforce()))
+        driftforcelist.append(norm(beffect1.dustdict[i].EXBacchybrid(B=beffect1.dustdict[i].dipoleB(const.dipolepos),combinedrifts=True)))
     # plt.plot(positions,driftforcelist,'bo',label='driftforce')
     # plt.plot(positions,vxbforcelist,'ro',label='vxB force')
     # plt.xlabel("r (m)")
