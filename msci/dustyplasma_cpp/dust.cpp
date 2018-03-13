@@ -325,16 +325,16 @@ class Dust{
 
             }
             else{
-            	if (pos[0]>float(0) and pos[1]>float(0)){
+            	if (pos[0]>float(0) && pos[1]>float(0)){
             		theta = atan(pos[1]/pos[0]);
             	}
-            	else if (pos[0]>float(0) and pos[1]<float(0)){
+            	else if (pos[0]>float(0) && pos[1]<float(0)){
             		theta = 2*PI - atan(abs(pos[1] /pos[0]));
             	}
-            	else if (pos[0]<float(0) and pos[1]>float(0)){
+            	else if (pos[0]<float(0) && pos[1]>float(0)){
             		theta = PI - atan(abs(pos[1] / pos[0]));
             	}
-            	else if (pos[0]<float(0) and pos[1]<float(0)){
+            	else if (pos[0]<float(0) && pos[1]<float(0)){
                     theta = PI + atan(abs(pos[1] / pos[0]));
             	}
             	else{

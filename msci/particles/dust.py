@@ -203,35 +203,64 @@ class Dust:
             vT = numpy.sqrt(const.kb * const.Ti / const.mi)  # Thermal speed ions
             E = self.radialfield()  # +self.sheathfield()
             vdrift = numpy.cross(E, numpy.array(B)) / (magB ** 2)  # vdrift for constant vertical B field
+            omega = abs(const.e * magB / const.mi)  # Ion cyclotron frequency
+            tau = 0.01 / omega  # ion-neutral collision time
+            theta = 0;
+            if abs(self.pos[0]) == 0.:
+                if self.pos[1]>0.:
+                    theta = math.pi/2
+                elif self.pos[1] < 0.:
+                    theta = 3*math.pi/2
+                else:
+                    print("1Problem with theta calculation EXB drift")
+            elif abs(self.pos[1]) == 0.:
+                if self.pos[0] > 0:
+                    theta = 0
+                elif self.pos[0] < 0:
+                    theta = math.pi
+                else:
+                    print("2Problem with theta calculation EXB drift")
+            else:
+                if self.pos[0] > 0. and self.pos[1] > 0.:
+                    theta = numpy.arctan(self.pos[1]/self.pos[0])
+                elif self.pos[0]>0. and self.pos[1] < 0.:
+                    theta = 2*math.pi - numpy.arctan(abs(self.pos[1] /self.pos[0]))
+                elif self.pos[0] < 0. and self.pos[1] > 0.:
+                    theta = math.pi - numpy.arctan(abs(self.pos[1]/self.pos[0]))
+                elif self.pos[0] < 0. and self.pos[1] < 0:
+                    theta = math.pi + numpy.arctan(abs(self.pos[1]/self.pos[0]))
+                else:
+                    print("3Problem with theta calculation EXB drift")
 
             # Ion-neutral collision change to vdrift
             if method == 'factor':
-                omega = abs(const.e * magB / const.mi)  # Ion cyclotron frequency
-                tau = 0.005 / omega  # ion-neutral collision time
                 vdrift[0] *= (omega * tau) ** 2 / (1 + (omega * tau) ** 2)  # neglect v_r component
                 vdrift[1] *= (omega * tau) ** 2 / (1 + (omega * tau) ** 2)
                 vdrift[2] *= (omega * tau) ** 2 / (1 + (omega * tau) ** 2)
 
             # Ion-neutral collision drift velocity new D.D. Millar 1976
             elif method == 'derivation':
-                omega = abs(const.e * magB / const.mi)
-                tau = 0.05 / omega
+                # omega = abs(const.e * magB / const.mi)
+                # tau = 0.05 / omega
                 Br = numpy.sqrt(B[0] ** 2 + B[1] ** 2)
                 Er = numpy.sqrt(E[0] ** 2 + E[1] ** 2)
-                k = ((const.e / const.mi) ** 2) * (B[2] * Er - Br * E[2])
-                p = Er - B[2] * k / omega ** 2
-                s = E[2] + Br * k / omega ** 2
-                drift0 = (-k / (omega ** 2 + 1. / tau ** 2))
-                drift1 = (const.e / (tau ** 2 * const.mi)) * (
-                    tau ** 3 * p - (B[2] * k / omega ** 4) * (-tau ** 3 * omega ** 2 / (1 + tau ** 2 * omega ** 2)))
-                drift2 = (const.e / (tau ** 2 * const.mi)) * (
-                    tau ** 3 * s + (Br * k / omega ** 4) * (-tau ** 3 * omega ** 3 / (1 + tau ** 2 * omega ** 2)))
+                # k = ((const.e / const.mi) ** 2) * (B[2] * Er - Br * E[2])
+                # p = Er - B[2] * k / omega ** 2
+                # s = E[2] + Br * k / omega ** 2
+                # drift0 = (-k / (omega ** 2 + 1. / tau ** 2))
+                # drift1 = (const.e / (tau ** 2 * const.mi)) * (
+                #     tau ** 3 * p - (B[2] * k / omega ** 4) * (-tau ** 3 * omega ** 2 / (1 + tau ** 2 * omega ** 2)))
+                # drift2 = (const.e / (tau ** 2 * const.mi)) * (
+                #     tau ** 3 * s + (Br * k / omega ** 4) * (-tau ** 3 * omega ** 3 / (1 + tau ** 2 * omega ** 2)))
+                #
+                # r = numpy.sqrt(self.pos[0] ** 2 + self.pos[1] ** 2)
+                # theta = numpy.arctan(self.pos[2] / self.pos[0])
+                # vdrift[0] = abs(drift1 * r * numpy.sin(theta)) * numpy.sign(vdrift[0])
+                # vdrift[1] = abs(drift1 * r * numpy.cos(theta)) * numpy.sign(vdrift[1])
 
-                r = numpy.sqrt(self.pos[0] ** 2 + self.pos[1] ** 2)
-                theta = numpy.arctan(self.pos[2] / self.pos[0])
-                vdrift[0] = abs(drift1 * r * numpy.sin(theta)) * numpy.sign(vdrift[0])
-                vdrift[1] = abs(drift1 * r * numpy.cos(theta)) * numpy.sign(vdrift[1])
-
+                Factor = (const.e * tau**2 / const.mi**2 * (1 + (omega*tau)**2)) * (Er * B[2] - E[2] * Br)
+                vdrift[0] = Factor * -1 * numpy.sin(theta)
+                vdrift[1] = Factor * numpy.cos(theta)
             else:
                 raise Exception('Method does not exist!')
 
@@ -272,7 +301,7 @@ class Dust:
             machmag = numpy.sqrt(mach[0] ** 2 + mach[1] ** 2 + mach[2] ** 2)
 
             LAMBDA = numpy.sqrt(1. / (numpy.exp(-machmag ** 2 / 2.) * const.lambdadi ** (-2) + const.lambdade ** (-2)))
-            beta = abs(Zd * const.e ** 2 / (LAMBDA * const.Ti * const.kb))
+            beta = abs(const.Zd * const.e ** 2 / (LAMBDA * const.Ti * const.kb))
             if machmag <= 1 and beta <= 13:
                 coloumblog = 5.
                 force = abs((1. / 3.) * numpy.sqrt(2. / math.pi) * (beta ** 2) * coloumblog) * mach
@@ -321,12 +350,14 @@ class Dust:
         else:
             return numpy.array([0, 0, 0])  # raise ValueError("Dust particle is not in sheath")
 
-    def EXBacchybrid(self, B=[0, 0, 0.014], machmag=0., method='factor'):
+    def EXBacchybrid(self, B=[0, 0, 0.014], machmag=0., method='factor',combinedrifts=False):
         if self.pos[2] < const.sheathd and self.Bswitch:
             magB = numpy.sqrt(B[0] ** 2 + B[1] ** 2 + B[2] ** 2)
             vT = numpy.sqrt(const.kb * const.Ti / const.mi)  # Thermal speed ions
             vdrift = numpy.cross(self.radialfield() + self.sheathfield(), numpy.array(B)) / (
                 magB ** 2)  # vdrift for constant vertical B field
+            if combinedrifts:
+                vdrift = vdrift + numpy.array(self.combinedrift(B))
             E = self.radialfield() + self.sheathfield()
             r = numpy.sqrt(self.pos[0] ** 2 + self.pos[1] ** 2)
             if abs(self.pos[0]) == 0.:
@@ -354,7 +385,7 @@ class Dust:
             # Just blindly multiplying by factor
             if method == 'factor':
                 omega = abs(const.e * magB / const.mi)
-                tau = 0.01 / omega
+                tau = 0.01 / abs(const.e * 0.014/const.mi)
                 vdrift[0] = vdrift[0] * (omega * tau) ** 2 / (
                     1 + (omega * tau) ** 2) # Multiplication by factor just to make simulation faster
                 vdrift[1] = vdrift[1]*(omega * tau) ** 2 / (1 + (omega * tau) ** 2)
@@ -463,19 +494,51 @@ class Dust:
             vpa = vperp * numpy.sqrt(1. / 2.)
             rL = const.mi * vperp / (const.e * magB)
             r = numpy.sqrt(self.pos[0] ** 2 + self.pos[1] ** 2 + self.pos[2] ** 2)
-            theta = numpy.arctan(self.pos[1] / self.pos[0])
-            gradB = (
-                        -3. * const.mu0 * numpy.sqrt(9 * self.pos[2] ** 2 + const.magBmom ** 2) / (
-                            4 * math.pi * r ** 4)) * numpy.array(
-                [numpy.cos(theta), numpy.sin(theta), 0.]) \
-                    + (const.mu0 * 18 * self.pos[2] / (
-                8 * math.pi * r ** 3 * numpy.sqrt(9 * self.pos[2] ** 2 + const.magBmom ** 2))) * numpy.array([0, 0, 1])
+            rplane = numpy.sqrt(self.pos[0] ** 2 + self.pos[1] ** 2)
+            if abs(self.pos[0]) == 0.:
+                if self.pos[1] > 0:
+                    theta = math.pi/2
+                elif self.pos[1]<0:
+                    theta = 3*math.pi/2
+                else:
+                    print("Error in finding theta")
+            elif abs(self.pos[1]) == 0:
+                if self.pos[0] >0:
+                    theta = 0
+                elif self.pos[0]<0:
+                    theta =math.pi
+            else:
+                if self.pos[0] >0 and self.pos[1] >0:
+                    theta = numpy.arctan(self.pos[1] / self.pos[0])
+                elif self.pos[0]>0 and self.pos[1]<0:
+                    theta = 2*math.pi - numpy.arctan(abs(self.pos[1] / self.pos[0]))
+                elif self.pos[0]<0 and self.pos[1]>0:
+                    theta = math.pi - numpy.arctan(abs(self.pos[1] / self.pos[0]))
+                elif self.pos[0]<0 and self.pos[1] <0:
+                    theta = math.pi + numpy.arctan(abs(self.pos[1] / self.pos[0]))
+            tempz = const.dipolepos[2] + self.pos[2]
+            mess = numpy.sqrt(10*const.magBmom**2*r**2 - 6*const.magBmom**2*tempz*r)
+            gradB = (const.mu0/(4*math.pi)) * ( mess * (-4*rplane/r**6) + (1./r**4)*(1./mess)*(10*const.magBmom**2*rplane -3*tempz*rplane*const.magBmom**2/r)) * numpy.array(
+                [numpy.cos(theta), numpy.sin(theta), 0.])\
+                    + (const.mu0/(4*math.pi)) * ( mess * (-4*tempz/r**6) + (1./r**4)*(1./mess)*(10*const.magBmom**2*tempz - 3*const.magBmom**2*r-3*tempz**2*const.magBmom**2/r)) * numpy.array([0, 0, 1])
             totaldrift = (numpy.cross(B, gradB) / (magB ** 2)) * (const.mi / (const.e * magB)) * (
                 vpa ** 2 + 0.5 * vperp ** 2)
-            # return totaldrift
             return totaldrift
         else:
             return numpy.array([0, 0, 0])
+
+    def EXBDRIFT(self,B):
+        if self.pos[2] < const.sheathd and self.Bswitch:
+            magB = numpy.sqrt(B[0] ** 2 + B[1] ** 2 + B[2] ** 2)
+            vdrift = numpy.cross(self.radialfield() + self.sheathfield(), numpy.array(B)) / (
+                magB ** 2)  # vdrift for constant vertical B field
+            return vdrift
+        else:
+            return numpy.array([0,0,0])
+
+    def vxBforce(self):
+        force = self.charge*numpy.cross(self.dipoleB(const.dipolepos),self.vel)
+        return force
 
     def dipoleB(self, r):
         if self.pos[2] < const.sheathd and self.Bswitch:

@@ -25,6 +25,12 @@ class BEffectsAnalysis:
         self.modified_b_field = {}
         self.const = const
         self.tindex = 0;
+        self.vxbforces=[]
+        self.hybridforces=[]
+        self.radialEforces=[]
+        self.intergrainforces=[]
+        self.combinedriftvel=[]
+        self.exbdriftvel=[]
 
     def create_particles(self, numparticles, initpositions):
         # Create dictionary of particles from pickle object
@@ -189,7 +195,7 @@ class BEffectsAnalysis:
                 if self.dustdict[b[0]].intergraind(self.dustdict[b[1]]):
                     pairsfinal.append(b)
                 else:
-                    pass  # pairsfinal.append(b)
+                    pass
             for j in pairsfinal:
                 interactfield = self.dustdict[j[0]].selffield(self.dustdict[j[1]])
                 self.dustdict[j[0]].selffieldmany(interactfield)
@@ -202,6 +208,14 @@ class BEffectsAnalysis:
             self.dustdict[l].Bswitch = True
 
         for i in tqdm(numpy.arange(iterationsB)):
+            MASSDUST = self.dustdict['g0'].m
+            dustwanted = self.dustdict[list(self.dustdict.keys())[-1]]
+            self.vxbforces.append(MASSDUST*dustwanted.vxBforce())
+            self.hybridforces.append(MASSDUST*dustwanted.EXBacchybrid(B=dustwanted.dipoleB(const.dipolepos),method='factor'))
+            self.radialEforces.append(MASSDUST*dustwanted.radialfield())
+            self.combinedriftvel.append(dustwanted.combinedrift(B=dustwanted.dipoleB(r=const.dipolepos)))
+            self.exbdriftvel.append(dustwanted.EXBDRIFT(B=dustwanted.dipoleB(r=const.dipolepos)))
+
             pairsfinal = []
             for b in self.pairs:
                 if self.dustdict[b[0]].intergraind(self.dustdict[b[1]]):
@@ -213,6 +227,9 @@ class BEffectsAnalysis:
                 interactfield = self.dustdict[j[0]].selffield(self.dustdict[j[1]])
                 self.dustdict[j[0]].selffieldmany(interactfield)
                 self.dustdict[j[1]].selffieldmany(-interactfield)
+
+            self.intergrainforces.append(MASSDUST*numpy.array(dustwanted.multifields))
+
             for k in self.dustdict:
                 if method == 'NoGibs':
                     self.dustdict[k].steptest(numpy.array(self.dustdict[k].multifields))

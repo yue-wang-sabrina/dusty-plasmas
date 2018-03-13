@@ -5,33 +5,35 @@ from msci.analysis.analysis_dust import BEffectsAnalysis
 from msci.utils.utils import generate_particle_equilibrium_positions, prepare_modified_b_field
 from msci.plots import dustplots
 import msci.dustyplasma_cpp.dustcpp_wrapper as dcpp
-
+import matplotlib.pyplot as plt
 from IPython import get_ipython
-
+import msci.analysis.constants as const
+import math
 ipython = get_ipython()
 ipython.magic('load_ext autoreload')
 ipython.magic('autoreload 2')
 
 beffect1 = BEffectsAnalysis()
 
-METHOD = "CPP"  # "ALLATONCE" OR "DROP"
+METHOD = "comparevxbwithotherdrifts"
 
-if METHOD == "ALLATONCE":
+if METHOD == "ALLATONCE": #Drop all particles at once
     beffect1.create_particles(
-        numparticles=10,
+        numparticles=200,
         initpositions=generate_particle_equilibrium_positions()
     )
     beffect1.create_pairs()
     beffect1.interact_and_iterate(
-        iterationsB=1000,
-        init_iterations=500,
+        iterationsB=2000,
+        init_iterations=100,
         method='Gibs',
         modified_b_field=prepare_modified_b_field()
     )
     beffect1.sort_positions_of_particles()
     dustplots.pplot(beffect1)
 
-elif METHOD == "DROP":
+
+elif METHOD == "DROP": #Drop 1 by 1
     beffect1.numparticles = 10
     beffect1.interact_and_iterate_drop_method(
         iterationsB=500,
@@ -42,7 +44,7 @@ elif METHOD == "DROP":
     dustplots.pplot(beffect1)
 
 
-elif METHOD == "CPP":
+elif METHOD == "CPP": #Use C++ to iterate
     particlenum = 10;
     itB=1000
     initit = 200
@@ -60,3 +62,69 @@ elif METHOD == "CPP":
     beffect1.sort_positions_of_particles()
     beffect1.modified_b_field=prepare_modified_b_field()
     dustplots.pplot(beffect1)
+
+elif METHOD == "Finddriftvelocities":
+    from msci.particles.dust import Dust
+    positions = numpy.arange(const.lambdaD, 200*const.lambdaD, 3*const.lambdaD)
+    magcombinevel = []
+    magexbvel =[]
+    def norm(x):
+        return numpy.sqrt(x[0]**2+x[1]**2+x[2]**2)
+
+    for i in positions:
+        g0 = Dust(const.md, const.radd, const.lambdaD, const.phia, const.Zd * const.e, [0, 0, 0], [0, 0, 0],[0, 0, 0])
+        g0.Bswitch = True
+        g0.pos = [i,0,0.0003825734]
+        magcombinevel.append(norm(g0.combinedrift(B=g0.dipoleB(r=const.dipolepos))))
+        magexbvel.append(norm(g0.EXBDRIFT(B=g0.dipoleB(r=const.dipolepos))))
+
+    plt.plot(positions,magcombinevel,'r-',label='combine drifts')
+    plt.plot(positions,magexbvel,'b-', label='ExB drifts')
+    plt.xlabel("r (m)")
+    plt.ylabel(r'$v_{drift}$ (m/s)')
+    plt.legend()
+    plt.show()
+
+elif METHOD == "comparevxbwithotherdrifts":
+    def norm(x):
+        return numpy.sqrt(x[0]**2+x[1]**2+x[2]**2)
+
+    beffect1.create_particles(
+        numparticles=300,
+        initpositions=generate_particle_equilibrium_positions()
+    )
+    beffect1.create_pairs()
+    beffect1.interact_and_iterate(
+        iterationsB=1000,
+        init_iterations=100,
+        method='NoGibs',
+        modified_b_field=prepare_modified_b_field()
+    )
+    beffect1.sort_positions_of_particles()
+    dustplots.pplot(beffect1)
+    # vxbforcelist = []
+    # positions = []
+    # velocities = []
+    # radialfield=[]
+    # cross = []
+    # Bfield=[]
+    # driftforcelist = []
+    #
+    # for i in beffect1.dustdict:
+    #     positions.append(numpy.sqrt(beffect1.dustdict[i].pos[0]**2+beffect1.dustdict[i].pos[1]**2))
+    #     velocities.append(norm(beffect1.dustdict[i].vel))
+    #     radialfield.append(norm(beffect1.dustdict[i].radialfield()))
+    #     normB=norm(beffect1.dustdict[i].dipoleB(const.dipolepos))
+    #     Bfield.append(beffect1.dustdict[i].dipoleB(const.dipolepos)[2])
+    #     cross.append(norm(numpy.cross(beffect1.dustdict[i].radialfield(),beffect1.dustdict[i].dipoleB(const.dipolepos))/normB**2))
+    #     vxbforcelist.append(norm(beffect1.dustdict[i].vxBforce()))
+    #     driftforcelist.append(norm(beffect1.dustdict[i].EXBacchybrid(B=beffect1.dustdict[i].dipoleB(const.dipolepos),combinedrifts=True)))
+    # plt.plot(positions,driftforcelist,'bo',label='driftforce')
+    # plt.plot(positions,vxbforcelist,'ro',label='vxB force')
+    # plt.xlabel("r (m)")
+    # plt.ylabel("Force (N)")
+    # plt.legend()
+    # plt.show()
+
+
+
