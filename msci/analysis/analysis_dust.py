@@ -5,13 +5,15 @@ import pandas as pd
 
 from tqdm import tqdm
 
-import msci.analysis.constants as const
 from msci.particles.dust import Dust
 from msci.utils.interpolate import interpolate
 
 
 class BEffectsAnalysis:
-    def __init__(self):
+    def __init__(self, const):
+
+        self.const = const
+
         self.dustdict = None
         self.pairs = None
         self.position = []
@@ -23,8 +25,7 @@ class BEffectsAnalysis:
         self.init_iterations = None
         self.position_array = None
         self.modified_b_field = {}
-        self.const = const
-        self.tindex = 0;
+        self.tindex = 0
         self.vxbforces=[]
         self.hybridforces=[]
         self.radialEforces=[]
@@ -42,7 +43,7 @@ class BEffectsAnalysis:
             names.append('g%s' % int_name)
 
         self.dustdict = {
-            name: Dust(const.md, const.radd, const.lambdaD, const.phia, const.Zd * const.e, [0, 0, 0], [0, 0, 0],
+            name: Dust(self.const, self.const.md, self.const.radd, self.const.lambdaD, self.const.phia, self.const.Zd * self.const.e, [0, 0, 0], [0, 0, 0],
                        [0, 0, 0])
             for name in names
             }
@@ -124,12 +125,12 @@ class BEffectsAnalysis:
 
         self.dustdict.update({
             names[nameindex]: Dust(
-                const.md, const.radd, const.lambdaD, const.phia,
-                const.Zd * const.e,
+                self.const.md, self.const.radd, self.const.lambdaD, self.const.phia,
+                self.const.Zd * self.const.e,
                 [
-                    const.lambdaD * numpy.random.randint(-50, 50),
-                    const.lambdaD * numpy.random.randint(-50, 50),
-                    const.boxz
+                    self.const.lambdaD * numpy.random.randint(-50, 50),
+                    self.const.lambdaD * numpy.random.randint(-50, 50),
+                    self.const.boxz
                 ], [0, 0, 0], [0, 0, 0])
         })
 
@@ -137,12 +138,12 @@ class BEffectsAnalysis:
 
         self.dustdict.update({
             names[nameindex]: Dust(
-                const.md, const.radd, const.lambdaD, const.phia,
-                const.Zd * const.e,
+                self.const.md, self.const.radd, self.const.lambdaD, self.const.phia,
+                self.const.Zd * self.const.e,
                 [
-                    const.lambdaD * numpy.random.randint(-50, 50),
-                    const.lambdaD * numpy.random.randint(-50, 50),
-                    const.boxz
+                    self.const.lambdaD * numpy.random.randint(-50, 50),
+                    self.const.lambdaD * numpy.random.randint(-50, 50),
+                    self.const.boxz
                 ], [0, 0, 0], [0, 0, 0])
         })
 
@@ -152,12 +153,12 @@ class BEffectsAnalysis:
             if i % 10 == 0 and nameindex <= self.numparticles - 1:
                 self.dustdict.update({
                     names[nameindex]: Dust(
-                        const.md, const.radd, const.lambdaD, const.phia,
-                        const.Zd * const.e,
+                        self.const.md, self.const.radd, self.const.lambdaD, self.const.phia,
+                        self.const.Zd * self.const.e,
                         [
-                            const.lambdaD * numpy.random.randint(-50, 50),
-                            const.lambdaD * numpy.random.randint(-50, 50),
-                            const.boxz
+                            self.const.lambdaD * numpy.random.randint(-50, 50),
+                            self.const.lambdaD * numpy.random.randint(-50, 50),
+                            self.const.boxz
                         ],[0, 0, 0], [0, 0, 0])
                 })
                 nameindex += 1
@@ -183,7 +184,7 @@ class BEffectsAnalysis:
             "z": self.position_array[:, 2]
         })
 
-    def interact_and_iterate(self, iterationsB, init_iterations, method='Gibs', modified_b_field=None):
+    def interact_and_iterate(self, iterationsB, init_iterations, method='Gibs', modified_b_field=None,combinedrifts=False):
         # Interact and iterate non-drop method
         self.iterationsB = iterationsB
         self.init_iterations = init_iterations
@@ -208,13 +209,13 @@ class BEffectsAnalysis:
             self.dustdict[l].Bswitch = True
 
         for i in tqdm(numpy.arange(iterationsB)):
-            MASSDUST = self.dustdict['g0'].m
+            MASSDUST = self.const.md
             dustwanted = self.dustdict[list(self.dustdict.keys())[-1]]
             self.vxbforces.append(MASSDUST*dustwanted.vxBforce())
-            self.hybridforces.append(MASSDUST*dustwanted.EXBacchybrid(B=dustwanted.dipoleB(const.dipolepos),method='factor',combinedrifts=True))
+            self.hybridforces.append(MASSDUST*dustwanted.EXBacchybrid(B=dustwanted.dipoleB(self.const.dipolepos),method='factor',combinedrifts=combinedrifts))
             self.radialEforces.append(MASSDUST*dustwanted.radialfield())
-            self.combinedriftvel.append(dustwanted.combinedrift(B=dustwanted.dipoleB(r=const.dipolepos)))
-            self.exbdriftvel.append(dustwanted.EXBDRIFT(B=dustwanted.dipoleB(r=const.dipolepos)))
+            self.combinedriftvel.append(dustwanted.combinedrift(B=dustwanted.dipoleB(r=self.const.dipolepos)))
+            self.exbdriftvel.append(dustwanted.EXBDRIFT(B=dustwanted.dipoleB(r=self.const.dipolepos)))
 
             pairsfinal = []
             for b in self.pairs:

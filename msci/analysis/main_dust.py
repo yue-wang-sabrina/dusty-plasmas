@@ -9,15 +9,16 @@ import matplotlib.pyplot as plt
 from IPython import get_ipython
 import msci.analysis.constants as const
 import math
+
 ipython = get_ipython()
 ipython.magic('load_ext autoreload')
 ipython.magic('autoreload 2')
 
-beffect1 = BEffectsAnalysis()
+beffect1 = BEffectsAnalysis(const)
 
-METHOD = "comparevxbwithotherdrifts"
+METHOD = "voidsizewrtB"
 
-if METHOD == "ALLATONCE": #Drop all particles at once
+if METHOD == "ALLATONCE":  # Drop all particles at once
     beffect1.create_particles(
         numparticles=200,
         initpositions=generate_particle_equilibrium_positions()
@@ -33,7 +34,7 @@ if METHOD == "ALLATONCE": #Drop all particles at once
     dustplots.pplot(beffect1)
 
 
-elif METHOD == "DROP": #Drop 1 by 1
+elif METHOD == "DROP":  # Drop 1 by 1
     beffect1.numparticles = 10
     beffect1.interact_and_iterate_drop_method(
         iterationsB=500,
@@ -44,9 +45,9 @@ elif METHOD == "DROP": #Drop 1 by 1
     dustplots.pplot(beffect1)
 
 
-elif METHOD == "CPP": #Use C++ to iterate
+elif METHOD == "CPP":  # Use C++ to iterate
     particlenum = 10;
-    itB=1000
+    itB = 1000
     initit = 200
     beffect2 = dcpp.DustAnalysisCpp(initit, itB, particlenum, 1)
 
@@ -57,29 +58,33 @@ elif METHOD == "CPP": #Use C++ to iterate
     beffect1.iterationsB = itB
     beffect1.init_iterations = initit
     beffect1.method = "Gibs"
-    beffect1.position=[[i,j,k] for i,j,k in zip(beffect2.positions_x,beffect2.positions_y,beffect2.positions_z)]
+    beffect1.position = [[i, j, k] for i, j, k in zip(beffect2.positions_x, beffect2.positions_y, beffect2.positions_z)]
     beffect1.position_array = numpy.array(beffect1.position)
     beffect1.sort_positions_of_particles()
-    beffect1.modified_b_field=prepare_modified_b_field()
+    beffect1.modified_b_field = prepare_modified_b_field()
     dustplots.pplot(beffect1)
 
 elif METHOD == "Finddriftvelocities":
     from msci.particles.dust import Dust
-    positions = numpy.arange(const.lambdaD, 200*const.lambdaD, 3*const.lambdaD)
+
+    positions = numpy.arange(const.lambdaD, 200 * const.lambdaD, 3 * const.lambdaD)
     magcombinevel = []
-    magexbvel =[]
+    magexbvel = []
+
+
     def norm(x):
-        return numpy.sqrt(x[0]**2+x[1]**2+x[2]**2)
+        return numpy.sqrt(x[0] ** 2 + x[1] ** 2 + x[2] ** 2)
+
 
     for i in positions:
-        g0 = Dust(const.md, const.radd, const.lambdaD, const.phia, const.Zd * const.e, [0, 0, 0], [0, 0, 0],[0, 0, 0])
+        g0 = Dust(const.md, const.radd, const.lambdaD, const.phia, const.Zd * const.e, [0, 0, 0], [0, 0, 0], [0, 0, 0])
         g0.Bswitch = True
-        g0.pos = [i,0,0.0003825734]
+        g0.pos = [i, 0, 0.0003825734]
         magcombinevel.append(norm(g0.combinedrift(B=g0.dipoleB(r=const.dipolepos))))
         magexbvel.append(norm(g0.EXBDRIFT(B=g0.dipoleB(r=const.dipolepos))))
 
-    plt.plot(positions,magcombinevel,'r-',label='combine drifts')
-    plt.plot(positions,magexbvel,'b-', label='ExB drifts')
+    plt.plot(positions, magcombinevel, 'r-', label='combine drifts')
+    plt.plot(positions, magexbvel, 'b-', label='ExB drifts')
     plt.xlabel("r (m)")
     plt.ylabel(r'$v_{drift}$ (m/s)')
     plt.legend()
@@ -87,10 +92,11 @@ elif METHOD == "Finddriftvelocities":
 
 elif METHOD == "comparevxbwithotherdrifts":
     def norm(x):
-        return numpy.sqrt(x[0]**2+x[1]**2+x[2]**2)
+        return numpy.sqrt(x[0] ** 2 + x[1] ** 2 + x[2] ** 2)
+
 
     beffect1.create_particles(
-        numparticles=100,
+        numparticles=10,
         initpositions=generate_particle_equilibrium_positions()
     )
     beffect1.create_pairs()
@@ -105,26 +111,61 @@ elif METHOD == "comparevxbwithotherdrifts":
     vxbforcelist = []
     positions = []
     velocities = []
-    radialfield=[]
+    radialfield = []
     cross = []
-    Bfield=[]
+    Bfield = []
     driftforcelist = []
 
     for i in beffect1.dustdict:
-        positions.append(numpy.sqrt(beffect1.dustdict[i].pos[0]**2+beffect1.dustdict[i].pos[1]**2))
+        positions.append(numpy.sqrt(beffect1.dustdict[i].pos[0] ** 2 + beffect1.dustdict[i].pos[1] ** 2))
         velocities.append(norm(beffect1.dustdict[i].vel))
         radialfield.append(norm(beffect1.dustdict[i].radialfield()))
-        normB=norm(beffect1.dustdict[i].dipoleB(const.dipolepos))
+        normB = norm(beffect1.dustdict[i].dipoleB(const.dipolepos))
         Bfield.append(beffect1.dustdict[i].dipoleB(const.dipolepos)[2])
-        cross.append(norm(numpy.cross(beffect1.dustdict[i].radialfield(),beffect1.dustdict[i].dipoleB(const.dipolepos))/normB**2))
+        cross.append(norm(numpy.cross(beffect1.dustdict[i].radialfield(),
+                                      beffect1.dustdict[i].dipoleB(const.dipolepos)) / normB ** 2))
         vxbforcelist.append(norm(beffect1.dustdict[i].vxBforce()))
-        driftforcelist.append(norm(beffect1.dustdict[i].EXBacchybrid(B=beffect1.dustdict[i].dipoleB(const.dipolepos),combinedrifts=True)))
-    # plt.plot(positions,driftforcelist,'bo',label='driftforce')
-    # plt.plot(positions,vxbforcelist,'ro',label='vxB force')
-    # plt.xlabel("r (m)")
-    # plt.ylabel("Force (N)")
-    # plt.legend()
-    # plt.show()
+        driftforcelist.append(norm(
+            beffect1.dustdict[i].EXBacchybrid(B=beffect1.dustdict[i].dipoleB(const.dipolepos), combinedrifts=True)))
+        # plt.plot(positions,driftforcelist,'bo',label='driftforce')
+        # plt.plot(positions,vxbforcelist,'ro',label='vxB force')
+        # plt.xlabel("r (m)")
+        # plt.ylabel("Force (N)")
+        # plt.legend()
+        # plt.show()
+elif METHOD == "voidsizewrtN":
+    lenNlist = 25
+    beffectlist = []
+    Nlist = 20 * numpy.arange(1,lenNlist)
+    voidsize = []
+
+    def norm(x):
+        return numpy.sqrt(x[0] ** 2 + x[1] ** 2 + x[2] ** 2)
+
+
+    for i in numpy.arange(len(Nlist)):
+        beffecttemp = BEffectsAnalysis(const)
+        beffecttemp.create_particles(
+            numparticles=Nlist[i],
+            initpositions=generate_particle_equilibrium_positions()
+        )
+        beffecttemp.create_pairs()
+        beffecttemp.interact_and_iterate(
+            iterationsB=500,
+            init_iterations=100,
+            method='Gibs',
+            modified_b_field=prepare_modified_b_field(),
+            combinedrifts=True
+        )
+        pos=[]
+        for j in beffecttemp.dustdict.keys():
+            dust=beffecttemp.dustdict[j]
+            pos.append(numpy.sqrt(dust.pos[0]**2+dust.pos[1]**2))
+        voidsize.append(min(pos))
+
+elif METHOD == "voidsizewrtB":
+
+
 
 
 
