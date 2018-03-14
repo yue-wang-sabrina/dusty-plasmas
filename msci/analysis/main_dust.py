@@ -164,6 +164,7 @@ elif METHOD == "voidsizewrtN":
         voidsize.append(min(pos))
 
 elif METHOD == "voidsizewrtB":
+    pass
 
 
 

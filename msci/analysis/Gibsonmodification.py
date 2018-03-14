@@ -14,7 +14,8 @@ from scipy.optimize import fsolve
 # Note pointdipoleB function has the original dipole position at -0.003m.
 
 class ModifyBFieldAnalysis:
-    def __init__(self, electrondriftpos=[const.boxr, 0, 0]):  # Position to calculate the drift in electron velocity
+    def __init__(self, constants=const, electrondriftpos=[const.boxr, 0, 0]):  # Position to calculate the drift in electron velocity
+        self.const = constants
         self.electrondriftpos = electrondriftpos
         self.rvalp0 = numpy.linalg.norm(electrondriftpos)  # the r value at which we are calculating p0
         self.B = None
@@ -323,9 +324,9 @@ class ModifyBFieldAnalysis:
         Efinal = (d3 ** 2 / dvertsq) * Ebottom + (d4 ** 2 / dvertsq) * Etop
         return Efinal, gridpoints
 
-    def savetopickle(self, security=False):
+    def savetopickle(self, name, security=False):
         if security:
-            filehandler = open(b"modifiedfieldtest.obj",
+            filehandler = open(b"modifiedfield{}.obj".format(name),
                                'wb')  ##2k particles 5.5hrs to run 2500 iterations just for settling down
             pickle.dump(self.gridr, filehandler)
             pickle.dump(self.gridz, filehandler)
@@ -337,4 +338,4 @@ class ModifyBFieldAnalysis:
             pickle.dump(self.separationhor2, filehandler)
             pickle.dump(self.firstpoint, filehandler)
             filehandler.close()
-            print("Saved modified fields to {}".format("modifiedbfieldtest.obj"))
+            print("Saved modified fields to {}".format("modifiedbfield{}.obj".format(name)))
