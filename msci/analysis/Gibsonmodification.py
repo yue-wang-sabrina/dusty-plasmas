@@ -321,8 +321,9 @@ class ModifyBFieldAnalysis:
         Efinal = (d3 ** 2 / dvertsq) * Ebottom + (d4 ** 2 / dvertsq) * Etop
         return Efinal, gridpoints
 
-    def savetopickle(self, name, security=False):
+    def savetopickle(self, name, decimals, security=False):
         if security:
+            name=format(name, '.{}f'.format(decimals))
             filehandler = open('modifiedfield%s.obj'%name,
                                'wb')  ##2k particles 5.5hrs to run 2500 iterations just for settling down
             pickle.dump(self.gridr, filehandler)

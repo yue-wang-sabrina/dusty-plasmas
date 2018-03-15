@@ -17,7 +17,7 @@ ipython.magic('autoreload 2')
 
 beffect1 = BEffectsAnalysis(const)
 
-METHOD = "test"
+METHOD = "testspecificmodifiedEfield"
 
 
 def norm(x):
@@ -171,26 +171,58 @@ elif METHOD == "voidsizewrtN":
 
 elif METHOD == "voidsizewrtB":
     beffectlist = []
-    Bmomstrength = numpy.arange(0.014, 1, 0.025)
+    Bmomstrength1 = numpy.arange(0.005, 0.019, 0.001)
+    Bmomstrength2 = numpy.arange(0.0121, 0.01660, 0.00045)
+    numberpart = 10
+    initit= 100
+    Bit=1000
+    def norm(x):
+        return numpy.sqrt(x[0] ** 2 + x[1] ** 2 + x[2] ** 2)
 
 
-    for i in numpy.arange(len(Bmomstrength[0:10])):
-        threeplaces = decimal.Decimal(10)**(-3)
-        namenumber = decimal.Decimal(Bmomstrength[i]).quantize(threeplaces)
+    for i in numpy.arange(len(Bmomstrength1)):
+        threeplaces = decimal.Decimal(10) ** (-3)
+        namenumber = decimal.Decimal(Bmomstrength1[i]).quantize(threeplaces)
         filename = 'modifiedfield{}.obj'.format(namenumber)
         beffecttemp = BEffectsAnalysis(const)
-        beffecttemp.const.Bmom = ((2 * math.pi * (0.003) ** 3) * Bmomstrength[i] / beffecttemp.const.mu0) * numpy.array(
+        beffecttemp.const.Bmom = (
+                                 (2 * math.pi * (0.003) ** 3) * Bmomstrength1[i] / beffecttemp.const.mu0) * numpy.array(
             [0, 0, 1])
         beffecttemp.const.magBmom = norm(beffecttemp.const.Bmom)
         beffecttemp.const.Bmomhat = numpy.array(beffecttemp.const.Bmom) / beffecttemp.const.magBmom
         beffecttemp.create_particles(
-            numparticles=100,
+            numparticles=numberpart,
             initpositions=generate_particle_equilibrium_positions()
         )
         beffecttemp.create_pairs()
         beffecttemp.interact_and_iterate(
-            iterationsB=1000,
-            init_iterations=100,
+            iterationsB=Bit,
+            init_iterations=initit,
+            method='Gibs',
+            modified_b_field=prepare_modified_b_field(filename),
+            combinedrifts=True
+        )
+        beffectlist.append(beffecttemp)
+
+
+
+    for i in numpy.arange(len(Bmomstrength2)):
+        namenumber = format(Bmomstrength2[i], '.{}f'.format(5))
+        filename = 'modifiedfield{}.obj'.format(namenumber)
+        beffecttemp = BEffectsAnalysis(const)
+        beffecttemp.const.Bmom = (
+                                 (2 * math.pi * (0.003) ** 3) * Bmomstrength2[i] / beffecttemp.const.mu0) * numpy.array(
+            [0, 0, 1])
+        beffecttemp.const.magBmom = norm(beffecttemp.const.Bmom)
+        beffecttemp.const.Bmomhat = numpy.array(beffecttemp.const.Bmom) / beffecttemp.const.magBmom
+        beffecttemp.create_particles(
+            numparticles=numberpart,
+            initpositions=generate_particle_equilibrium_positions()
+        )
+        beffecttemp.create_pairs()
+        beffecttemp.interact_and_iterate(
+            iterationsB=Bit,
+            init_iterations=initit,
             method='Gibs',
             modified_b_field=prepare_modified_b_field(filename),
             combinedrifts=True
@@ -200,26 +232,25 @@ elif METHOD == "voidsizewrtB":
     voidsize = []
 
     for i in beffectlist:
-        pos=[]
+        pos = []
         for j in i.dustdict.keys():
             dust = i.dustdict[j]
             pos.append(numpy.sqrt(dust.pos[0] ** 2 + dust.pos[1] ** 2))
         voidsize.append(min(pos))
 
-    figBmom, axBmom = plt.subplots(nrows=1, ncols=1, figsize=(16, 8))
+    fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(16, 8))
 
-    axBmom.plot(Bmomstrength[0:10], voidsize, 'o')
-    axBmom.set_xlabel("Magnetic moment", fontsize=15)
-    axBmom.set_ylabel("Void size (m)", fontsize=15)
-    axBmom.legend(fontsize=15);
+    ax.plot(Bmomstrength1, voidsize[0:len(Bmomstrength1)], 'bo', label='%s particles in crystal' % numberpart)
+    ax.plot(Bmomstrength2, voidsize[len(Bmomstrength1):], 'ro', label='%s particles in crystal' % numberpart)
+    ax.set_xlabel("Magnetic moment (Nm)", fontsize=15)
+    ax.set_ylabel("Void size (m)", fontsize=15)
+    ax.legend(fontsize=15)
+    fig.show()
 
-elif METHOD == "test":
-    threeplaces = decimal.Decimal(10) ** (-3)
-    Bmomstrength = numpy.arange(0.014, 1, 0.025)
-    namenumber = decimal.Decimal(Bmomstrength[2]).quantize(threeplaces)
-    filename = 'modifiedfield{}.obj'.format(namenumber)
+elif METHOD == "testspecificmodifiedEfield":
+    filename = 'modifiedfield0.011.obj'
     beffecttemp = BEffectsAnalysis(const)
-    beffecttemp.const.Bmom = ((2 * math.pi * (0.003) ** 3) * Bmomstrength[2] / beffecttemp.const.mu0) * numpy.array(
+    beffecttemp.const.Bmom = ((2 * math.pi * (0.003) ** 3) * 0.011 / beffecttemp.const.mu0) * numpy.array(
         [0, 0, 1])
     beffecttemp.const.magBmom = norm(beffecttemp.const.Bmom)
     beffecttemp.const.Bmomhat = numpy.array(beffecttemp.const.Bmom) / beffecttemp.const.magBmom
@@ -230,13 +261,14 @@ elif METHOD == "test":
     beffecttemp.create_pairs()
     beffecttemp.interact_and_iterate(
         iterationsB=500,
-        init_iterations=100,
-        method='NoGibs',
+        init_iterations=50,
+        method='Gibs',
         modified_b_field=prepare_modified_b_field(filename),
         combinedrifts=True
     )
     beffecttemp.sort_positions_of_particles()
     dustplots.pplot(beffecttemp)
+
 
 
 

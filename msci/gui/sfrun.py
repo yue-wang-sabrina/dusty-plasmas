@@ -159,7 +159,7 @@ class SFGui(Ui_Dialog):  # Setting up/Connecting the gui buttons and connecting 
     def runfromequil(self):
         self.Bfield()
         self.Gfield()
-        self.beffect1 = BEffectsAnalysis()
+        self.beffect1 = BEffectsAnalysis(const)
         self.beffect1.create_particles(
             numparticles=self.particlenumber,
             initpositions=generate_particle_equilibrium_positions()

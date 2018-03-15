@@ -14,6 +14,7 @@ def interpolate(r, gridr, gridz, Evalsr, Evalsz, rmax, separationsheath, separat
     z0 = r[2]
     if z0 > const.sheathd:
         return numpy.array([0, 0, 0])
+
     else:
         if r0 < rmax:
             Eresult = numpy.array([0, 0])
