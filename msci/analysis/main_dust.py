@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 from IPython import get_ipython
 import msci.analysis.constants as const
 import math
+import decimal
 
 ipython = get_ipython()
 ipython.magic('load_ext autoreload')
@@ -16,7 +17,12 @@ ipython.magic('autoreload 2')
 
 beffect1 = BEffectsAnalysis(const)
 
-METHOD = "voidsizewrtB"
+METHOD = "test"
+
+
+def norm(x):
+    return numpy.sqrt(x[0] ** 2 + x[1] ** 2 + x[2] ** 2)
+
 
 if METHOD == "ALLATONCE":  # Drop all particles at once
     beffect1.create_particles(
@@ -28,7 +34,7 @@ if METHOD == "ALLATONCE":  # Drop all particles at once
         iterationsB=2000,
         init_iterations=100,
         method='Gibs',
-        modified_b_field=prepare_modified_b_field()
+        modified_b_field=prepare_modified_b_field('modifiedfield.obj')
     )
     beffect1.sort_positions_of_particles()
     dustplots.pplot(beffect1)
@@ -40,7 +46,7 @@ elif METHOD == "DROP":  # Drop 1 by 1
         iterationsB=500,
         init_iterations=500,
         method='NoGibs',
-        modified_b_field=prepare_modified_b_field())
+        modified_b_field=prepare_modified_b_field('modifiedfield.obj'))
     beffect1.sort_posititions_drop_method()
     dustplots.pplot(beffect1)
 
@@ -61,7 +67,7 @@ elif METHOD == "CPP":  # Use C++ to iterate
     beffect1.position = [[i, j, k] for i, j, k in zip(beffect2.positions_x, beffect2.positions_y, beffect2.positions_z)]
     beffect1.position_array = numpy.array(beffect1.position)
     beffect1.sort_positions_of_particles()
-    beffect1.modified_b_field = prepare_modified_b_field()
+    beffect1.modified_b_field = prepare_modified_b_field('modifiedfield.obj')
     dustplots.pplot(beffect1)
 
 elif METHOD == "Finddriftvelocities":
@@ -104,7 +110,7 @@ elif METHOD == "comparevxbwithotherdrifts":
         iterationsB=1000,
         init_iterations=100,
         method='NoGibs',
-        modified_b_field=prepare_modified_b_field()
+        modified_b_field=prepare_modified_b_field('modifiedfield.obj')
     )
     beffect1.sort_positions_of_particles()
     dustplots.pplot(beffect1)
@@ -154,7 +160,7 @@ elif METHOD == "voidsizewrtN":
             iterationsB=500,
             init_iterations=100,
             method='Gibs',
-            modified_b_field=prepare_modified_b_field(),
+            modified_b_field=prepare_modified_b_field('modifiedfield.obj'),
             combinedrifts=True
         )
         pos=[]
@@ -164,9 +170,73 @@ elif METHOD == "voidsizewrtN":
         voidsize.append(min(pos))
 
 elif METHOD == "voidsizewrtB":
-    pass
+    beffectlist = []
+    Bmomstrength = numpy.arange(0.014, 1, 0.025)
 
 
+    for i in numpy.arange(len(Bmomstrength[0:10])):
+        threeplaces = decimal.Decimal(10)**(-3)
+        namenumber = decimal.Decimal(Bmomstrength[i]).quantize(threeplaces)
+        filename = 'modifiedfield{}.obj'.format(namenumber)
+        beffecttemp = BEffectsAnalysis(const)
+        beffecttemp.const.Bmom = ((2 * math.pi * (0.003) ** 3) * Bmomstrength[i] / beffecttemp.const.mu0) * numpy.array(
+            [0, 0, 1])
+        beffecttemp.const.magBmom = norm(beffecttemp.const.Bmom)
+        beffecttemp.const.Bmomhat = numpy.array(beffecttemp.const.Bmom) / beffecttemp.const.magBmom
+        beffecttemp.create_particles(
+            numparticles=100,
+            initpositions=generate_particle_equilibrium_positions()
+        )
+        beffecttemp.create_pairs()
+        beffecttemp.interact_and_iterate(
+            iterationsB=1000,
+            init_iterations=100,
+            method='Gibs',
+            modified_b_field=prepare_modified_b_field(filename),
+            combinedrifts=True
+        )
+        beffectlist.append(beffecttemp)
+
+    voidsize = []
+
+    for i in beffectlist:
+        pos=[]
+        for j in i.dustdict.keys():
+            dust = i.dustdict[j]
+            pos.append(numpy.sqrt(dust.pos[0] ** 2 + dust.pos[1] ** 2))
+        voidsize.append(min(pos))
+
+    figBmom, axBmom = plt.subplots(nrows=1, ncols=1, figsize=(16, 8))
+
+    axBmom.plot(Bmomstrength[0:10], voidsize, 'o')
+    axBmom.set_xlabel("Magnetic moment", fontsize=15)
+    axBmom.set_ylabel("Void size (m)", fontsize=15)
+    axBmom.legend(fontsize=15);
+
+elif METHOD == "test":
+    threeplaces = decimal.Decimal(10) ** (-3)
+    Bmomstrength = numpy.arange(0.014, 1, 0.025)
+    namenumber = decimal.Decimal(Bmomstrength[2]).quantize(threeplaces)
+    filename = 'modifiedfield{}.obj'.format(namenumber)
+    beffecttemp = BEffectsAnalysis(const)
+    beffecttemp.const.Bmom = ((2 * math.pi * (0.003) ** 3) * Bmomstrength[2] / beffecttemp.const.mu0) * numpy.array(
+        [0, 0, 1])
+    beffecttemp.const.magBmom = norm(beffecttemp.const.Bmom)
+    beffecttemp.const.Bmomhat = numpy.array(beffecttemp.const.Bmom) / beffecttemp.const.magBmom
+    beffecttemp.create_particles(
+        numparticles=100,
+        initpositions=generate_particle_equilibrium_positions()
+    )
+    beffecttemp.create_pairs()
+    beffecttemp.interact_and_iterate(
+        iterationsB=500,
+        init_iterations=100,
+        method='NoGibs',
+        modified_b_field=prepare_modified_b_field(filename),
+        combinedrifts=True
+    )
+    beffecttemp.sort_positions_of_particles()
+    dustplots.pplot(beffecttemp)
 
 
 

@@ -26,9 +26,10 @@ def plot_particle_equilibrium_positions(initpositions):
     plt.show()
 
 
-def prepare_modified_b_field():
+def prepare_modified_b_field(filename):
+
     # Prepare modified B field
-    filehandler = open("/Users/yuewang/Dropbox/Msci-DustyPlasmas/Code/objects/modifiedfield.obj",
+    filehandler = open('/Users/yuewang/Documents/Repos/dusty-plasmas/msci/objects/{}'.format(filename),
                        'rb')  ##2k particles 5.5hrs to run 2500 iterations just for settling down
     gridr = pickle.load(filehandler)
     gridz = pickle.load(filehandler)

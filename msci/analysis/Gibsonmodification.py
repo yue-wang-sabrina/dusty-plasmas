@@ -19,9 +19,6 @@ class ModifyBFieldAnalysis:
         self.electrondriftpos = electrondriftpos
         self.rvalp0 = numpy.linalg.norm(electrondriftpos)  # the r value at which we are calculating p0
         self.B = None
-        self.Bmom = const.Bmom
-        self.magBmom = const.magBmom
-        self.Bmomhat = const.Bmomhat
         self.LAMBDA = None
         self.curlyM = None
         self.VeT = None
@@ -56,21 +53,21 @@ class ModifyBFieldAnalysis:
         self.firstpoint = None
 
     def Gibsonconstants(self):  # Constants following from Joe's thesis, Run this when initialise
-        self.LAMBDA = numpy.sqrt(self.magBmom * const.mu0 * const.e / (
-            4 * math.pi * const.me * numpy.sqrt(
-                const.kb * const.Te * 3 / const.me)))  # Distance at which electron is influenced from Joe's thesis
-        self.curlyM = self.magBmom * const.mu0 / (4 * math.pi)
-        self.VeT = numpy.sqrt(const.kb * const.Te * 3 / const.me)  # Thermal velocity of electrons
+        self.LAMBDA = numpy.sqrt(self.const.magBmom * self.const.mu0 * self.const.e / (
+            4 * math.pi * self.const.me * numpy.sqrt(
+                self.const.kb * self.const.Te * 3 / self.const.me)))  # Distance at which electron is influenced from Joe's thesis
+        self.curlyM = self.const.magBmom * self.const.mu0 / (4 * math.pi)
+        self.VeT = numpy.sqrt(self.const.kb * self.const.Te * 3 / self.const.me)  # Thermal velocity of electrons
         self.critp0 = 2 * numpy.sqrt(
-            const.e * const.me * self.VeT * self.curlyM)  # Critical p0 value determining regimes
+            self.const.e * self.const.me * self.VeT * self.curlyM)  # Critical p0 value determining regimes
 
     def electrondrift(
             self):  # Calculate E/B drift for electrons rough estimate Assuming B field is 0.014 vertical at all positions. Run this when initialise
         r = self.electrondriftpos
-        omega = abs(const.e * 0.014 / const.me)  # Ion cyclotron frequency
+        omega = abs(self.const.e * 0.014 / self.const.me)  # Ion cyclotron frequency
         tau = 2. / omega  # electron-neutral collision time #Ratio Taken from konopkas paper on experimentalbasis crystals
-        V = -const.wallV * (r[0] ** 2 + r[1] ** 2) / (const.boxr ** 2)
-        mag = (const.wallV / (const.boxr ** 2)) * 2 * math.sqrt(r[0] ** 2 + r[1] ** 2)
+        V = -self.const.wallV * (r[0] ** 2 + r[1] ** 2) / (self.const.boxr ** 2)
+        mag = (self.const.wallV / (self.const.boxr ** 2)) * 2 * math.sqrt(r[0] ** 2 + r[1] ** 2)
         unitr = [-r[0], -r[1], 0]
         if (unitr[0] ** 2 + unitr[1] ** 2) == 0.:
             self.edriftvel = numpy.array([0, 0, 0])
@@ -80,48 +77,48 @@ class ModifyBFieldAnalysis:
             self.electrondriftvel = numpy.linalg.norm(self.edriftvel)
 
     def getrmax(self):
-        func = lambda rmax: 1. - const.e * self.curlyM / (
-            rmax * (2 * numpy.sqrt(const.e * self.curlyM * const.me * self.VeT) + const.me * rmax * self.VeT))
+        func = lambda rmax: 1. - self.const.e * self.curlyM / (
+            rmax * (2 * numpy.sqrt(self.const.e * self.curlyM * self.const.me * self.VeT) + self.const.me * rmax * self.VeT))
         self.rmax = fsolve(func, 0.4 * self.LAMBDA)
 
     def VoidVol(self):
         intfunc = lambda r: 2 * math.pi * r * numpy.sqrt(
-            (const.e * self.curlyM * r ** 2 / (
-                2 * numpy.sqrt(const.e * self.curlyM * self.VeT * const.me) + const.me * r * self.VeT)) ** (
+            (self.const.e * self.curlyM * r ** 2 / (
+                2 * numpy.sqrt(self.const.e * self.curlyM * self.VeT * self.const.me) + self.const.me * r * self.VeT)) ** (
                 2. / 3.) - r ** 2)
         voidvol = scipy.integrate.quad(intfunc, 0, self.rmax)
         self.voidvol = voidvol[0]
 
     def voidQ(self):
-        Qfunc = lambda r: const.e * const.ne0 * numpy.exp(
-            (const.e / (const.kb * const.Te)) * const.electrodeV * ((1. - (1. / const.sheathd) * numpy.sqrt(
-                (const.e * self.curlyM * r ** 2 / (
-                    2 * numpy.sqrt(const.e * self.curlyM * self.VeT * const.me) + const.me * self.VeT * r)) ** (
+        Qfunc = lambda r: self.const.e * self.const.ne0 * numpy.exp(
+            (self.const.e / (self.const.kb * self.const.Te)) * self.const.electrodeV * ((1. - (1. / self.const.sheathd) * numpy.sqrt(
+                (self.const.e * self.curlyM * r ** 2 / (
+                    2 * numpy.sqrt(self.const.e * self.curlyM * self.VeT * self.const.me) + self.const.me * self.VeT * r)) ** (
                     2. / 3.) - r ** 2)) ** 2 + (
-                                                                        r / const.boxr) ** 2)) * 2 * math.pi * r * numpy.sqrt(
-            (const.e * self.curlyM * r ** 2 / (
-                2 * numpy.sqrt(const.e * self.curlyM * self.VeT * const.me) + const.me * self.VeT * r)) ** (
+                                                                        r / self.const.boxr) ** 2)) * 2 * math.pi * r * numpy.sqrt(
+            (self.const.e * self.curlyM * r ** 2 / (
+                2 * numpy.sqrt(self.const.e * self.curlyM * self.VeT * self.const.me) + self.const.me * self.VeT * r)) ** (
                 2. / 3.) - r ** 2)
         self.voidcharge = scipy.integrate.quad(Qfunc, 0, self.rmax)[0]
 
     def Zpm(self, r, p, pm):  # Define z+/- function for determining accessible/inaccessible electron regions
-        if math.isnan(const.e * self.curlyM * r ** 2 / (p + pm * const.me * r * (self.VeT + self.electrondriftvel)) ** (
+        if math.isnan(self.const.e * self.curlyM * r ** 2 / (p + pm * self.const.me * r * (self.VeT + self.electrondriftvel)) ** (
                     2. / 3.)):
             return 10
-        elif (const.e * self.curlyM * r ** 2 / (p + pm * const.me * r * (self.VeT + self.electrondriftvel))) ** (
+        elif (self.const.e * self.curlyM * r ** 2 / (p + pm * self.const.me * r * (self.VeT + self.electrondriftvel))) ** (
                     2. / 3.) - r ** 2 <= 0:
             return 0
         else:
             return numpy.sqrt(
-                (const.e * self.curlyM * r ** 2 / (p + pm * const.me * r * (self.VeT + self.electrondriftvel))) ** (
+                (self.const.e * self.curlyM * r ** 2 / (p + pm * self.const.me * r * (self.VeT + self.electrondriftvel))) ** (
                     2. / 3.) - r ** 2)
 
     def inaccessiblecurrentp0(self):  # Get inaccessible zone at current p0
-        r2 = numpy.arange(const.lambdaD, const.boxr, const.boxr / 10000)
+        r2 = numpy.arange(self.const.lambdaD, self.const.boxr, self.const.boxr / 10000)
         zinaccesspos = []
         zinaccessneg = []
-        term1 = const.me * self.rvalp0 * self.electrondriftvel  # As boxr is the maximum r that the electron can come from
-        term2 = const.e * const.mu0 * const.magBmom / (
+        term1 = self.const.me * self.rvalp0 * self.electrondriftvel  # As boxr is the maximum r that the electron can come from
+        term2 = self.const.e * self.const.mu0 * self.const.magBmom / (
             4 * math.pi * self.rvalp0)  # when electron is at boxr this term is at its minimum
         p0 = term1 + term2  # As p0 is always very tiny, P0=0 essentially
         for i in r2:
@@ -133,7 +130,7 @@ class ModifyBFieldAnalysis:
         self.znormneg = numpy.array(zinaccessneg) / self.LAMBDA
 
     def inaccessibleanyp0(self):
-        r = numpy.arange(0, const.boxr, const.boxr / 10000)
+        r = numpy.arange(0, self.const.boxr, self.const.boxr / 10000)
         zcrit = []
         for i in r:
             zcrit.append(self.Zpm(i, self.critp0, 1))
@@ -143,9 +140,9 @@ class ModifyBFieldAnalysis:
     def radialfield(self, r):  # Apply radial E field at the sheath, r = position of dust
         if r[1] < 0:
             raise ValueError("particle fell out of cylinder!!!!")
-        elif r[1] < const.sheathd:
-            V = -const.wallV * (r[0] ** 2 + r[1] ** 2) / (const.boxr ** 2)
-            mag = (const.wallV / (const.boxr ** 2)) * 2 * math.sqrt(r[0] ** 2 + r[1] ** 2)
+        elif r[1] < self.const.sheathd:
+            V = -self.const.wallV * (r[0] ** 2 + r[1] ** 2) / (self.const.boxr ** 2)
+            mag = (self.const.wallV / (self.const.boxr ** 2)) * 2 * math.sqrt(r[0] ** 2 + r[1] ** 2)
             unitr = [-r[0], 0]
             if (unitr[0] ** 2 + unitr[1] ** 2) == 0.:
                 self.Eapplied = numpy.array([0, 0])
@@ -155,15 +152,15 @@ class ModifyBFieldAnalysis:
             self.Eapplied = numpy.array([0, 0])
 
     def SheathField(self, r):
-        if r[1] < const.sheathd and r[1] >= 0:
-            V = const.electrodeV * (1. - r[1] / const.sheathd) ** 2
-            field = abs(2 * (1. - r[1] / const.sheathd) * (const.electrodeV / const.sheathd))
+        if r[1] < self.const.sheathd and r[1] >= 0:
+            V = self.const.electrodeV * (1. - r[1] / self.const.sheathd) ** 2
+            field = abs(2 * (1. - r[1] / self.const.sheathd) * (self.const.electrodeV / self.const.sheathd))
             self.sheathfield = numpy.array([0, field])
         else:
             self.sheathfield = numpy.array([0, 0])
 
     def pospos(self):  # positive charge positions
-        separation = const.lambdaD / 2
+        separation = self.const.lambdaD / 2
         chargepos = []  # positive charge positions
         intcharge = int(self.voidvol)  # integer number of positive particles
         rows = int(self.rmax / separation)  # number of positive particles separated by lambdaD along the r axis
@@ -180,7 +177,7 @@ class ModifyBFieldAnalysis:
     def MagEcharge(self, r):  # magnitude of E field due to charge
         normr = numpy.linalg.norm(r)
         rhat = r / normr
-        self.magEcharge = abs((self.voidcharge / self.numbcharge) / (4 * math.pi * const.e0 * normr ** 2)) * rhat
+        self.magEcharge = abs((self.voidcharge / self.numbcharge) / (4 * math.pi * self.const.e0 * normr ** 2)) * rhat
 
     def gridcheck(self, chargepos):
         Evalsr = []
@@ -200,7 +197,7 @@ class ModifyBFieldAnalysis:
                 Evalsradialtemp.append(self.Eapplied[0])
                 self.SheathField([self.gridr[i][j], self.gridz[i][j]])
                 Evalsheathtemp.append(self.sheathfield[1])
-                for k in tqdm(numpy.arange(len(chargepos[0]))):
+                for k in numpy.arange(len(chargepos[0])):
                     r = [chargepos[0][k] - self.gridr[i][j], chargepos[1][k] - self.gridz[i][j]]
                     if numpy.linalg.norm(r) == 0.:
                         pass  # Ignore the points that fall directly on a positive charge to avoid infinities
@@ -224,29 +221,29 @@ class ModifyBFieldAnalysis:
     def checkedenofm(
             self):  # Run this function to calculate ratio of charge in the void that is displaced compared to outside void in rest of sheath
         print("Ratio of charge inside to outside region of inaccessibility=",
-              self.voidcharge / (const.ne0 * const.e * (2 * math.pi * const.boxr * const.sheathd - self.voidvol)))
+              self.voidcharge / (self.const.ne0 * self.const.e * (2 * math.pi * self.const.boxr * self.const.sheathd - self.voidvol)))
         print(
             "Approximate volume using half doughnut calculation is",
             2 * math.pi * (self.rmax / 2) * math.pi * self.rmax ** 2 / 2,
             "should be bigger than integral of my solid, which is", self.voidvol)
 
     def getgrids(self):
-        self.voidchargeguess = self.voidvol * const.ne0 * const.e
+        self.voidchargeguess = self.voidvol * self.const.ne0 * self.const.e
         self.pospos()
         self.numbcharge = len(self.chargepos[
-                                  0]) * 2 * math.pi * const.boxr / const.lambdaD  # The factor multiplied by is the number of 2D slices in the r-z plane there are in the 3D volume
+                                  0]) * 2 * math.pi * self.const.boxr / self.const.lambdaD  # The factor multiplied by is the number of 2D slices in the r-z plane there are in the 3D volume
 
-        separationsheath = const.lambdaD  # separation distance between grid points
+        separationsheath = self.const.lambdaD  # separation distance between grid points
         self.separationsheath = separationsheath
-        separationhor1 = const.lambdaD
-        separationhor2 = const.lambdaD * 10
+        separationhor1 = self.const.lambdaD
+        separationhor2 = self.const.lambdaD * 10
         self.separationhor1 = separationhor1
         self.separationhor2 = separationhor2
         firstpoint = separationsheath / 4
         self.firstpoint = firstpoint
-        gridlinesheath = numpy.arange(firstpoint, const.sheathd * 1.5, separationsheath)
+        gridlinesheath = numpy.arange(firstpoint, self.const.sheathd * 1.5, separationsheath)
         gridlinehor = numpy.arange(firstpoint, self.rmax, separationhor1)
-        gridlinehor2 = numpy.arange(self.rmax + firstpoint, const.boxr * 1.5, separationhor2)
+        gridlinehor2 = numpy.arange(self.rmax + firstpoint, self.const.boxr * 1.5, separationhor2)
         gridhor = list(gridlinehor) + list(gridlinehor2)
         self.gridr, self.gridz = numpy.meshgrid(gridhor, gridlinesheath)
 
@@ -296,7 +293,7 @@ class ModifyBFieldAnalysis:
                               [self.gridr[indlow][indleft + 1], self.gridz[indlow][indleft + 1]]]
         elif r0 > self.rmax:
             Eresult = numpy.array([0, 0])
-            indleft = (const.boxr - self.firstpoint - self.rmax) / self.separationhor2
+            indleft = (self.const.boxr - self.firstpoint - self.rmax) / self.separationhor2
             indlow = (z0 - self.firstpoint) / self.separationsheath
             s1 = isclose((indleft ** 3) ** (1.0 / 3), int(indleft))
             s2 = isclose((indlow ** 3) ** (1.0 / 3), int(indlow))
@@ -326,7 +323,7 @@ class ModifyBFieldAnalysis:
 
     def savetopickle(self, name, security=False):
         if security:
-            filehandler = open(b"modifiedfield{}.obj".format(name),
+            filehandler = open('modifiedfield%s.obj'%name,
                                'wb')  ##2k particles 5.5hrs to run 2500 iterations just for settling down
             pickle.dump(self.gridr, filehandler)
             pickle.dump(self.gridz, filehandler)

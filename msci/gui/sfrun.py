@@ -177,7 +177,7 @@ class SFGui(Ui_Dialog):  # Setting up/Connecting the gui buttons and connecting 
             iterationsB=self.Biterations,
             init_iterations=100 + self.init_iterationsadd,
             method=self.method,
-            modified_b_field=prepare_modified_b_field()
+            modified_b_field=prepare_modified_b_field('modifiedfield.obj')
         )
         self.beffect1.sort_positions_of_particles()
         self.graph.display(self.beffect1, view=True)
@@ -200,7 +200,7 @@ class SFGui(Ui_Dialog):  # Setting up/Connecting the gui buttons and connecting 
             iterationsB=int(self.Biterations),
             init_iterations=int((10 * self.particlenumber + 500) + self.init_iterationsadd),
             method=self.method,
-            modified_b_field=prepare_modified_b_field())
+            modified_b_field=prepare_modified_b_field('modifiedfield.obj'))
         self.beffect1.sort_posititions_drop_method()
         self.graph.display(self.beffect1, view=False)
 
@@ -233,7 +233,7 @@ class SFGui(Ui_Dialog):  # Setting up/Connecting the gui buttons and connecting 
                                   zip(beffect2.positions_x, beffect2.positions_y, beffect2.positions_z)]
         self.beffect1.position_array = numpy.array(self.beffect1.position)
         self.beffect1.sort_positions_of_particles()
-        self.beffect1.modified_b_field = prepare_modified_b_field()
+        self.beffect1.modified_b_field = prepare_modified_b_field('modifiedfield.obj')
         self.graph.display(self.beffect1, view=True)
 
     def runwithcppdrop1by1(self):
