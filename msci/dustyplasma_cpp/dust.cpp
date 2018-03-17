@@ -83,11 +83,24 @@ float SEPARATIONHOR1;
 float SEPARATIONHOR2;
 int METH; // Gibs = 1, NoGibs = 0;
 
-
 float t = 1;
 std::vector<std::vector<int>> pairs;
 
 
+std::vector<float> g2pos(3);
+std::vector<float> acctempT(3);
+std::vector<float> difft(3);
+std::vector<float> unitrt(3);
+std::vector<float> rt(3);
+
+std::vector<float> temp1(2);
+std::vector<float> temp2(2);
+std::vector<float> temp3(2);
+std::vector<float> temp4(2);
+std::vector<float> temp5(2);
+std::vector<float> temp6(2);
+std::vector<float> temp7(2);
+std::vector<float> temp8(2);
 
 float Magnitude(std::vector<float> v1, float output_float){
 	output_float = sqrt(1*pow(v1[0],2) + 1*pow(v1[1],2) + 1*pow(v1[2],2));
@@ -205,19 +218,15 @@ class Dust{
 	}
 
 	std::vector<float> selffield(Dust g2){
-		std::vector<float> g2pos(3);
+
 		g2pos = g2.getselfpos();
-		std::vector<float> diff(3);
-		diff = Minusvectors(g2pos,pos,diff);
-		float d = Magnitude(diff,d);
-		std::vector<float> r(3);
-		r = Minusvectors(pos,g2pos,r);
-		std::vector<float> unitr(3);
-		unitr = Multiplyscalar(r,1./d,unitr);
-		float E = abs(phia/lambdaD)*exp(-1*(d-2*radd)/lambdaD);
-		std::vector<float> acctemp(3);
-		acctemp = Multiplyscalar(unitr, E,acctemp);
-		return acctemp;
+		difft = Minusvectors(g2pos,pos,difft);
+		float d = Magnitude(difft,d);
+		rt = Minusvectors(pos,g2pos,rt);
+		unitrt = Multiplyscalar(rt,1./d,unitrt);
+		float ET = abs(phia/lambdaD)*exp(-1*(d-2*radd)/lambdaD);
+		acctempT = Multiplyscalar(unitrt, ET,acctempT);
+		return acctempT;
 		
 	}
 
@@ -612,14 +621,7 @@ class DustAnalysis{
             if (r0 < rmax){
                 int indleft = int((abs(r0) - abs(firstpoint))/sephor1);
                 int indlow = int((abs(z0)-abs(firstpoint))/sheathsep);
-                std::vector<float> temp1(2);
-                std::vector<float> temp2(2);
-                std::vector<float> temp3(2);
-                std::vector<float> temp4(2);
-                std::vector<float> temp5(2);
-                std::vector<float> temp6(2);
-                std::vector<float> temp7(2);
-                std::vector<float> temp8(2);
+
 
                 temp1 = {changeevalsr[indlow][indleft], changeevalsz[indlow][indleft]};
                 temp2 = {changeevalsr[indlow+1][indleft], changeevalsz[indlow+1][indleft]};
@@ -629,6 +631,8 @@ class DustAnalysis{
                 temp6 = {changegridr[indlow+1][indleft],changegridz[indlow+1][indleft]};
                 temp7 = {changegridr[indlow+1][indleft+1],changegridz[indlow+1][indleft+1]};
                 temp8 = {changegridr[indlow][indleft+1],changegridz[indlow][indleft+1]};
+
+
                 gridEs.push_back(temp1);
                 gridEs.push_back(temp2);
                 gridEs.push_back(temp3);
@@ -645,14 +649,14 @@ class DustAnalysis{
                 int indleft = int((boxr - firstpoint - rmax)/sephor2);
                 int indlow = int((z0-firstpoint)/sheathsep);
 
-                std::vector<float> temp1(2);
-                std::vector<float> temp2(2);
-                std::vector<float> temp3(2);
-                std::vector<float> temp4(2);
-                std::vector<float> temp5(2);
-                std::vector<float> temp6(2);
-                std::vector<float> temp7(2);
-                std::vector<float> temp8(2);
+//                std::vector<float> temp1(2);
+//                std::vector<float> temp2(2);
+//                std::vector<float> temp3(2);
+//                std::vector<float> temp4(2);
+//                std::vector<float> temp5(2);
+//                std::vector<float> temp6(2);
+//                std::vector<float> temp7(2);
+//                std::vector<float> temp8(2);
 
                 temp1 = {changeevalsr[indlow][indleft], changeevalsz[indlow][indleft]};
                 temp2 = {changeevalsr[indlow+1][indleft], changeevalsz[indlow+1][indleft]};
@@ -747,27 +751,26 @@ class DustAnalysis{
 			dustlist[l].changeBswitch(true);
 		}
 
+		std::vector<float> interactfield(3);
+
 		for (int ittwo = 0; ittwo < iterationsB; ittwo ++ ){
 			std::vector<std::vector<int>> pairsfinal;
 			for (int b = 0; b < pairs.size(); b++) {
 				if (dustlist[pairs[b][0]].intergraind(dustlist[pairs[b][1]])){
 					pairsfinal.push_back(pairs[b]);
-				}		
+				}
 			}
 
 			if (method == 0){
                 for (int k = 0; k<pairsfinal.size(); k++){
-                    std::vector<float> interactfield(3);
                     interactfield = dustlist[pairsfinal[k][0]].selffield(dustlist[pairsfinal[k][1]]);
                     dustlist[pairsfinal[k][0]].selffieldmany(interactfield);
                     dustlist[pairsfinal[k][1]].selffieldmany(Multiplyscalar(interactfield,-1,interactfield));
                 }
 			}
 
-			else if (method == 1){
+			if (method == 1){
                 for (int k = 0; k<pairsfinal.size(); k++){
-                    std::vector<float> interactfield(3);
-
                     interactfield = dustlist[pairsfinal[k][0]].selffield(dustlist[pairsfinal[k][1]]);
                     dustlist[pairsfinal[k][0]].selffieldmany(interactfield);
                     dustlist[pairsfinal[k][0]].selffieldmany(interpolate(dustlist[pairsfinal[k][0]].getselfpos()));
@@ -778,18 +781,18 @@ class DustAnalysis{
 
 
 
-			for (int D=0; D<dustlist.size(); D++){
-				dustlist[D].updateEuler();
-				std::vector<float> selfpos(3);
-				selfpos = dustlist[D].getselfpos();
-				positionx.push_back(selfpos[0]);
-				positiony.push_back(selfpos[1]);
-				positionz.push_back(selfpos[2]);	
-			}
-
-			if (ittwo % 1000 == 0) {
-				bar.update(ittwo, iterationsB);
-			}
+//			for (int D=0; D<dustlist.size(); D++){
+//				dustlist[D].updateEuler();
+//				std::vector<float> selfpos(3);
+//				selfpos = dustlist[D].getselfpos();
+//				positionx.push_back(selfpos[0]);
+//				positiony.push_back(selfpos[1]);
+//				positionz.push_back(selfpos[2]);
+//			}
+//
+//			if (ittwo % 1000 == 0) {
+//				bar.update(ittwo, iterationsB);
+//			}
 
 		}
 	}

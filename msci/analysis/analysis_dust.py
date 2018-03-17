@@ -184,11 +184,12 @@ class BEffectsAnalysis:
             "z": self.position_array[:, 2]
         })
 
-    def interact_and_iterate(self, iterationsB, init_iterations, method='Gibs', modified_b_field=None,combinedrifts=False):
+    def interact_and_iterate(self, iterationsB, init_iterations, method='Gibs', modified_b_field=None, combinedrifts=False):
         # Interact and iterate non-drop method
         self.iterationsB = iterationsB
         self.init_iterations = init_iterations
         self.modified_b_field = modified_b_field
+        MASSDUST = self.const.md
 
         for i in tqdm(numpy.arange(init_iterations)):
             pairsfinal = []
@@ -209,7 +210,11 @@ class BEffectsAnalysis:
             self.dustdict[l].Bswitch = True
 
         for i in tqdm(numpy.arange(iterationsB)):
-            MASSDUST = self.const.md
+            for i in self.dustdict:
+                if abs(self.dustdict[i].pos[2])>self.const.sheathd:
+                    self.position_array = numpy.array(self.position)
+                    return None
+
             dustwanted = self.dustdict[list(self.dustdict.keys())[-1]]
             self.vxbforces.append(MASSDUST*dustwanted.vxBforce())
             self.hybridforces.append(MASSDUST*dustwanted.EXBacchybrid(B=dustwanted.dipoleB(self.const.dipolepos),method='factor',combinedrifts=combinedrifts))

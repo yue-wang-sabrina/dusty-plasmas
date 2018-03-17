@@ -82,6 +82,8 @@ class Dust:
             self.pos = numpy.array(self.pos) + numpy.array(self.vel) * self.const.dt + 0.5 * numpy.array(
                 self.acc) * self.const.dt ** 2
             self.multifields = numpy.array([0, 0, 0])
+            if self.Bswitch==True and self.pos[2]>self.sheathd*2:
+                print("ERROR: DUST IS EXPLODED")
 
         elif method == 'leap frog':
             # Leapfrog - unstable

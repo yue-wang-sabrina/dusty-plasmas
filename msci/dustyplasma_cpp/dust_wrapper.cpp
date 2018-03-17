@@ -60,16 +60,16 @@ extern "C" void simulate (int meth, int init_iterationsInput, int iterationsBInp
 	analysis.interact_and_iterate(METH);
 
     // Output
-	std::vector<float> xpos;
-	std::vector<float> ypos;
-	std::vector<float> zpos;
-
-	xpos = analysis.getallpositionx();
-	ypos = analysis.getallpositiony();
-	zpos = analysis.getallpositionz();
-
-	std::copy(xpos.begin(), xpos.end(), output);
-	std::copy(ypos.begin(), ypos.end(), output2);
-	std::copy(zpos.begin(), zpos.end(), output3);
+//	std::vector<float> xpos;
+//	std::vector<float> ypos;
+//	std::vector<float> zpos;
+//
+//	xpos = analysis.getallpositionx();
+//	ypos = analysis.getallpositiony();
+//	zpos = analysis.getallpositionz();
+//
+//	std::copy(xpos.begin(), xpos.end(), output);
+//	std::copy(ypos.begin(), ypos.end(), output2);
+//	std::copy(zpos.begin(), zpos.end(), output3);
 
 }

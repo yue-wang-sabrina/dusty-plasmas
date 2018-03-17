@@ -26,13 +26,13 @@ def norm(x):
 
 if METHOD == "ALLATONCE":  # Drop all particles at once
     beffect1.create_particles(
-        numparticles=200,
+        numparticles=50,
         initpositions=generate_particle_equilibrium_positions()
     )
     beffect1.create_pairs()
     beffect1.interact_and_iterate(
         iterationsB=2000,
-        init_iterations=100,
+        init_iterations=0,
         method='Gibs',
         modified_b_field=prepare_modified_b_field('modifiedfield.obj')
     )
@@ -52,9 +52,9 @@ elif METHOD == "DROP":  # Drop 1 by 1
 
 
 elif METHOD == "CPP":  # Use C++ to iterate
-    particlenum = 10;
-    itB = 1000
-    initit = 200
+    particlenum = 50
+    itB = 2000
+    initit = 0
     beffect2 = dcpp.DustAnalysisCpp(initit, itB, particlenum, 1)
 
     beffect2.get_modified_field()
@@ -248,20 +248,20 @@ elif METHOD == "voidsizewrtB":
     fig.show()
 
 elif METHOD == "testspecificmodifiedEfield":
-    filename = 'modifiedfield0.011.obj'
+    filename = 'modifiedfield0.01255.obj'
     beffecttemp = BEffectsAnalysis(const)
-    beffecttemp.const.Bmom = ((2 * math.pi * (0.003) ** 3) * 0.011 / beffecttemp.const.mu0) * numpy.array(
+    beffecttemp.const.Bmom = ((2 * math.pi * (0.003) ** 3) * 0.01255 / beffecttemp.const.mu0) * numpy.array(
         [0, 0, 1])
     beffecttemp.const.magBmom = norm(beffecttemp.const.Bmom)
     beffecttemp.const.Bmomhat = numpy.array(beffecttemp.const.Bmom) / beffecttemp.const.magBmom
     beffecttemp.create_particles(
-        numparticles=100,
+        numparticles=250,
         initpositions=generate_particle_equilibrium_positions()
     )
     beffecttemp.create_pairs()
     beffecttemp.interact_and_iterate(
         iterationsB=500,
-        init_iterations=50,
+        init_iterations=10,
         method='Gibs',
         modified_b_field=prepare_modified_b_field(filename),
         combinedrifts=True
