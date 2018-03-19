@@ -13,12 +13,14 @@ import numpy
 import math
 import dill
 import decimal
+from scipy.spatial import Delaunay
+
 
 def norm(x):
     return numpy.sqrt(x[0] ** 2 + x[1] ** 2 + x[2] ** 2)
 
 
-case = "5"
+case = "3"
 
 # Plot ratio of size of crystal before and after B+Gibson turned on wrt strength of dipole moment
 if case == "1":
@@ -108,9 +110,9 @@ elif case == "4":
     )
     beffect1.sort_positions_of_particles()
 
-    filehandler = open(b'case4.obj', 'wb')
-    dill.dump(beffect1, filehandler)
-    filehandler.close()
+    # filehandler = open(b'case4.obj', 'wb')
+    # dill.dump(beffect1, filehandler)
+    # filehandler.close()
 
     vxbforcelist = []
     positions = []
@@ -205,12 +207,12 @@ elif case == "5":
         )
         beffectlist.append(beffecttemp)
 
-    filehandler = open(b'case5.obj', 'wb')
-    dill.dump(beffectlist, filehandler)
-    filehandler.close()
+    # filehandler = open(b'case5.obj', 'wb')
+    # dill.dump(beffectlist, filehandler)
+    # filehandler.close()
 
     speeds = []
-    distaway = 0.0009
+    distaway = 0.00081
     positions = []
     for i in beffectlist:
         minlist = []
@@ -225,8 +227,8 @@ elif case == "5":
         positions.append(numpy.sqrt(postemp[0] ** 2 + postemp[1] ** 2))
 
     plt.plot(Bmomstrength, speeds, 'o', label=r'Dust particle $%sm$ away' % distaway)
-    plt.set_xlabel("Magnetic moment")
-    plt.set_ylabel("Speeds (m/s)")
+    plt.xlabel("Magnetic moment")
+    plt.ylabel("Speeds (m/s)")
     plt.legend()
     plt.show()
 
@@ -258,14 +260,16 @@ elif case == "6":
             combinedrifts=True
         )
         beffectlist.append(beffecttemp)
-        filehandler = open(b'case6.obj', 'wb')
-        dill.dump(beffectlist, filehandler)
-        filehandler.close()
         pos = []
         for j in beffecttemp.dustdict.keys():
             dust = beffecttemp.dustdict[j]
             pos.append(numpy.sqrt(dust.pos[0] ** 2 + dust.pos[1] ** 2))
         voidsize.append(min(pos))
+
+    # filehandler = open(b'case6.obj', 'wb')
+    # dill.dump(beffectlist, filehandler)
+    # filehandler.close()
+
     plt.figure()
     plt.plot(Nlist,voidsize,'o',label=r'Dust particle $\approx 9 \times 10^{-4}m$ away')
     plt.xlabel("Number of particles in crystal")
@@ -362,12 +366,12 @@ elif case == "7":
                 beffectlist.append(beffecttemp)
             elif METHOD == 'NoGibs':
                 beffectlistnoGibs.append(beffecttemp)
-    filehandler = open(b'case7.obj','wb')
-    dill.dump(beffectlist,filehandler)
-    dill.dump(beffectlistnoGibs,filehandler)
-    dill.dump(Bmomstrength1,filehandler)
-    dill.dump(Bmomstrength2,filehandler)
-    filehandler.close()
+    # filehandler = open(b'case7.obj','wb')
+    # dill.dump(beffectlist,filehandler)
+    # dill.dump(beffectlistnoGibs,filehandler)
+    # dill.dump(Bmomstrength1,filehandler)
+    # dill.dump(Bmomstrength2,filehandler)
+    # filehandler.close()
 
     # Plot 1
     voidsize = []
@@ -477,11 +481,11 @@ elif case == "8":
             elif METHOD == 'NoGibs':
                 beffectlistchangeparticlesnoGibs.append(beffecttemp)
 
-    filehandler = open(b'case8.obj','wb')
-    dill.dump(beffectlistchangeparticles,filehandler)
-    dill.dump(beffectlistchangeparticlesnoGibs,filehandler)
-    dill.dump(Nlistcrystal,filehandler)
-    filehandler.close()
+    # filehandler = open(b'case8.obj','wb')
+    # dill.dump(beffectlistchangeparticles,filehandler)
+    # dill.dump(beffectlistchangeparticlesnoGibs,filehandler)
+    # dill.dump(Nlistcrystal,filehandler)
+    # filehandler.close()
 
     crystalsizeNoGibs = []
     crystalsizeGibs = []

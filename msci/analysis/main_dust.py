@@ -248,9 +248,9 @@ elif METHOD == "voidsizewrtB":
     fig.show()
 
 elif METHOD == "testspecificmodifiedEfield":
-    filename = 'modifiedfield0.01255.obj'
+    filename = 'modifiedfield0.014.obj'
     beffecttemp = BEffectsAnalysis(const)
-    beffecttemp.const.Bmom = ((2 * math.pi * (0.003) ** 3) * 0.01255 / beffecttemp.const.mu0) * numpy.array(
+    beffecttemp.const.Bmom = ((2 * math.pi * (0.003) ** 3) * 0.014 / beffecttemp.const.mu0) * numpy.array(
         [0, 0, 1])
     beffecttemp.const.magBmom = norm(beffecttemp.const.Bmom)
     beffecttemp.const.Bmomhat = numpy.array(beffecttemp.const.Bmom) / beffecttemp.const.magBmom
@@ -260,14 +260,15 @@ elif METHOD == "testspecificmodifiedEfield":
     )
     beffecttemp.create_pairs()
     beffecttemp.interact_and_iterate(
-        iterationsB=500,
-        init_iterations=10,
+        iterationsB=1000,
+        init_iterations=100,
         method='Gibs',
         modified_b_field=prepare_modified_b_field(filename),
         combinedrifts=True
     )
     beffecttemp.sort_positions_of_particles()
-    dustplots.pplot(beffecttemp)
+    dustplots.pplot(beffecttemp,save=True,jn=True)
+
 
 
 

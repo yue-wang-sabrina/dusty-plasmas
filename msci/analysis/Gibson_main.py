@@ -22,4 +22,4 @@ for i in numpy.arange(len(Bmomstrength)):
     gibtemp.pospos()
     gibtemp.getgrids()
     gibtemp.gridcheck(gibtemp.chargepos)
-    gibtemp.savetopickle(Bmomstrength[i], decimals=5, security=True)
+    gibtemp.savetopickle(Bmomstrength[i], decimals=5, security=False)
