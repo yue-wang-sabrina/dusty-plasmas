@@ -267,7 +267,7 @@ elif METHOD == "testspecificmodifiedEfield":
         combinedrifts=True
     )
     beffecttemp.sort_positions_of_particles()
-    dustplots.pplot(beffecttemp,save=True,jn=True)
+    dustplots.pplot(beffecttemp)
 
 
 

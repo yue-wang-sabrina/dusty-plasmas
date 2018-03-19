@@ -20,7 +20,7 @@ def norm(x):
     return numpy.sqrt(x[0] ** 2 + x[1] ** 2 + x[2] ** 2)
 
 
-case = "3"
+case = "2"
 
 # Plot ratio of size of crystal before and after B+Gibson turned on wrt strength of dipole moment
 if case == "1":
@@ -60,6 +60,8 @@ elif case == "2":
                  0.00060399301791775977]
 
     plt.plot(Bmomtotal, voidsizes, 'ro')
+    plt.xlabel("Magnetic dipole moment (Nm)")
+    plt.ylabel("Void size (m)")
     plt.show()
 
 # Plot magnitude of combined curvature and grad B drifts vs EXB drift without collisional effects to show the regions where either is dominant. No Gibson field used (NB: sheath included)
