@@ -10,11 +10,14 @@ import matplotlib
 
 
 
-filehandler = open("/Users/yuewang/Dropbox/Msci-DustyPlasmas/Code/objects/crystalpositions2,5K.obj",
+filehandler = open("/Users/yuewang/Documents/Repos/dusty-plasmas/msci/Results/40mmcylinder1Kdust.obj",
                    'rb')  ##2k particles 5.5hrs to run 2500 iterations just for settling down
-xinit = pickle.load(filehandler)
-yinit = pickle.load(filehandler)
-zinit = pickle.load(filehandler)
+# xinit = pickle.load(filehandler)
+# yinit = pickle.load(filehandler)
+# zinit = pickle.load(filehandler)
+initpos = pickle.load(filehandler)
+xinit = [i[0] for i in initpos]
+yinit = [i[1] for i in initpos]
 filehandler.close()
 initpositions = numpy.array([[i,j] for i,j in zip(xinit, yinit)])
 triangulate = Delaunay(initpositions)

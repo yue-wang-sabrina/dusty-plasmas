@@ -14,10 +14,12 @@ from scipy.optimize import fsolve
 # Note pointdipoleB function has the original dipole position at -0.003m.
 
 class ModifyBFieldAnalysis:
-    def __init__(self, constants=const, electrondriftpos=[const.boxr, 0, 0]):  # Position to calculate the drift in electron velocity
+    def __init__(self, constants=const, electrondriftpos=[const.boxr, 0, 0],initialvel=0):  # Position to calculate the drift in electron velocity
         self.const = constants
         self.electrondriftpos = electrondriftpos
         self.rvalp0 = numpy.linalg.norm(electrondriftpos)  # the r value at which we are calculating p0
+        self.initialvel= initialvel
+        self.p0 = None
         self.B = None
         self.LAMBDA = None
         self.curlyM = None
@@ -117,10 +119,12 @@ class ModifyBFieldAnalysis:
         r2 = numpy.arange(self.const.lambdaD, self.const.boxr, self.const.boxr / 10000)
         zinaccesspos = []
         zinaccessneg = []
-        term1 = self.const.me * self.rvalp0 * self.electrondriftvel  # As boxr is the maximum r that the electron can come from
+        term1 = self.const.me * self.const.lambdaD * self.initialvel  # As boxr is the maximum r that the electron can come from
         term2 = self.const.e * self.const.mu0 * self.const.magBmom / (
             4 * math.pi * self.rvalp0)  # when electron is at boxr this term is at its minimum
-        p0 = term1 + term2  # As p0 is always very tiny, P0=0 essentially
+        p0 = term1 #+ term2  # As p0 is always very tiny, P0=0 essentially
+        thermalvel=numpy.sqrt(8 * self.const.kb * self.const.Te / (math.pi * self.const.me))
+        self.p0 = p0/(2*(numpy.sqrt(self.const.e*self.curlyM*thermalvel*self.const.me)))
         for i in r2:
             zinaccessneg.append(self.Zpm(i, p0, -1))
             zinaccesspos.append(self.Zpm(i, p0, +1))

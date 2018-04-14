@@ -32,6 +32,10 @@ class BEffectsAnalysis:
         self.intergrainforces=[]
         self.combinedriftvel=[]
         self.exbdriftvel=[]
+        self.exbforcelist=[]
+        self.otherdriftforcelist=[]
+        self.neutraldragforcelist=[]
+        self.dustwanted = None
 
     def create_particles(self, numparticles, initpositions):
         # Create dictionary of particles from pickle object
@@ -124,7 +128,7 @@ class BEffectsAnalysis:
         nameindex = 0;
 
         self.dustdict.update({
-            names[nameindex]: Dust(
+            names[nameindex]: Dust(self.const,
                 self.const.md, self.const.radd, self.const.lambdaD, self.const.phia,
                 self.const.Zd * self.const.e,
                 [
@@ -137,7 +141,7 @@ class BEffectsAnalysis:
         nameindex += 1
 
         self.dustdict.update({
-            names[nameindex]: Dust(
+            names[nameindex]: Dust(self.const,
                 self.const.md, self.const.radd, self.const.lambdaD, self.const.phia,
                 self.const.Zd * self.const.e,
                 [
@@ -152,7 +156,7 @@ class BEffectsAnalysis:
         for i in tqdm(numpy.arange(init_iterations)):
             if i % 10 == 0 and nameindex <= self.numparticles - 1:
                 self.dustdict.update({
-                    names[nameindex]: Dust(
+                    names[nameindex]: Dust(self.const,
                         self.const.md, self.const.radd, self.const.lambdaD, self.const.phia,
                         self.const.Zd * self.const.e,
                         [
@@ -216,11 +220,15 @@ class BEffectsAnalysis:
                     return None
 
             dustwanted = self.dustdict[list(self.dustdict.keys())[-1]]
+            self.dustwanted = dustwanted
             self.vxbforces.append(MASSDUST*dustwanted.vxBforce())
             self.hybridforces.append(MASSDUST*dustwanted.EXBacchybrid(B=dustwanted.dipoleB(self.const.dipolepos),method='factor',combinedrifts=combinedrifts))
             self.radialEforces.append(MASSDUST*dustwanted.radialfield())
             self.combinedriftvel.append(dustwanted.combinedrift(B=dustwanted.dipoleB(r=self.const.dipolepos)))
             self.exbdriftvel.append(dustwanted.EXBDRIFT(B=dustwanted.dipoleB(r=self.const.dipolepos)))
+            self.exbforcelist.append(MASSDUST*dustwanted.EXBacchybrid(B=dustwanted.dipoleB(self.const.dipolepos),method='factor',combinedrifts=False))
+            self.otherdriftforcelist.append(MASSDUST*dustwanted.accfromotherdrifts(B=dustwanted.dipoleB(self.const.dipolepos)))
+            self.neutraldragforcelist.append(MASSDUST*dustwanted.neutraldrag())
 
             pairsfinal = []
             for b in self.pairs:

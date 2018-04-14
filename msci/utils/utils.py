@@ -15,6 +15,14 @@ def generate_particle_equilibrium_positions():
     initpositions = [[i, j, k] for i, j, k in zip(xinit, yinit, zinit)]
     return initpositions
 
+def generate_particle_equilibrium_positions2():
+    # Generate particles in their equilibrium position
+    filehandler = open("/Users/yuewang/Documents/Repos/dusty-plasmas/msci/Results/40mmcylinder1Kdust.obj",
+                       'rb')  ##2k particles 5.5hrs to run 2500 iterations just for settling down
+    initpositions = pickle.load(filehandler)
+
+    filehandler.close()
+    return initpositions
 
 def plot_particle_equilibrium_positions(initpositions):
     # Quick plot to view initial configuration

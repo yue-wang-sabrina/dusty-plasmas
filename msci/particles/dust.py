@@ -351,14 +351,95 @@ class Dust:
         else:
             return numpy.array([0, 0, 0])  # raise ValueError("Dust particle is not in sheath")
 
-    def EXBacchybrid(self, B=[0, 0, 0.014], machmag=0., method='factor',combinedrifts=False):
+    def EXBacchybrid(self, B=[0, 0, 0.014], machmag=0., method='factor',combinedrifts=True):
         if self.pos[2] < self.const.sheathd and self.Bswitch:
             magB = numpy.sqrt(B[0] ** 2 + B[1] ** 2 + B[2] ** 2)
             vT = numpy.sqrt(self.const.kb * self.const.Ti / self.const.mi)  # Thermal speed ions
             vdrift = numpy.cross(self.radialfield() + self.sheathfield(), numpy.array(B)) / (
                 magB ** 2)  # vdrift for self.constant vertical B field
             if combinedrifts:
-                vdrift = vdrift + numpy.array(self.combinedrift(B))
+                vdrift = vdrift #+ numpy.array(self.combinedrift(B))
+            E = self.radialfield() + self.sheathfield()
+            r = numpy.sqrt(self.pos[0] ** 2 + self.pos[1] ** 2)
+            if abs(self.pos[0]) == 0.:
+                if self.pos[1] > 0:
+                    theta = math.pi/2
+                elif self.pos[1]<0:
+                    theta = 3*math.pi/2
+                else:
+                    print("Error in finding theta")
+            elif abs(self.pos[1]) == 0:
+                if self.pos[0] >0:
+                    theta = 0;
+                elif self.pos[0]<0:
+                    theta =math.pi
+            else:
+                if self.pos[0] >0 and self.pos[1] >0:
+                    theta = numpy.arctan(self.pos[1] / self.pos[0])
+                elif self.pos[0]>0 and self.pos[1]<0:
+                    theta = 2*math.pi - numpy.arctan(abs(self.pos[1] / self.pos[0]))
+                elif self.pos[0]<0 and self.pos[1]>0:
+                    theta = math.pi - numpy.arctan(abs(self.pos[1] / self.pos[0]))
+                elif self.pos[0]<0 and self.pos[1] <0:
+                    theta = math.pi + numpy.arctan(abs(self.pos[1] / self.pos[0]))
+
+            # Just blindly multiplying by factor
+            if method == 'factor':
+                omega = abs(self.const.e * magB / self.const.mi)
+                tau = 0.01 / abs(self.const.e * 0.014/self.const.mi)
+                vdrift[0] = vdrift[0] * (omega * tau) ** 2 / (1 + (omega * tau) ** 2) # Multiplication by factor just to make simulation faster
+                vdrift[1] = vdrift[1]*(omega * tau) ** 2 / (1 + (omega * tau) ** 2)
+                vdrift[2] = 0#abs(vdrift[2])*((omega * tau) ** 2 / (1 + (omega * tau) ** 2))
+            # Ion-neutral collision drift velocity new D.D. Millar 1976
+            elif method == 'derivation':
+                omega = abs(self.const.e * magB / self.const.mi)
+                tau = 0.01 / omega
+                Br = numpy.sqrt(B[0] ** 2 + B[1] ** 2)
+                Er = numpy.sqrt(E[0] ** 2 + E[1] ** 2)
+                # k = ((self.const.e / self.const.mi) ** 2) * (B[2] * Er - Br * E[2])
+                # p = Er - B[2] * k / omega ** 2
+                # s = E[2] + Br * k / omega ** 2
+                # drift0 = (-k / (omega ** 2 + 1. / tau ** 2))
+                # drift1 = (self.const.e / (tau ** 2 * self.const.mi)) * (
+                #     tau ** 3 * p - (B[2] * k / omega ** 4) * (-tau ** 3 * omega ** 2 / (1 + tau ** 2 * omega ** 2)))
+                # drift2 = (self.const.e / (tau ** 2 * self.const.mi)) * (
+                #     tau ** 3 * s + (Br * k / omega ** 4) * (-tau ** 3 * omega ** 3 / (1 + tau ** 2 * omega ** 2)))
+                # vdrift[0] = abs((drift1) * r * numpy.sin(theta)) * numpy.sign(vdrift[0])
+                # vdrift[1] = abs((drift1) * r * numpy.cos(theta)) * numpy.sign(vdrift[1])
+                # vdrift[2] = abs(drift2) * numpy.sign(vdrift[2])
+                factor = (self.const.e**2 * tau**2 /(self.const.mi**2 * (1+(omega*tau)**2))) * (Er * B[2] - E[2]*Br)
+                vdrift[0] = factor * -numpy.sin(theta)
+                vdrift[1] = factor * numpy.cos(theta)
+                vdrift[2]=0
+            else:
+                raise Exception('Method does not exist!')
+            mach = numpy.array([vdrift[0] - self.vel[0], vdrift[1] - self.vel[1], vdrift[2] - self.vel[2]]) / vT
+            machmag = numpy.sqrt(mach[0] ** 2 + mach[1] ** 2 + mach[2] ** 2)
+            LAMBDA = numpy.sqrt(1. / (numpy.exp(-machmag ** 2 / 2.) * self.const.lambdadi ** (-2) + self.const.lambdade ** (-2)))
+            beta = abs(self.const.Zd * self.const.e ** 2 / (LAMBDA * self.const.Ti * self.const.kb))
+            u = numpy.sqrt(vdrift[0] ** 2 + vdrift[1] ** 2 + vdrift[2] ** 2) / vT
+            z = abs(self.const.Zd) * self.const.e ** 2 / (4 * math.pi * self.const.e0 * self.const.radd * self.const.Te * self.const.kb)
+            tau = self.const.Te / self.const.Ti
+            coloumblog = 5.
+            force = numpy.sqrt(2 * math.pi) * self.const.radd ** 2 * self.const.ni0 * self.const.mi * vT ** 2 * \
+                    (numpy.sqrt(math.pi / 2) * special.erf(u / numpy.sqrt(2)) *
+                     (1 + u ** 2 + (1 - u ** (-2)) * (1 + 2 * z * tau) + 4 * z ** 2 * tau ** 2 * u ** (-2) * numpy.log(
+                         coloumblog)) +
+                     (
+                         u ** (-1) * (
+                             1 + 2 * z * tau + u ** 2 - 4 * z ** 2 * tau ** 2 * numpy.log(coloumblog)) * numpy.exp(
+                             -u ** 2 / 2.))) * mach / machmag
+
+            return force / self.m
+
+        else:
+            return numpy.array([0, 0, 0])  # raise ValueError("Dust particle is not in sheath")
+
+    def accfromotherdrifts(self,B=[0, 0, 0.014], method='factor'):
+        if self.pos[2] < self.const.sheathd and self.Bswitch:
+            magB = numpy.sqrt(B[0] ** 2 + B[1] ** 2 + B[2] ** 2)
+            vT = numpy.sqrt(self.const.kb * self.const.Ti / self.const.mi)  # Thermal speed ions
+            vdrift = numpy.array(self.combinedrift(B))
             E = self.radialfield() + self.sheathfield()
             r = numpy.sqrt(self.pos[0] ** 2 + self.pos[1] ** 2)
             if abs(self.pos[0]) == 0.:
@@ -430,8 +511,19 @@ class Dust:
                          u ** (-1) * (
                              1 + 2 * z * tau + u ** 2 - 4 * z ** 2 * tau ** 2 * numpy.log(coloumblog)) * numpy.exp(
                              -u ** 2 / 2.))) * mach / machmag
-            return force / self.m
+            forceN = -numpy.array(self.vel) * self.const.mi * numpy.sqrt(4 * math.pi) * self.const.ni0 * numpy.sqrt(self.const.kb * self.const.Ti / (2 * math.pi * self.const.mi)) * math.pi * self.const.radd ** 2
 
+            return force+forceN / self.m
+
+        else:
+            return numpy.array([0, 0, 0])  # raise ValueError("Dust particle is not in sheath")
+
+    def neutraldrag(self):
+        if self.pos[2] < self.const.sheathd and self.Bswitch == True:
+
+            forceN = -numpy.array(self.vel) * self.const.mi * numpy.sqrt(4 * math.pi) * self.const.ni0 * numpy.sqrt(self.const.kb * self.const.Ti / (2 * math.pi * self.const.mi)) * math.pi * self.const.radd ** 2
+
+            return forceN / self.m
         else:
             return numpy.array([0, 0, 0])  # raise ValueError("Dust particle is not in sheath")
 

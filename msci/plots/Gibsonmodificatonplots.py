@@ -40,12 +40,12 @@ def plotmodifiedefield(rnormalize, LAMBDA, znormalize, gridr, gridz, Evalsr, Eva
     plt.figure()
     plt.plot(numpy.array(rnormalize) * LAMBDA, numpy.array(znormalize) * LAMBDA, 'r-',
              label='Inaccessible region for all p0')
-    plt.quiver(gridr, gridz, Evalsr, Evalsz, color='b', label='modified field')
+    plt.quiver(gridr, gridz, -Evalsr, -Evalsz, color='b', label='modified field')
     # plt.quiver(gridr, gridz, Evalsradial, Evalsradialz, color='k', label='radial field')
     # plt.quiver(gridr, gridz, Evalsheathr, Evalsheath, color='g', label='sheath field')
     # plt.plot(chargepos.T[:, 0], chargepos.T[:, 1], 'r.')
-    # plt.plot(numpy.arange(len(gridr[0])), numpy.ones(len(gridr[0])) * 0.00038257340070632558, 'm-',
-    #          label='crystal plane')
+    plt.plot(numpy.arange(len(gridr[0])), numpy.ones(len(gridr[0])) * 0.00038257340070632558, 'm-',
+             label='crystal plane')
     plt.legend()
     plt.xlim([0, rmax])
     plt.ylim([0, const.sheathd * 1.5])
