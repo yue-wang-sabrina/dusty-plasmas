@@ -81,7 +81,7 @@ class ModifyBFieldAnalysis:
     def getrmax(self):
         func = lambda rmax: 1. - self.const.e * self.curlyM / (
             rmax * (2 * numpy.sqrt(self.const.e * self.curlyM * self.const.me * self.VeT) + self.const.me * rmax * self.VeT))
-        self.rmax = fsolve(func, 0.4 * self.LAMBDA)
+        self.rmax = fsolve(func, 0.001)
 
     def VoidVol(self):
         intfunc = lambda r: 2 * math.pi * r * numpy.sqrt(
@@ -164,7 +164,7 @@ class ModifyBFieldAnalysis:
             self.sheathfield = numpy.array([0, 0])
 
     def pospos(self):  # positive charge positions
-        separation = self.const.lambdaD / 2
+        separation = self.const.lambdaD / 5
         chargepos = []  # positive charge positions
         intcharge = int(self.voidvol)  # integer number of positive particles
         rows = int(self.rmax / separation)  # number of positive particles separated by lambdaD along the r axis

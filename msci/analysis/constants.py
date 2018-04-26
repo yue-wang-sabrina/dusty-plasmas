@@ -18,7 +18,7 @@ cs = numpy.sqrt(kb * Te / mi)  # Bohm speed = sound speed
 lambdade = (kb * Te * e0 / (ne0 * e ** 2)) ** 0.5  # Electron debye rad
 lambdadi = (kb * Ti * e0 / (ni0 * e ** 2)) ** 0.5  # Ion debye rad
 lambdaD = 1. / (1. / (lambdadi ** 2) + 1. / (lambdade ** 2)) ** 0.5  # dusty debye radius
-boxr = 0.04# 523 * lambdaD  # cylinder radius
+boxr = 523 * lambdaD  # cylinder radius
 boxz = 0.001  # cylinder height
 g = -9.8  # gravitational acceleration
 dt = 0.0001  # Much longer than charging time which is order nanoseconds
@@ -30,7 +30,7 @@ dipolea = boxr / 100.
 mu0 = 4 * math.pi * 10 ** (-7)  # Permeability free space
 gamma = 5000.  # damping gamma
 mu0 = 4 * math.pi * 10 ** (-7)  # Permeaility free space
-Bmom = ((2 * math.pi * (0.00038) ** 3) * 0.014 / mu0) * numpy.array(
+Bmom = ((2 * math.pi * (0.001) ** 3) * 0.014 / mu0) * numpy.array(
     [0, 0, 1])  # Nm/T #At 1cm away I want the B to be 0.014T
 magBmom = numpy.sqrt(Bmom[0] ** 2 + Bmom[1] ** 2 + Bmom[2] ** 2)
 Bmomhat = numpy.array(Bmom) / magBmom

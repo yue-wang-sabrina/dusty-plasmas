@@ -21,16 +21,17 @@ g.voidQ()
 g.inaccessibleanyp0()
 g.inaccessiblecurrentp0()
 g.getgrids()
+g.gridcheck(g.chargepos)
 
 # Plot inaccessibility region
 # Gplot.plotinaccessibility(g.rnorm, g.znormpos, g.znormneg, g.rnormalize, g.znormalize, g.LAMBDA, save=False)
 
 
 
-#Plot modified electric field inside region inaccessible to electrons
-# Gplot.plotmodifiedefield(g.rnormalize, g.LAMBDA, g.znormalize, g.gridr, g.gridz, g.Evalsr, g.Evalsz, g.Evalsradial,
-                         # g.Evalsradialz,
-                         # g.Evalsheathr, g.Evalsheath, g.chargepos, g.rmax)
+# Plot modified electric field inside region inaccessible to electrons
+Gplot.plotmodifiedefield(g.rnormalize, g.LAMBDA, g.znormalize, g.gridr, g.gridz, g.Evalsr, g.Evalsz, g.Evalsradial,
+                         g.Evalsradialz,
+                         g.Evalsheathr, g.Evalsheath, g.chargepos, g.rmax)
 
 
 
@@ -40,13 +41,13 @@ g.getgrids()
 
 
 
-# #Plot inaccessibility region for report
+#Plot inaccessibility region for report
 # f, axarr = plt.subplots(2, 2)
 # rnorm=[]
 # znormpos=[]
 # znormneg=[]
 # thermalvel=numpy.sqrt(8*const.kb*const.Te/(math.pi*const.me))
-# initialvels=[thermalvel,thermalvel*130,thermalvel*265,thermalvel*400]
+# initialvels=[thermalvel*0.5,thermalvel*6,thermalvel*12,thermalvel*18]
 # rnormalize =[]
 # znormalize = []
 # LAMBDA = []
@@ -71,12 +72,12 @@ g.getgrids()
 # # axarr[0, 0].plot(rnorm[j], znormpos[j], 'b.-', label='Region below inaccessble to electrons')  # for this p0, zinaccesspos')
 # # axarr[0, 0].plot(rnorm[j], znormneg[j], 'k.-', label='Region above inaccessible to electrons')  # for this p0, zinaccessneg')
 # axarr[0, 0].fill_between(rnorm[j], znormpos[j], znormneg[j], where=znormneg[j] > znormpos[j], interpolate=True, color='pink')
-# axarr[0, 0].plot(rnormalize[j], znormalize[j], 'r.-')#,label="Region below is inaccessible for electrons of all velocities")  # p0 below curve")
+# axarr[0, 0].plot(rnormalize[j], znormalize[j], 'r-')#,label="Region below is inaccessible for electrons of all velocities")  # p0 below curve")
 # axarr[0, 0].plot(rnormalize[j], numpy.ones(len(rnormalize[j])) * const.sheathd / LAMBDA[j], 'm-', label="Region of interest is below this line (Sheath top)")
 # axarr[0, 0].fill_between(rnormalize[j], 0, znormalize[j], interpolate=True, color='red')
 # # axarr[0, 0].set_xlabel(r"$\frac{r}{\Lambda}$", fontsize=35)
 # # axarr[0, 0].set_ylabel(r"$\frac{z}{\Lambda}$", fontsize=35)
-# axarr[0, 0].set_xlim([0, max(rnormalize[j])])
+# axarr[0, 0].set_xlim([0, 4])
 # axarr[0, 0].set_ylim([0, 1])
 # axarr[0,0].set_title(r"$p_0$=%s"%"%0.1f"%p0list[j])
 #
@@ -84,12 +85,12 @@ g.getgrids()
 # # axarr[0, 1].plot(rnorm[j], znormpos[j], 'b.-', label='Region below inaccessble to electrons')  # for this p0, zinaccesspos')
 # # axarr[0, 1].plot(rnorm[j], znormneg[j], 'k.-', label='Region above inaccessible to electrons')  # for this p0, zinaccessneg')
 # axarr[0, 1].fill_between(rnorm[j], znormpos[j], znormneg[j], where=znormneg[j] > znormpos[j], interpolate=True, color='pink')
-# axarr[0, 1].plot(rnormalize[j], znormalize[j], 'r.-')#,label="Region below is inaccessible for electrons of all velocities")  # p0 below curve")
-# axarr[0, 1].plot(rnormalize[j], numpy.ones(len(rnormalize[j])) * const.sheathd / LAMBDA[j], 'm-', label="Region of interest is below this line (Sheath top)")
+# axarr[0, 1].plot(rnormalize[j], znormalize[j], 'r-')#,label="Region below is inaccessible for electrons of all velocities")  # p0 below curve")
+# axarr[0, 1].plot(rnormalize[j], numpy.ones(len(rnormalize[j])) * const.sheathd / LAMBDA[j], 'm.-', label="Top of sheath")
 # axarr[0, 1].fill_between(rnormalize[j], 0, znormalize[j], interpolate=True, color='red')
 # # axarr[0, 1].set_xlabel(r"$\frac{r}{\Lambda}$", fontsize=35)
 # # axarr[0, 1].set_ylabel(r"$\frac{z}{\Lambda}$", fontsize=35)
-# axarr[0, 1].set_xlim([0, max(rnormalize[j])])
+# axarr[0, 1].set_xlim([0, 4])
 # axarr[0, 1].set_ylim([0, 1])
 # axarr[0,1].set_title(r"$p_0$=%s"%"%0.1f"%p0list[j])
 #
@@ -97,12 +98,12 @@ g.getgrids()
 # # axarr[1, 0].plot(rnorm[j], znormpos[j], 'b.-', label='Region below inaccessble to electrons')  # for this p0, zinaccesspos')
 # # axarr[1, 0].plot(rnorm[j], znormneg[j], 'k.-', label='Region above inaccessible to electrons')  # for this p0, zinaccessneg')
 # axarr[1, 0].fill_between(rnorm[j], znormpos[j], znormneg[j], where=znormneg[j] > znormpos[j], interpolate=True, color='pink')
-# axarr[1, 0].plot(rnormalize[j], znormalize[j], 'r.-')#,label="Region below is inaccessible for electrons of all velocities")  # p0 below curve")
-# axarr[1, 0].plot(rnormalize[j], numpy.ones(len(rnormalize[j])) * const.sheathd / LAMBDA[j], 'm-', label="Region of interest is below this line (Sheath top)")
+# axarr[1, 0].plot(rnormalize[j], znormalize[j], 'r-')#,label="Region below is inaccessible for electrons of all velocities")  # p0 below curve")
+# axarr[1, 0].plot(rnormalize[j], numpy.ones(len(rnormalize[j])) * const.sheathd / LAMBDA[j], 'm-', label="Top of sheath")
 # axarr[1, 0].fill_between(rnormalize[j], 0, znormalize[j], interpolate=True, color='red')
 # # axarr[1, 0].set_xlabel(r"$\frac{r}{\Lambda}$", fontsize=35)
 # # axarr[1, 0].set_ylabel(r"$\frac{z}{\Lambda}$", fontsize=35)
-# axarr[1, 0].set_xlim([0, max(rnormalize[j])])
+# axarr[1, 0].set_xlim([0, 4])
 # axarr[1, 0].set_ylim([0, 1])
 # axarr[1,0].set_title(r"$p_0$=%s"%"%0.1f"%p0list[j])
 #
@@ -110,12 +111,12 @@ g.getgrids()
 # # axarr[1, 1].plot(rnorm[j], znormpos[j], 'b.-', label='Region below inaccessble to electrons')  # for this p0, zinaccesspos')
 # # axarr[1, 1].plot(rnorm[j], znormneg[j], 'k.-', label='Region above inaccessible to electrons')  # for this p0, zinaccessneg')
 # axarr[1, 1].fill_between(rnorm[j], znormpos[j], znormneg[j], where=znormneg[j] > znormpos[j], interpolate=True, color='pink')
-# axarr[1, 1].plot(rnormalize[j], znormalize[j], 'r.-')#,label="Region below is inaccessible for electrons of all velocities")  # p0 below curve")
-# axarr[1, 1].plot(rnormalize[j], numpy.ones(len(rnormalize[j])) * const.sheathd / LAMBDA[j], 'm-', label="Top of sheath")
+# axarr[1, 1].plot(rnormalize[j], znormalize[j], 'r-')#,label="Region below is inaccessible for electrons of all velocities")  # p0 below curve")
 # axarr[1, 1].fill_between(rnormalize[j], 0, znormalize[j], interpolate=True, color='red')
+# axarr[1, 1].plot(rnormalize[j], numpy.ones(len(rnormalize[j])) * const.sheathd / LAMBDA[j], 'm-', label="Top of sheath")
 # # axarr[1, 1].set_xlabel(r"$\frac{r}{\Lambda}$", fontsize=35)
 # # axarr[1, 1].set_ylabel(r"$\frac{z}{\Lambda}$", fontsize=35)
-# axarr[1, 1].set_xlim([0, max(rnormalize[j])])
+# axarr[1, 1].set_xlim([0, 4])
 # axarr[1, 1].set_ylim([0, 1])
 # axarr[1,1].set_title(r"$p_0$=%s"%"%0.1f"%p0list[j])
 #
