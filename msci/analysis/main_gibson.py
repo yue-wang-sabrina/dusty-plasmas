@@ -21,7 +21,6 @@ g.voidQ()
 g.inaccessibleanyp0()
 g.inaccessiblecurrentp0()
 g.getgrids()
-g.gridcheck(g.chargepos)
 
 # Plot inaccessibility region
 # Gplot.plotinaccessibility(g.rnorm, g.znormpos, g.znormneg, g.rnormalize, g.znormalize, g.LAMBDA, save=False)

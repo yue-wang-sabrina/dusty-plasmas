@@ -94,7 +94,7 @@ def plotratiomanytime(filename, lentimelist, omega, tau):
     fig = plt.figure()
     plt.errorbar(timelist, driftsav, yerr=[poserr, negerr], fmt='o', ecolor='g', label='Average drifts')
     plt.xlabel("Run time (s)")
-    plt.ylabel("Simulated drift/theoretical drift (m)")
+    plt.ylabel("Simulated drift/Theoretical drift (m)")
     plt.legend()
     plt.title(
         r"Different runtime, (omega*tau)^n for n=%s" % n)
@@ -202,9 +202,9 @@ def plotolddrifts(fontsize, figsize0, figsize1):
 
     theoryx = numpy.arange(0, max(omegatau), 10 ** (-2))
     plt.plot(theoryx, theoryx**3/ (1+theoryx**3), 'r-', label=r'$y = \frac{(\omega*\tau)^3}{1+(\omega*\tau)^3}$')
-    plt.plot(theoryx, theoryx**2/3, 'g-', label=r'$y = \frac{(\omega*\tau)^2}{3}$')
+    plt.plot(theoryx, theoryx**2/3, 'g-', label=r'$Ratio = \frac{(\omega*\tau)^2}{3}$')
     plt.xlabel(r"$\omega*\tau$", fontsize=fontsize)
-    plt.ylabel("simulated drift velocity / \n theoretical drift velocity", fontsize=fontsize)
+    plt.ylabel("Simulated drift velocity / \n Theoretical drift velocity", fontsize=fontsize)
     plt.title("Reduction factor for ion-drift velocity \n due to ion-neutral collisions")
     plt.ticklabel_format(style='sci', axis='x', scilimits=(0, 0))
     plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))

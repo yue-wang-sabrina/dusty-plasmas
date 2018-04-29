@@ -37,19 +37,24 @@ def plotinaccessibility(rnorm, znormpos, znormneg, rnormalize, znormalize, LAMBD
 
 def plotmodifiedefield(rnormalize, LAMBDA, znormalize, gridr, gridz, Evalsr, Evalsz, Evalsradial, Evalsradialz,
                        Evalsheathr, Evalsheath, chargepos, rmax):
-    plt.figure()
-    plt.plot(numpy.array(rnormalize) * LAMBDA, numpy.array(znormalize) * LAMBDA, 'r-',
-             label='Inaccessible region for all p0')
-    plt.quiver(gridr, gridz, -1*numpy.array(Evalsr), -1*numpy.array(Evalsz), color='b', label='modified field')
+    fig,ax = plt.subplots(nrows=1,ncols=1, figsize=(16,8))
+    ax.plot(numpy.array(rnormalize) * LAMBDA, numpy.array(znormalize) * LAMBDA, 'r-',
+             label='Inaccessible Region For All p0')
+    ax.quiver(gridr, gridz, -1*numpy.array(Evalsr), -1*numpy.array(Evalsz), color='b', label='Modified Field')
     # plt.quiver(gridr, gridz, Evalsradial, Evalsradialz, color='k', label='radial field')
     # plt.quiver(gridr, gridz, Evalsheathr, Evalsheath, color='g', label='sheath field')
     # plt.plot(chargepos.T[:, 0], chargepos.T[:, 1], 'r.')
-    plt.plot(numpy.arange(len(gridr[0])), numpy.ones(len(gridr[0])) * 0.00038257340070632558 , 'm-',
+    ax.plot(numpy.arange(len(gridr[0])), numpy.ones(len(gridr[0])) * 0.00038257340070632558 , 'm-',
              label='crystal plane')
-    plt.ticklabel_format(style='plain',axis = 'both')
+    ax.set_xlim([0, rmax])
+    ax.set_ylim([0, const.sheathd * 1.5 ])
+    ticks = ax.get_xticks() * 1000
+    ticks2 = ax.get_yticks() * 1000
+    ax.set_xticklabels(ticks)
+    ax.set_yticklabels(ticks2)
+    ax.set_xlabel("r (mm)")
+    ax.set_ylabel("z (mm)")
     plt.legend()
-    plt.xlim([0, rmax])
-    plt.ylim([0, const.sheathd * 1.5])
     plt.show()
 
 

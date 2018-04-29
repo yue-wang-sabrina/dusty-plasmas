@@ -30,7 +30,7 @@ dipolea = boxr / 100.
 mu0 = 4 * math.pi * 10 ** (-7)  # Permeability free space
 gamma = 5000.  # damping gamma
 mu0 = 4 * math.pi * 10 ** (-7)  # Permeaility free space
-Bmom = ((2 * math.pi * (0.001) ** 3) * 0.014 / mu0) * numpy.array(
+Bmom = ((2 * math.pi * (0.00038) ** 3) * 0.014 / mu0) * numpy.array(
     [0, 0, 1])  # Nm/T #At 1cm away I want the B to be 0.014T
 magBmom = numpy.sqrt(Bmom[0] ** 2 + Bmom[1] ** 2 + Bmom[2] ** 2)
 Bmomhat = numpy.array(Bmom) / magBmom

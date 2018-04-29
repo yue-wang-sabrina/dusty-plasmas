@@ -13,6 +13,10 @@ import decimal
 import pickle
 from msci.utils.interpolate import interpolate
 import matplotlib
+import matplotlib.font_manager as font_manager
+import dill
+font = font_manager.FontProperties(family='Times New Roman',style='normal', size=30)
+csfont = {'fontname':'Times New Roman'}
 
 ipython = get_ipython()
 ipython.magic('load_ext autoreload')
@@ -213,7 +217,6 @@ elif METHOD == "velocitiesforreport":
         modified_b_field=prepare_modified_b_field('modifiedfield.obj')
     )
 
-
     beffect1.sort_positions_of_particles()
     dustplots.pplot(beffect1)
 
@@ -323,7 +326,6 @@ elif METHOD == "velvsB": #The pickled object is every velocity vector of every p
     def norm(x):
         return numpy.sqrt(x[0] ** 2 + x[1] ** 2 + x[2] ** 2)
 
-
     for i in numpy.arange(len(Bmomstrength)):
         beffecttemp = BEffectsAnalysis(const)
         beffecttemp.const.Bmom = ((2 * math.pi * (0.00038) ** 3) * Bmomstrength[i] / beffecttemp.const.mu0) * numpy.array(
@@ -345,6 +347,9 @@ elif METHOD == "velvsB": #The pickled object is every velocity vector of every p
         )
         beffectlist.append(beffecttemp)
 
+    filehandler = open(b'velsvsB.obj','wb')
+    dill.dump(beffectlist,filehandler)
+    filehandler.close()
     speeds = []
     distaway = 0.0006
     positions = []
@@ -363,9 +368,12 @@ elif METHOD == "velvsB": #The pickled object is every velocity vector of every p
     figBmom, axBmom = plt.subplots(nrows=1, ncols=1, figsize=(16, 8))
 
     axBmom.plot(Bmomstrength, speeds, 'o')#, label=r'Dust particle $%sm$ away' % distaway)
-    axBmom.set_xlabel("Magnetic strength (T) ", fontsize=15)
-    axBmom.set_ylabel("Speeds (m/s)", fontsize=15)
-    axBmom.legend(fontsize=15);
+    axBmom.set_xlabel("Magnetic strength (T) ", fontsize=30)
+    axBmom.set_ylabel("Speeds (m/s)", fontsize=30)
+    axBmom.legend(fontsize=25);
+    axBmom.tick_params(labelsize=25)
+    axBmom.set_xticklabels(axBmom.get_xticks().astype(int), csfont)
+    axBmom.set_yticklabels(axBmom.get_yticks().astype(int), csfont);
     figBmom.show()
 
 

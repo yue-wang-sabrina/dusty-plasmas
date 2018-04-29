@@ -20,7 +20,7 @@ def norm(x):
     return numpy.sqrt(x[0] ** 2 + x[1] ** 2 + x[2] ** 2)
 
 
-case = "2"
+case = "5"
 
 # Plot ratio of size of crystal before and after B+Gibson turned on wrt strength of dipole moment
 if case == "1":
@@ -181,37 +181,40 @@ elif case == "4":
 
 # Vary the magnetic moment to increase the B field strength and plot the velocity at specific distances away against this change in dipole B field strength (including all drifts exb + grad B + curvature). No gibson so does not need to change internal E field.
 elif case == "5":
-    beffectlist = []
     Bmomstrength = numpy.arange(0.014, 1, 0.05)
 
     def norm(x):
         return numpy.sqrt(x[0] ** 2 + x[1] ** 2 + x[2] ** 2)
 
 
-    for i in numpy.arange(len(Bmomstrength)):
-        beffecttemp = BEffectsAnalysis(const)
-        beffecttemp.const.Bmom = ((2 * math.pi * (0.003) ** 3) * Bmomstrength[i] / beffecttemp.const.mu0) * numpy.array(
-            [0, 0, 1])
-        beffecttemp.const.magBmom = norm(beffecttemp.const.Bmom)
-        beffecttemp.const.Bmomhat = numpy.array(beffecttemp.const.Bmom) / beffecttemp.const.magBmom
-        beffecttemp.create_particles(
-            numparticles=300,
-            initpositions=generate_particle_equilibrium_positions()
-        )
-        filename = 'modifiedfield0.014.obj'
-        beffecttemp.create_pairs()
-        beffecttemp.interact_and_iterate(
-            iterationsB=1000,
-            init_iterations=100,
-            method='NoGibs',
-            modified_b_field=prepare_modified_b_field(filename),
-            combinedrifts=True
-        )
-        beffectlist.append(beffecttemp)
+    # for i in numpy.arange(len(Bmomstrength)):
+    #     beffecttemp = BEffectsAnalysis(const)
+    #     beffecttemp.const.Bmom = ((2 * math.pi * (0.003) ** 3) * Bmomstrength[i] / beffecttemp.const.mu0) * numpy.array(
+    #         [0, 0, 1])
+    #     beffecttemp.const.magBmom = norm(beffecttemp.const.Bmom)
+    #     beffecttemp.const.Bmomhat = numpy.array(beffecttemp.const.Bmom) / beffecttemp.const.magBmom
+    #     beffecttemp.create_particles(
+    #         numparticles=300,
+    #         initpositions=generate_particle_equilibrium_positions()
+    #     )
+    #     filename = 'modifiedfield0.014.obj'
+    #     beffecttemp.create_pairs()
+    #     beffecttemp.interact_and_iterate(
+    #         iterationsB=1000,
+    #         init_iterations=100,
+    #         method='NoGibs',
+    #         modified_b_field=prepare_modified_b_field(filename),
+    #         combinedrifts=True
+    #     )
+    #     beffectlist.append(beffecttemp)
 
     # filehandler = open(b'case5.obj', 'wb')
     # dill.dump(beffectlist, filehandler)
     # filehandler.close()
+
+    filehandler = open('case5.obj','rb')
+    beffectlist = dill.load(filehandler)
+    filehandler.close()
 
     speeds = []
     distaway = 0.00081

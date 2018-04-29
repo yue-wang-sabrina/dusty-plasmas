@@ -164,7 +164,7 @@ class ModifyBFieldAnalysis:
             self.sheathfield = numpy.array([0, 0])
 
     def pospos(self):  # positive charge positions
-        separation = self.const.lambdaD / 5
+        separation = self.const.lambdaD / 2
         chargepos = []  # positive charge positions
         intcharge = int(self.voidvol)  # integer number of positive particles
         rows = int(self.rmax / separation)  # number of positive particles separated by lambdaD along the r axis
